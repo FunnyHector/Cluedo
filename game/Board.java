@@ -38,35 +38,68 @@ public class Board {
     // board is created as a 2d array of positions
     private Position[][] postions;
 
+    // @formatter:off
     // a string used to print out text-based UI
-    public static final String UI_STRING = "■■■■■■■■■ ■■■■ ■■■■■■■■■\n"
-            + "┌────□■   ┌──┐   ■┌────┐\n" + "│KITC│  ┌─┘  └─┐  │CSTY│\n"
-            + "│HEN │  │ BALL │  │    │\n" + "│    │  │ ROOM │  ↑│  ┌┘\n"
-            + "└┐   │  →      ←   └──□■\n" + "■└──↑┘  │      │        \n"
-            + "        └↑────↑┘       ■\n" + "■                 ┌────┐\n"
-            + "┌───┐             →BILL│\n" + "│   └──┐  ┌───┐   │ARD │\n"
-            + "│DINING│  │CRI│   │    │\n" + "│ROOM  ←  │ME │   └───↑┘\n"
-            + "│      │  │SCE│        ■\n" + "│      │  │NE │   ┌─↓─┐■\n"
-            + "└─────↑┘  │   │  ┌┘LIB└┐\n" + "■         └───┘  → RARY│\n"
-            + "                 └┐   ┌┘\n" + "■        ┌─↓↓─┐   └───┘■\n"
-            + "□─────↓  │HALL│         \n" + "│LOUNG│  │    ←        ■\n"
-            + "│E    │  │    │  ↓─────□\n" + "│     │  │    │  │STUDY│\n"
-            + "│    ┌┘  │    │  └┐    │\n" + "└────┘■ ■└────┘■ ■└────┘\n";
+    public static final String UI_STRING = 
+            "■■■■■■■■■ ■■■■ ■■■■■■■■■\n" +
+            "┌────□■   ┌──┐   ■┌────┐\n" + 
+            "│KITC│  ┌─┘  └─┐  │CSTY│\n" +
+            "│HEN │  │ BALL │  │    │\n" + 
+            "│    │  │ ROOM │  ↑│  ┌┘\n" +
+            "└┐   │  →      ←   └──□■\n" + 
+            "■└──↑┘  │      │        \n" +
+            "        └↑────↑┘       ■\n" + 
+            "■                 ┌────┐\n" +
+            "┌───┐             →BILL│\n" + 
+            "│   └──┐  ┌───┐   │ARD │\n" +
+            "│DINING│  │CRI│   │    │\n" + 
+            "│ROOM  ←  │ME │   └───↑┘\n" +
+            "│      │  │SCE│        ■\n" + 
+            "│      │  │NE │   ┌─↓─┐■\n" +
+            "└─────↑┘  │   │  ┌┘LIB└┐\n" + 
+            "■         └───┘  → RARY│\n" +
+            "                 └┐   ┌┘\n" + 
+            "■        ┌─↓↓─┐   └───┘■\n" +
+            "□─────↓  │HALL│         \n" + 
+            "│LOUNG│  │    ←        ■\n" +
+            "│E    │  │    │  ↓─────□\n" + 
+            "│     │  │    │  │STUDY│\n" +
+            "│    ┌┘  │    │  └┐    │\n" + 
+            "└────┘■ ■└────┘■ ■└────┘\n";
 
-    // a string used to construct the board
-    private static final String BOARD_STRING = "         0    0         \n"
-            + "       000    000       \n" + "      00        00      \n"
-            + "      00        00      \n" + "      00        003     \n"
-            + "      002      2000     \n" + "    1 00        00000000\n"
-            + "00000000 2    2 0000000 \n" + " 00000000000000000      \n"
-            + "     00000000000004     \n" + "        00     000      \n"
-            + "        00     000      \n" + "       900     000    4 \n"
-            + "        00     00000000 \n" + "        00     000  5   \n"
-            + "      9 00     00       \n" + " 000000000     005      \n"
-            + "00000000000000000       \n" + " 00000000  77  000      \n"
-            + "      800      000000000\n" + "       00     700000000 \n"
-            + "       00      006      \n" + "       00      00       \n"
-            + "       00      00       \n" + "       0        0       \n";
+    /*
+     * a string used to construct the board. This could be defined outside of source code,
+     * for instance in a .txt file, but since Cluedo is brand-registered, and the board
+     * layout is not so much modifiable under those game rules, so it's easier to be put
+     * just here.
+     */
+    private static final String BOARD_STRING = 
+            "         0    0         \n" +
+            "       000    000       \n" + 
+            "      00        00      \n" +
+            "      00        00      \n" + 
+            "      00        003     \n" +
+            "      002      2000     \n" + 
+            "    1 00        00000000\n" +
+            "00000000 2    2 0000000 \n" + 
+            " 00000000000000000      \n" +
+            "     00000000000004     \n" + 
+            "        00     000      \n" +
+            "        00     000      \n" + 
+            "       900     000    4 \n" +
+            "        00     00000000 \n" + 
+            "        00     000  5   \n" +
+            "      9 00     00       \n" + 
+            " 000000000     005      \n" +
+            "00000000000000000       \n" + 
+            " 00000000  77  000      \n" +
+            "      800      000000000\n" + 
+            "       00     700000000 \n" +
+            "       00      006      \n" + 
+            "       00      00       \n" +
+            "       00      00       \n" + 
+            "       0        0       \n";
+    // @formatter:on
 
     /**
      * 
@@ -143,10 +176,14 @@ public class Board {
     /**
      * This method tells whether a player can move towards south from a given position.
      * 
+     * NB: this method cannot tell whether a player can move into a room. eg. if a player
+     * is standing at a tile facing an room entrance, the result will be false if this
+     * method is called.
+     * 
      * @param position
      * @return
      */
-    public boolean CanMoveSouth(Position position) {
+    public boolean CanMoveSouth(Position position, int steps) {
         if (position instanceof Room) {
             return false;
         }
@@ -154,18 +191,15 @@ public class Board {
         Tile tile = (Tile) position;
 
         int tileY = tile.getY();
-        if (tileY + 1 > 24) {
+        if (tileY + steps > 24) {
             return false;
         }
 
-        Position posSouth = postions[tile.getX()][tileY + 1];
-
-        if (posSouth == null) {
-            return false;
-        }
-
-        if (posSouth instanceof Room) {
-            return ((Room) posSouth).canEnterFromPosition(tile);
+        for (int i = 1; i <= steps; i++) {
+            Position posSouth = postions[tile.getX()][tileY + i];
+            if (posSouth == null) {
+                return false;
+            }
         }
 
         return true;
@@ -175,19 +209,19 @@ public class Board {
      * This method returns the position on south of the given position.
      * 
      * 
-     * NB: The use of this method should always be guarded by conditional check with
-     * CanMoveSouth(Tile tile) method.
-     * 
      * @param tile
      * @return
      */
-    public Position southTile(Position position) {
+    public Position southTile(Position position, int steps) {
         if (!(position instanceof Tile)) {
             throw new GameError(
                     "wrong method(Board.southTile()) call from a room object");
         }
         Tile tile = (Tile) position;
-        return postions[tile.getX()][tile.getY() + 1];
+        if (tile.getY() + steps > 24) {
+            throw new GameError("Out of board.");
+        }
+        return postions[tile.getX()][tile.getY() + steps];
     }
 
     /**
@@ -195,7 +229,7 @@ public class Board {
      * @param position
      * @return
      */
-    public boolean CanMoveNorth(Position position) {
+    public boolean CanMoveNorth(Position position, int steps) {
         if (position instanceof Room) {
             return false;
         }
@@ -203,18 +237,15 @@ public class Board {
         Tile tile = (Tile) position;
 
         int tileY = tile.getY();
-        if (tileY - 1 < 0) {
+        if (tileY - steps < 0) {
             return false;
         }
 
-        Position posNorth = postions[tile.getX()][tileY - 1];
-
-        if (posNorth == null) {
-            return false;
-        }
-
-        if (posNorth instanceof Room) {
-            return ((Room) posNorth).canEnterFromPosition(tile);
+        for (int i = 1; i <= steps; i++) {
+            Position posNorth = postions[tile.getX()][tileY - i];
+            if (posNorth == null) {
+                return false;
+            }
         }
 
         return true;
@@ -225,13 +256,16 @@ public class Board {
      * @param position
      * @return
      */
-    public Position northTile(Position position) {
+    public Position northTile(Position position, int steps) {
         if (!(position instanceof Tile)) {
             throw new GameError(
                     "wrong method(Board.northTile()) call from a room object");
         }
         Tile tile = (Tile) position;
-        return postions[tile.getX()][tile.getY() - 1];
+        if (tile.getY() - steps < 0) {
+            throw new GameError("Out of board.");
+        }
+        return postions[tile.getX()][tile.getY() - steps];
     }
 
     /**
@@ -239,8 +273,7 @@ public class Board {
      * @param position
      * @return
      */
-    public boolean CanMoveEast(Position position) {
-
+    public boolean CanMoveEast(Position position, int steps) {
         if (position instanceof Room) {
             return false;
         }
@@ -248,18 +281,15 @@ public class Board {
         Tile tile = (Tile) position;
 
         int tileX = tile.getX();
-        if (tileX + 1 > 23) {
+        if (tileX + steps > 23) {
             return false;
         }
 
-        Position posEast = postions[tileX + 1][tile.getY()];
-
-        if (posEast == null) {
-            return false;
-        }
-
-        if (posEast instanceof Room) {
-            return ((Room) posEast).canEnterFromPosition(tile);
+        for (int i = 1; i <= steps; i++) {
+            Position posEast = postions[tileX + i][tile.getY()];
+            if (posEast == null) {
+                return false;
+            }
         }
 
         return true;
@@ -270,12 +300,15 @@ public class Board {
      * @param position
      * @return
      */
-    public Position eastTile(Position position) {
+    public Position eastTile(Position position, int steps) {
         if (!(position instanceof Tile)) {
             throw new GameError("wrong method(Board.eastTile()) call from a room object");
         }
         Tile tile = (Tile) position;
-        return postions[tile.getX() + 1][tile.getY()];
+        if (tile.getX() + steps > 23) {
+            throw new GameError("Out of board.");
+        }
+        return postions[tile.getX() + steps][tile.getY()];
     }
 
     /**
@@ -283,8 +316,7 @@ public class Board {
      * @param position
      * @return
      */
-    public boolean CanMoveWest(Position position) {
-
+    public boolean CanMoveWest(Position position, int steps) {
         if (position instanceof Room) {
             return false;
         }
@@ -292,18 +324,15 @@ public class Board {
         Tile tile = (Tile) position;
 
         int tileX = tile.getX();
-        if (tileX - 1 < 0) {
+        if (tileX - steps < 0) {
             return false;
         }
 
-        Position posWest = postions[tileX - 1][tile.getY()];
-
-        if (posWest == null) {
-            return false;
-        }
-
-        if (posWest instanceof Room) {
-            return ((Room) posWest).canEnterFromPosition(tile);
+        for (int i = 1; i <= steps; i++) {
+            Position posEast = postions[tileX - i][tile.getY()];
+            if (posEast == null) {
+                return false;
+            }
         }
 
         return true;
@@ -314,12 +343,15 @@ public class Board {
      * @param position
      * @return
      */
-    public Position westTile(Position position) {
+    public Position westTile(Position position, int steps) {
         if (!(position instanceof Tile)) {
             throw new GameError("wrong method(Board.westTile()) call from a room object");
         }
         Tile tile = (Tile) position;
-        return postions[tile.getX() - 1][tile.getY()];
+        if (tile.getX() - steps < 0) {
+            throw new GameError("Out of board.");
+        }
+        return postions[tile.getX() - steps][tile.getY()];
     }
 
     /**

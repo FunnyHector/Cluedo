@@ -71,49 +71,57 @@ public class Player {
     public boolean isInGame() {
         return isInGame;
     }
+    
+    /**
+     * 
+     * @return
+     */
+    public Position getPosition() {
+        return position;
+    }
 
     /**
      * 
      * @param board
      */
-    public void moveNorth(Board board) {
-        if (!board.CanMoveNorth(position)) {
+    public void moveNorth(Board board, int steps) {
+        if (!board.CanMoveNorth(position, steps)) {
             throw new GameError("Player " + playerID + "cannot move north.");
         }
-        position = board.northTile(position);
+        position = board.northTile(position, steps);
     }
 
     /**
      * 
      * @param board
      */
-    public void moveEast(Board board) {
-        if (!board.CanMoveEast(position)) {
+    public void moveEast(Board board, int steps) {
+        if (!board.CanMoveEast(position, steps)) {
             throw new GameError("Player " + playerID + "cannot move east.");
         }
-        position = board.eastTile(position);
+        position = board.eastTile(position, steps);
     }
 
     /**
      * 
      * @param board
      */
-    public void moveSouth(Board board) {
-        if (!board.CanMoveSouth(position)) {
+    public void moveSouth(Board board, int steps) {
+        if (!board.CanMoveSouth(position, steps)) {
             throw new GameError("Player " + playerID + "cannot move south.");
         }
-        position = board.southTile(position);
+        position = board.southTile(position, steps);
     }
 
     /**
      * 
      * @param board
      */
-    public void moveWest(Board board) {
-        if (!board.CanMoveWest(position)) {
+    public void moveWest(Board board, int steps) {
+        if (!board.CanMoveWest(position, steps)) {
             throw new GameError("Player " + playerID + "cannot move west.");
         }
-        position = board.westTile(position);
+        position = board.westTile(position, steps);
     }
 
     /**
