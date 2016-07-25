@@ -13,6 +13,7 @@ public class GameError extends RuntimeException {
 
     public GameError(String errMsg) {
         super(errMsg);
+        // huhuhuhuhuhuhuhuhu
     }
 
 }
