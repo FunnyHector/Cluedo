@@ -1,14 +1,18 @@
-package game;
+package gui;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import game.Game;
+import game.Player;
 import tile.Position;
+import tile.Room;
+import tile.Tile;
 
 public class ClientTxt {
 
-    private Board board;
     private static final Scanner SCANNER = new Scanner(System.in);
 
     // used to represent player's move directions
@@ -20,8 +24,10 @@ public class ClientTxt {
 
         welcomeMsg();
 
-        setupGame();
-
+        Game game = setupGame();
+        
+        runGame(game);
+        
         // TODO should check the status first, and close it at last
         SCANNER.close();
     }
@@ -33,21 +39,67 @@ public class ClientTxt {
 
     }
 
-    private static void setupGame() {
+    private static Game setupGame() {
 
-        System.out.println("How many players?");
+        int numPlayer = 0;
+        while (numPlayer < 3 || numPlayer > 6) {
+            System.out.println("How many players? Please enter an integer between 3 and 6.");
+            numPlayer = parseInt();
+        }
+        
+        System.out.println("Standard Cluedo board or customised board?");
+        System.out.println("1. Standard Cluedo board.");
+        System.out.println("2. Customised board.");
+        int boardType = parseInt();
+        while (boardType != 1 && boardType != 2) {
+            System.out.println("Choose an option between 1 or 2:");
+            boardType = parseInt();
+        }
+        
+        Game game = new Game(numPlayer, boardType);
+        
+        System.out.println("Loading completed");
+        
+        return game;
+        
+    }
 
-        int numPlayer = parseInt();
-
+    private static void runGame(Game game) {
+        System.out.println("Game running");
+        
+        System.out.println(game.getBoardString());
+        
     }
 
     private static int parseInt() {
-        // TODO
-        return 0;
+        while (true) {
+            String line = SCANNER.nextLine();
+            try {
+                int i = Integer.valueOf(line);
+                return i;
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter an integer.");
+                continue;
+            }
+        }
     }
 
-    private static void parseFreeMove(Player player, int availableSteps) {
+    private static int skipWhiteSpace(int index, String line) {
+        int newIndex = index;
+        while ((line.charAt(newIndex) == ' ' || line.charAt(newIndex) == '\t')
+                && newIndex < line.length()) {
+            newIndex++;
+        }
+        return newIndex;
+    }
 
+    private static void failMsg(String msg) {
+        System.out.println(msg);
+    }
+
+    @Deprecated
+    private static void parseFreeMove(Player player, int availableSteps) {
+    
         /*
          * this method is designed to parse a free-move input. It would be nice to support
          * free move input, eg, w5a2s1d3, can be parsed as move north 5 steps, then west 2
@@ -55,25 +107,25 @@ public class ClientTxt {
          * && (no wall hit) holds true.
          * 
          * 
-         * The method is not complete yet. Need more logic, and perhaps testing. 
+         * The method is not complete yet. Need more logic, and perhaps testing.
          * 
          * But it's already too long.....
          * 
          * 
          */
-
+    
         String line = SCANNER.nextLine();
-
+    
         int index = 0; // an index to get each char in player's input
         int totalSteps = 0; // total steps in player's input
         List<Direction> moves = new ArrayList<>(); // an ordered sequence of valid moves
         Direction lastDirection;
         Position pos = player.getPosition();
-
+    
         while (index < line.length()) {
             index = skipWhiteSpace(index, line);
             char directionChar = line.charAt(index++);
-
+    
             // deal with the direction character
             switch (directionChar) {
             case 'w':
@@ -96,27 +148,28 @@ public class ClientTxt {
                 failMsg("invalid input, \"w, a, s, d\" expected at index " + (index - 1));
                 return;
             }
-            
+    
             // then the steps
             index = skipWhiteSpace(index, line);
             char stepsChar = line.charAt(index++);
             int steps = 0;
-            
+    
             if (Character.isDigit(stepsChar)) {
                 steps = Integer.parseInt("" + stepsChar);
             } else {
                 failMsg("invalid input, digits expected at index " + (index - 1));
                 return;
             }
-          
+    
             // check if the third character is still a digit
             char nextStepsChar = line.charAt(index);
             if (Character.isDigit(nextStepsChar)) {
-                // this digit and the previous digit together indicates the number of steps
+                // this digit and the previous digit together indicates the number of
+                // steps
                 steps = steps * 10 + Integer.parseInt("" + nextStepsChar);
                 index++;
             }
-            
+    
             // now some sanity checks
             // 1. if the player's free input has more than available moves
             totalSteps += steps;
@@ -126,38 +179,22 @@ public class ClientTxt {
                         + availableSteps + " steps.");
                 return;
             }
-
+    
             // TODO need to do a simulated move, to see if the player will hit a wall
             // condition cannot be true, change it.
             // 2. if the player's free input will hit a wall
             for (int i = 0; i < steps; i++) {
                 
             }
-            
-            
-            
+    
             if (true) {
                 moves.clear();
                 failMsg("Your free-move will hit a wall, try again.");
                 return;
             }
-
+    
         }
-
-    }
-
-    private static int skipWhiteSpace(int index, String line) {
-        int newIndex = index;
-        while ((line.charAt(newIndex) == ' ' || line.charAt(newIndex) == '\t')
-                && newIndex < line.length()) {
-            newIndex++;
-        }
-        return newIndex;
-    }
-
-    private static void failMsg(String msg) {
-        // TODO Auto-generated method stub
-        System.out.println(msg);
+    
     }
 
 }

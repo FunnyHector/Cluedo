@@ -17,26 +17,26 @@ public enum Weapon implements Card {
     }
 
     @Override
-    public String toStringOnBoard() {
-        String s = null;
+    public char toStringOnBoard() {
+        char s = ' ';
         switch (this.ordinal()) {
         case 0:
-            s = "c";
+            s = 'c';
             break;
         case 1:
-            s = "d";
+            s = 'd';
             break;
         case 2:
-            s = "p";
+            s = 'p';
             break;
         case 3:
-            s = "g";
+            s = 'g';
             break;
         case 4:
-            s = "r";
+            s = 'r';
             break;
         case 5:
-            s = "s";
+            s = 's';
             break;
         default:
         }

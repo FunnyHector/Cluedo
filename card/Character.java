@@ -10,16 +10,7 @@ package card;
  */
 public enum Character implements Card {
 
-    Miss_Scarlet(24, 7), Colonel_Mustard(17, 0), Mrs_White(0, 9), The_Reverend_Green(3,
-            14), Mrs_Peacock(6, 23), Professor_Plum(19, 23);
-
-    public final int startPosX;
-    public final int startPosY;
-
-    private Character(int startPosX, int startPosY) {
-        this.startPosX = startPosX;
-        this.startPosY = startPosY;
-    }
+    Miss_Scarlet, Colonel_Mustard, Mrs_White, The_Reverend_Green, Mrs_Peacock, Professor_Plum;
 
     @Override
     public String toString() {
@@ -27,26 +18,26 @@ public enum Character implements Card {
     }
 
     @Override
-    public String toStringOnBoard() {
-        String s = null;
+    public char toStringOnBoard() {
+        char s = ' ';
         switch (this.ordinal()) {
         case 0:
-            s = "S";
+            s = 'S';
             break;
         case 1:
-            s = "M";
+            s = 'M';
             break;
         case 2:
-            s = "W";
+            s = 'W';
             break;
         case 3:
-            s = "G";
+            s = 'G';
             break;
         case 4:
-            s = "C";
+            s = 'C';
             break;
         case 5:
-            s = "P";
+            s = 'P';
             break;
         default:
         }

@@ -17,7 +17,7 @@ public enum Location implements Card {
     }
 
     @Override
-    public String toStringOnBoard() {
-        return "";
+    public char toStringOnBoard() {
+        return ' ';
     }
 }

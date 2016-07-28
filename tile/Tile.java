@@ -11,7 +11,7 @@ import game.GameError;
 public class Tile extends Position {
 
     // the coordinates of this tile
-    private final int x, y;
+    public final int x, y;
 
     /**
      * 
@@ -28,24 +28,13 @@ public class Tile extends Position {
         this.y = y;
     }
 
-    /**
-     * 
-     * @return
-     */
-    public int getX() {
-        return x;
-    }
-
-    /**
-     * 
-     * @return
-     */
-    public int getY() {
-        return y;
-    }
-
     @Override
     public String toString() {
+        // return "[" + x + " , " + y + "]";
+        return "0";
+    }
+    
+    public String toStringOnBoard() {
         return "0";
     }
 

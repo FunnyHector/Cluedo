@@ -9,4 +9,5 @@ package tile;
  */
 public abstract class Position {
 
+    // TODO equals and hashcode
 }

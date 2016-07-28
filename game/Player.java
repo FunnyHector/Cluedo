@@ -36,11 +36,11 @@ public class Player {
      * @param token
      * @param isInGame
      */
-    public Player(Character token, boolean isInGame) {
+    public Player(Character token, boolean isInGame, Position pos) {
 
         this.token = token;
         // initialise the position as the default position on board
-        this.position = new Tile(token.startPosX, token.startPosY);
+        this.position = pos;
 
         // playerID is set to from 1 to 6
         this.playerID = token.ordinal() + 1;
@@ -79,72 +79,81 @@ public class Player {
     public Position getPosition() {
         return position;
     }
-
-    /**
-     * 
-     * @param board
-     */
-    public void moveNorth(Board board, int steps) {
-        if (!board.CanMoveNorth(position, steps)) {
-            throw new GameError("Player " + playerID + "cannot move north.");
-        }
-        position = board.northTile(position, steps);
+    
+    public void setPosition(Position position) {
+        this.position = position;
     }
-
-    /**
-     * 
-     * @param board
-     */
-    public void moveEast(Board board, int steps) {
-        if (!board.CanMoveEast(position, steps)) {
-            throw new GameError("Player " + playerID + "cannot move east.");
-        }
-        position = board.eastTile(position, steps);
+    
+    public Character getToken() {
+        return token;
     }
+    
 
-    /**
-     * 
-     * @param board
-     */
-    public void moveSouth(Board board, int steps) {
-        if (!board.CanMoveSouth(position, steps)) {
-            throw new GameError("Player " + playerID + "cannot move south.");
-        }
-        position = board.southTile(position, steps);
-    }
-
-    /**
-     * 
-     * @param board
-     */
-    public void moveWest(Board board, int steps) {
-        if (!board.CanMoveWest(position, steps)) {
-            throw new GameError("Player " + playerID + "cannot move west.");
-        }
-        position = board.westTile(position, steps);
-    }
-
-    /**
-     * This method moves a player into the given room.
-     * 
-     * 
-     * NB: this method should only be used when a player moves into a room whether from a
-     * tile or a room with secret passage.
-     * 
-     * 
-     * @param position
-     */
-    public void moveIntoRoom(Room room) {
-        if (position instanceof Tile && !room.canEnterFromPosition((Tile) position)) {
-            throw new GameError("cannot move into " + room.toString());
-        }
-
-        if (position instanceof Room && ((Room) position).getSecPas() != room.getRoom()) {
-            throw new GameError("cannot move into " + room.toString());
-        }
-
-        position = room;
-
-    }
+//    /**
+//     * 
+//     * @param board
+//     */
+//    public void moveNorth(Board board, int steps) {
+//        if (!board.CanMoveNorth(position, steps)) {
+//            throw new GameError("Player " + playerID + "cannot move north.");
+//        }
+//        position = board.northTile(position, steps);
+//    }
+//
+//    /**
+//     * 
+//     * @param board
+//     */
+//    public void moveEast(Board board, int steps) {
+//        if (!board.CanMoveEast(position, steps)) {
+//            throw new GameError("Player " + playerID + "cannot move east.");
+//        }
+//        position = board.eastTile(position, steps);
+//    }
+//
+//    /**
+//     * 
+//     * @param board
+//     */
+//    public void moveSouth(Board board, int steps) {
+//        if (!board.CanMoveSouth(position, steps)) {
+//            throw new GameError("Player " + playerID + "cannot move south.");
+//        }
+//        position = board.southTile(position, steps);
+//    }
+//
+//    /**
+//     * 
+//     * @param board
+//     */
+//    public void moveWest(Board board, int steps) {
+//        if (!board.CanMoveWest(position, steps)) {
+//            throw new GameError("Player " + playerID + "cannot move west.");
+//        }
+//        position = board.westTile(position, steps);
+//    }
+//
+//    /**
+//     * This method moves a player into the given room.
+//     * 
+//     * 
+//     * NB: this method should only be used when a player moves into a room whether from a
+//     * tile or a room with secret passage.
+//     * 
+//     * 
+//     * @param position
+//     */
+//    public void moveIntoRoom(Room room) {
+//        if (position instanceof Tile && !room.canEnterFromPosition((Tile) position)) {
+//            throw new GameError("cannot move into " + room.toString());
+//        }
+//
+//        if (position instanceof Room && ((Room) position).getSecPas() != room.getRoom()) {
+//            throw new GameError("cannot move into " + room.toString());
+//        }
+//
+//        position = room;
+//
+//    }
 
 }

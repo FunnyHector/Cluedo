@@ -1,5 +1,6 @@
 package tile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import card.Location;
@@ -18,7 +19,15 @@ public class Room extends Position {
     // The end of the secret passage if this room has one. null if it doesn't have one.
     private final Location secPasTo;
     // a collection of entrance tiles only on which a player can enter this room.
-    private List<Tile> entrances;
+    private final List<Entrance> entrances;
+    // a collection of decorative tiles for drawing tokens
+    private final List<Tile> decoTiles;
+    private int decoIndex = 0;
+
+    // Three tiles inside this room (three is at most we need for drawing tokens)
+//    private final Tile playerTile_1;
+//    private final Tile playerTile_2;
+//    private final Tile weaponTile;
 
     /**
      * 
@@ -26,10 +35,14 @@ public class Room extends Position {
      * @param secPasTo
      * @param entrances
      */
-    public Room(Location room, Location secPasTo, List<Tile> entrances) {
+    public Room(Location room, Location secPasTo) {
         this.room = room;
         this.secPasTo = secPasTo;
-        this.entrances = entrances;
+        entrances = new ArrayList<>();
+        decoTiles = new ArrayList<>();
+//        this.playerTile_1 = playerTile_1;
+//        this.playerTile_2 = playerTile_2;
+//        this.weaponTile = weaponTile;
     }
 
     /**
@@ -55,22 +68,32 @@ public class Room extends Position {
     public Location getSecPas() {
         return secPasTo;
     }
-
-    /**
-     * This method tells whether a player can enter into this room from a given tile.
-     * 
-     * @param tile
-     * @return
-     */
-    public boolean canEnterFromPosition(Tile tile) {
-        return entrances.contains(tile);
+    
+    public List<Entrance> getEntrances() {
+        return entrances;
     }
+
+    public void addEntrances(Entrance entrance) {
+        entrances.add(entrance);
+    }
+    
+    public void addDecoTiles(Tile decoTile) {
+        decoTiles.add(decoTile);
+    }
+    
+    public Tile getNextDecoTile() {
+        int index = decoIndex;
+        decoIndex++;
+        if (decoIndex >= decoTiles.size()) {
+            decoIndex = 0;  // get only 
+        }
+        return decoTiles.get(index);
+    }
+
 
     @Override
     public String toString() {
-        // TODO change this toString
-        // or do two toString methods, one is for messages, one is for board printing
-        return String.valueOf(room.ordinal() + 1);
+        // return " ";
+        return "" + (room.ordinal() + 1);
     }
-
 }
