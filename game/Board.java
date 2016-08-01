@@ -268,6 +268,13 @@ public class Board {
         }
     }
 
+    /**
+     * This method should not return a Room !!!!!
+     * 
+     * 
+     * @param player
+     * @return
+     */
     public Tile lookNorth(Player player) {
 
         Position playerPos = player.getPosition();
@@ -283,6 +290,7 @@ public class Board {
             return null;
         }
 
+        // this method should not return a Room
         if (board[playerTile.x - 1][playerTile.y] instanceof Room) {
             return null;
         }

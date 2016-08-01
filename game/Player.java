@@ -20,9 +20,11 @@ import tile.Tile;
 public class Player {
 
     private final Character token;
-    private final int playerID;
+//    private final int playerID;
     private Position position;
     private List<Card> cards;
+    private int remainingSteps;
+    
     /**
      * If a player lose, he will be marked as out of game (false); or, if this character
      * is not played by human player, i.e. it's only a token on board, it's also marked as
@@ -43,7 +45,7 @@ public class Player {
         this.position = pos;
 
         // playerID is set to from 1 to 6
-        this.playerID = token.ordinal() + 1;
+//        this.playerID = token.ordinal() + 1;
         this.isInGame = isInGame;
         cards = new ArrayList<>();
     }
@@ -60,8 +62,8 @@ public class Player {
     /**
      * This method kicks a player out of game if he is lost.
      */
-    public void setPlayerOut() {
-        isInGame = false;
+    public void setInOrOut(boolean in) {
+        this.isInGame = in;
     }
 
     /**
@@ -87,6 +89,35 @@ public class Player {
     public Character getToken() {
         return token;
     }
+    
+    public void setRemainingSteps(int steps) {
+        remainingSteps = steps;
+    }
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((token == null) ? 0 : token.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Player other = (Player) obj;
+        if (token != other.token)
+            return false;
+        return true;
+    }
+
+
+    
     
 
 //    /**

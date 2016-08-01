@@ -23,6 +23,30 @@ public class StandardCluedo {
     public static final Room LOUNGE = new Room(Location.Lounge, Location.Conservatory);
     public static final Room DINING_ROOM = new Room(Location.Dining_Room, null);
     
+    public static Room getRoom(Location loc) {
+        switch (loc) {
+        case Ball_room:
+            return BALL_ROOM;
+        case Billard_Room:
+            return BILLARD_ROOM;
+        case Conservatory:
+            return CONSERVATORY;
+        case Dining_Room:
+            return DINING_ROOM;
+        case Hall:
+            return HALL;
+        case Kitchen:
+            return KITCHEN;
+        case Library:
+            return LIBRARY;
+        case Lounge:
+            return LOUNGE;
+        case Study:
+            return STUDY;
+        default:
+            return null;  // dead code
+        }
+    }
     
     // @formatter:off
     // a string used to print out text-based UI

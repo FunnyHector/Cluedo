@@ -6,7 +6,7 @@ package card;
  * Professor Plum. Each of them has a unique starting position on board.
  * 
  * @author Hector
- *
+ * 
  */
 public enum Character implements Card {
 
