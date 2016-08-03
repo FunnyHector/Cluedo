@@ -1,6 +1,5 @@
 package gui;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -10,16 +9,15 @@ import game.Game;
 import game.Player;
 import tile.Position;
 import tile.Room;
-import tile.Tile;
 
 public class ClientTxt {
 
     private static final Scanner SCANNER = new Scanner(System.in);
 
     // used to represent player's move directions
-    private enum Direction {
-        N, E, S, W
-    };
+    // private enum Direction {
+    // N, E, S, W
+    // };
 
     public static void main(String[] args) {
 
@@ -95,32 +93,104 @@ public class ClientTxt {
 
     private static void runGame(Game game) {
         System.out.println("============Game running============");
-        
+
         while (game.updateAndgetGameStatus()) {
             System.out.println(game.getBoardString());
-            Player player = game.getNextPlayer();
-            List<Position> movablePos = game.getMovablePositions(player);
-            
+
             // prompt possible moves,
-            
-            // prompt accusation option
-            
-            
-            
             promtOptions(game);
+
         }
-        
 
         gameStop();
 
     }
 
-    private static void gameStop() {
-        // TODO Auto-generated method stub
-        
+    private static void promtOptions(Game game) {
+
+        int currentPlayerID = game.getCurrentPlayerID();
+        Player player = game.getCurrentPlayer();
+        int remainingSteps = player.getRemainingSteps();
+
+        System.out.println("Player " + currentPlayerID + ", "
+                + player.getToken().toString() + "'s move.");
+
+        if (remainingSteps == 0) {
+            int roll = game.rollDice(player);
+            System.out.println("You rolled " + roll + ".");
+            remainingSteps = player.getRemainingSteps();
+        }
+
+        System.out.println("You have " + remainingSteps + " steps left.");
+
+        Position currentPos = player.getPosition();
+        List<Position> movablePos = game.getMovablePositions(player);
+        int menuNo = 1;
+
+        // prompt (destination.size()) options
+        for (Position destination : movablePos) {
+            System.out.println("" + menuNo + ". " + currentPos.optionString(destination));
+            menuNo++;
+        }
+
+        // prompt make suggestion if the player is in a room
+        if (currentPos instanceof Room) {
+            System.out.println("" + menuNo + ". Make suggestion.");
+            menuNo++;
+        }
+
+        // prompt accusation option, end turn, win or lose.
+        System.out.println("" + menuNo + ". Make accusation.");
+
+        int choice = 0;
+        while (choice < 1 || choice > menuNo) {
+            System.out.println("Choose an option from 1 to " + menuNo + ":");
+            choice = parseInt();
+        }
+
+        // see what the player choose, and act accordingly
+        if (choice <= movablePos.size()) {
+            // TODO move to another tile or room
+            Position destination = movablePos.get(choice - 1);
+            game.getBoard().moveTo(player, destination);
+
+            if (destination instanceof Room) {
+                // move into a room, remainingSteps = 0
+                remainingSteps = 0;
+                
+                // TODO now the player can make suggestion
+                
+                
+                
+                
+                
+            } else {
+                // move to another tile, remainingSteps--
+                remainingSteps--;
+            }
+
+        } else if (choice == menuNo) {
+            // TODO made an accucation
+
+            // accusation ends player's turn
+            remainingSteps = 0;
+        } else {
+            // TODO made a suggestion
+
+            // suggestion ends player's turn
+        }
+
+        player.setRemainingSteps(remainingSteps);
+
+        // if current player has no step left, it's next player's turn
+        if (remainingSteps == 0) {
+            game.currentPlayerEndTurn();
+        }
     }
 
-    private static void promtOptions(Game game) {
+    private static void gameStop() {
+        // TODO set game stop, prompt the winner
+        // prompt do you want to play again blahblah
 
     }
 
@@ -233,7 +303,7 @@ public class ClientTxt {
     // return;
     // }
     //
-    // // TODO need to do a simulated move, to see if the player will hit a wall
+    // // need to do a simulated move, to see if the player will hit a wall
     // // condition cannot be true, change it.
     // // 2. if the player's free input will hit a wall
     // for (int i = 0; i < steps; i++) {

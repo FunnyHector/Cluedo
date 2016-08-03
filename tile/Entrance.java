@@ -1,5 +1,7 @@
 package tile;
 
+import game.GameError;
+
 /**
  * 
  * 
@@ -7,7 +9,7 @@ package tile;
  *
  */
 public class Entrance extends Tile {
-    
+
     private Room toRoom;
 
     public Entrance(int x, int y, Room toRoom) {
@@ -21,6 +23,7 @@ public class Entrance extends Tile {
     
     @Override
     public String toString() {
+        /*
         switch (toRoom.getRoom()) {
         case Kitchen:
             return "a";
@@ -42,6 +45,31 @@ public class Entrance extends Tile {
             return "i";
         default:
             return " ";
+        }
+        */
+        return super.toString();
+    }
+    
+    @Override
+    public String optionString(Position destination) {
+        if (destination instanceof Tile) {
+            Tile destinationTile = (Tile) destination;
+            if (destinationTile.x - this.x == 1) {
+                return "Move east.";
+            } else if (destinationTile.x - this.x == -1) {
+                return "Move west.";
+            } else if (destinationTile.y - this.y == 1) {
+                return "Move south.";
+            } else if (destinationTile.y - this.y == -1) {
+                return "Move north.";
+            } else {
+                throw new GameError("Shouldn't move two tiles away once");
+            }
+        } else if (destination instanceof Room) {
+            Room destinationRoom = (Room) destination;
+            return "Enter " + destinationRoom.getRoom().toString() + ".";
+        } else {
+            throw new GameError("Shouldn't move from an entrance to " + destination.toString());
         }
     }
 

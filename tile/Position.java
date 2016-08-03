@@ -8,6 +8,8 @@ package tile;
  *
  */
 public abstract class Position {
+    
+    public abstract String optionString(Position destination);
 
     // TODO equals and hashcode
 }

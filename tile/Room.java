@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import card.Location;
+import game.GameError;
 
 /**
  * This class represents a room on Cluedo game board. Each room has one or more entrance
@@ -58,14 +59,14 @@ public class Room extends Position {
      * @return
      */
     public boolean hasSecPas() {
-        return secPasTo == null;
+        return secPasTo != null;
     }
 
     /**
      * 
      * @return
      */
-    public Location getSecPas() {
+    public Location getSecPasTo() {
         return secPasTo;
     }
     
@@ -89,11 +90,25 @@ public class Room extends Position {
         }
         return decoTiles.get(index);
     }
+    
 
 
     @Override
     public String toString() {
-        // return " ";
-        return "" + (room.ordinal() + 1);
+        return room.toString();
+        //return "" + (room.ordinal() + 1);
+    }
+
+    @Override
+    public String optionString(Position destination) {
+        if (destination instanceof Room) {
+            Room destinationRoom = (Room) destination;
+            return "Take the secret passage to " + destinationRoom.getSecPasTo().toString() + ".";
+        } else if (destination instanceof Entrance) {
+            Entrance exitOfRoom = (Entrance) destination;
+            return "Exit room from exit (" + exitOfRoom.x + ", " + exitOfRoom.y + ").";
+        } else {
+            throw new GameError("Shouldn't move from a room to a tile (not entrance)");
+        }
     }
 }

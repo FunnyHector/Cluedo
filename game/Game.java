@@ -214,13 +214,9 @@ public class Game {
         return remainingCards;
     }
 
-    public Player getNextPlayer() {
+    public Player getCurrentPlayer() {
         for (Entry<Player, Integer> en : players.entrySet()) {
             if (en.getValue() == currentPlayerID) {
-                currentPlayerID++;
-                if (currentPlayerID > numPlayers) {
-                    currentPlayerID = 1;
-                }
                 return en.getKey();
             }
         }
@@ -228,6 +224,50 @@ public class Game {
         return null; // dead code
     }
 
+    public void currentPlayerEndTurn() {
+        currentPlayerID++;
+        if (currentPlayerID > numPlayers) {
+            currentPlayerID = 1;
+        }
+    }
+
+    // public Player getNextPlayer() {
+    // for (Entry<Player, Integer> en : players.entrySet()) {
+    // if (en.getValue() == currentPlayerID) {
+    // currentPlayerID++;
+    // if (currentPlayerID > numPlayers) {
+    // currentPlayerID = 1;
+    // }
+    // return en.getKey();
+    // }
+    // }
+    //
+    // return null; // dead code
+    // }
+
+    public int getCurrentPlayerID() {
+        return currentPlayerID;
+    }
+
+    // @formatter:off
+    /**
+     * The Position in the list returned will be of a certain order, which is:
+     * 
+     * north tile
+     * east tile
+     * south tile
+     * west tile
+     * room if standing at an entrance
+     * exits (entrances) if in a room
+     * room which can go to via the secret passage of current room
+     * 
+     * 
+     * 
+     * 
+     * @param player
+     * @return
+     */
+    // @formatter:off
     public List<Position> getMovablePositions(Player player) {
         // Position playerPos = player.getPosition();
         List<Position> movablePos = new ArrayList<>();
@@ -253,28 +293,23 @@ public class Game {
         
         // if the player is in a room, get the exits
         List<Entrance> entrances = board.lookForExit(player);
-        if (!entrances.isEmpty()) {
+        if (entrances != null && !entrances.isEmpty()) {
             for (Entrance e : entrances) {
                 movablePos.add(e);
             }
         }
         
         // if the player is in a room, and there is a secret passage
-        Position pos = player.getPosition();
-        if (pos instanceof Room) {
-            Room room = (Room) pos;
-            if (room.hasSecPas()) {
-                movablePos.add(StandardCluedo.getRoom(room.getSecPas()));
-            }
+        if (board.lookForSecPas(player) != null) {
+            movablePos.add(board.lookForSecPas(player));
         }
         
-        // TODO board has to examine movablePos, if any other player standing there,
-        // remove this position
+        // check if any other player standing there, then it's not an option
         for (Player existingPlayer : players.keySet()) {
             Iterator<Position> itr = movablePos.iterator();
             while (itr.hasNext()) {
                 Position nextPos = itr.next();
-                if (nextPos.equals(existingPlayer.getPosition())) {
+                if (nextPos instanceof Tile && nextPos.equals(existingPlayer.getPosition())) {
                     itr.remove();
                 }
             }
@@ -288,9 +323,11 @@ public class Game {
      *
      * @return
      */
-    public void rollDice(Player player) {
+    public int rollDice(Player player) {
         // two dices can roll out 2 - 12;
-        player.setRemainingSteps(RAN.nextInt(11) + 2);
+        int roll = RAN.nextInt(11) + 2;
+        player.setRemainingSteps(roll);
+        return roll;
     }
 
     /**
@@ -299,6 +336,10 @@ public class Game {
      */
     public Suggestion getSolution() {
         return solution;
+    }
+    
+    public Board getBoard() {
+        return board;
     }
 
     public boolean updateAndgetGameStatus() {
@@ -349,10 +390,24 @@ public class Game {
 
         // put remaining cards after the ASCII board
         if (!remainingCards.isEmpty()) {
-            boardString = boardString + "Remaining cards:\n";
+            boardString = boardString + "[Remaining cards]:\n";
             for (Card c : remainingCards) {
                 boardString = boardString + c.toString() + "\n";
             }
+        }
+        
+        // shows what cards are in the current player's hand
+        Player player = null;
+        for (Entry<Player, Integer> en : players.entrySet()) {
+            if (en.getValue() == currentPlayerID) {
+                player = en.getKey();
+            }
+        }
+        
+        boardString = boardString + "[Cards in hand]:\n";
+        List<Card> cards = player.getCards();
+        for (Card c : player.getCards()) {
+            boardString = boardString + c.toString() + "\n";
         }
 
         return boardString;

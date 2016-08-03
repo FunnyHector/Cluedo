@@ -49,6 +49,10 @@ public class Player {
         this.isInGame = isInGame;
         cards = new ArrayList<>();
     }
+    
+    public List<Card> getCards() {
+        return cards;
+    }
 
     /**
      * This method draws a card for the player.
@@ -92,6 +96,10 @@ public class Player {
     
     public void setRemainingSteps(int steps) {
         remainingSteps = steps;
+    }
+    
+    public int getRemainingSteps() {
+        return remainingSteps;
     }
     
     @Override
