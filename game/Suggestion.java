@@ -1,5 +1,9 @@
 package game;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import card.Card;
 import card.Character;
 import card.Location;
 import card.Weapon;
@@ -30,16 +34,41 @@ public class Suggestion {
         this.location = location;
         this.weapon = weapon;
     }
-
-    /**
-     * This method tells whether current suggestion is correct (same as solution).
-     * 
-     * @param game
-     * @return
-     */
-    public boolean isCorrect(Game game) {
-        return this.equals(game.getSolution());
+    
+    public List<Card> asList() {
+        List<Card> list = new ArrayList<>();
+        list.add(character);
+        list.add(weapon);
+        list.add(location);
+        return list;
     }
 
-    // TODO equals and hashcode
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((character == null) ? 0 : character.hashCode());
+        result = prime * result + ((location == null) ? 0 : location.hashCode());
+        result = prime * result + ((weapon == null) ? 0 : weapon.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Suggestion other = (Suggestion) obj;
+        if (character != other.character)
+            return false;
+        if (location != other.location)
+            return false;
+        if (weapon != other.weapon)
+            return false;
+        return true;
+    }
+ 
 }

@@ -1,23 +1,27 @@
 package gui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Map.Entry;
 
+import card.Card;
 import card.Character;
+import card.Location;
+import card.Weapon;
 import game.Game;
 import game.Player;
+import game.Suggestion;
 import tile.Position;
 import tile.Room;
 
 public class ClientTxt {
 
-    private static final Scanner SCANNER = new Scanner(System.in);
+    private static final int MIN_PLAYER = 3;
+    private static final int MAX_PLAYER = 6;
 
-    // used to represent player's move directions
-    // private enum Direction {
-    // N, E, S, W
-    // };
+    private static final Scanner SCANNER = new Scanner(System.in);
 
     public static void main(String[] args) {
 
@@ -27,7 +31,8 @@ public class ClientTxt {
 
         runGame(game);
 
-        // TODO should check the status first, and close it at last
+        gameStop(game);
+
         SCANNER.close();
     }
 
@@ -41,22 +46,8 @@ public class ClientTxt {
     private static Game setupGame() {
 
         // set how many players
-        int numPlayers = 0;
-        while (numPlayers < 3 || numPlayers > 6) {
-            System.out.println(
-                    "How many players? Please enter an integer between 3 and 6.");
-            numPlayers = parseInt();
-        }
-
-        // standard cluedo or customised board
-        // System.out.println("Standard Cluedo board or customised board?");
-        // System.out.println("1. Standard Cluedo board.");
-        // System.out.println("2. Customised board.");
-        // int boardType = parseInt();
-        // while (boardType != 1 && boardType != 2) {
-        // System.out.println("Choose an option between 1 or 2:");
-        // boardType = parseInt();
-        // }
+        System.out.println("How many players?");
+        int numPlayers = parseInt(MIN_PLAYER, MAX_PLAYER);
 
         int boardType = 1;
         Game game = new Game(numPlayers, boardType);
@@ -74,11 +65,8 @@ public class ClientTxt {
                         "" + (i + 1) + ". " + playableCharacters.get(i).toString());
             }
             // make a choice
-            int choice = 0;
-            while (choice < 1 || choice > size) {
-                System.out.println("Choose an option from 1 to " + size + ":");
-                choice = parseInt();
-            }
+            int choice = parseInt(1, size);
+
             // join this player in
             game.joinPlayer(playerID, playableCharacters.get(choice - 1));
             choice = 0;
@@ -87,7 +75,6 @@ public class ClientTxt {
         // create solution, and deal cards
         game.creatSolutionAndDealCards();
 
-        // System.out.println("[DEBUG] Loading completed");
         return game;
     }
 
@@ -95,116 +82,417 @@ public class ClientTxt {
         System.out.println("============Game running============");
 
         while (game.updateAndgetGameStatus()) {
+            // print board
             System.out.println(game.getBoardString());
-
-            // prompt possible moves,
-            promtOptions(game);
-
+            // prompt possible moves, and player choose to make move
+            go(game);
         }
-
-        gameStop();
-
     }
 
-    private static void promtOptions(Game game) {
+    private static void go(Game game) {
 
         int currentPlayerID = game.getCurrentPlayerID();
-        Player player = game.getCurrentPlayer();
-        int remainingSteps = player.getRemainingSteps();
+        Player currentPlayer = game.getCurrentPlayer();
+        int remainingSteps = currentPlayer.getRemainingSteps();
 
         System.out.println("Player " + currentPlayerID + ", "
-                + player.getToken().toString() + "'s move.");
+                + currentPlayer.getToken().toString() + "'s move.");
 
+        // if this player hasn't roll a dice
         if (remainingSteps == 0) {
-            int roll = game.rollDice(player);
+            int roll = game.rollDice(currentPlayer);
             System.out.println("You rolled " + roll + ".");
-            remainingSteps = player.getRemainingSteps();
+            remainingSteps = currentPlayer.getRemainingSteps();
         }
 
         System.out.println("You have " + remainingSteps + " steps left.");
 
-        Position currentPos = player.getPosition();
-        List<Position> movablePos = game.getMovablePositions(player);
+        Position currentPos = currentPlayer.getPosition();
+        List<Position> movablePos = game.getMovablePositions(currentPlayer);
         int menuNo = 1;
 
-        // prompt (destination.size()) options
+        // two helper flags
+        boolean hasSuggestionOption = false;
+        boolean hasNowhereToGo = false;
+
+        // prompt options of movable positions
         for (Position destination : movablePos) {
             System.out.println("" + menuNo + ". " + currentPos.optionString(destination));
             menuNo++;
         }
 
+        // prompt accusation option
+        System.out.println("" + menuNo + ". Make accusation.");
+        menuNo++;
+
         // prompt make suggestion if the player is in a room
         if (currentPos instanceof Room) {
             System.out.println("" + menuNo + ". Make suggestion.");
+            hasSuggestionOption = true;
             menuNo++;
         }
 
-        // prompt accusation option, end turn, win or lose.
-        System.out.println("" + menuNo + ". Make accusation.");
-
-        int choice = 0;
-        while (choice < 1 || choice > menuNo) {
-            System.out.println("Choose an option from 1 to " + menuNo + ":");
-            choice = parseInt();
+        // means the player is blocked by other players, so he cannot move
+        if (movablePos.isEmpty()) {
+            System.out.println("" + menuNo + ". Nowhere to move, end turn.");
+            hasNowhereToGo = true;
+            menuNo++;
         }
 
-        // see what the player choose, and act accordingly
-        if (choice <= movablePos.size()) {
-            // TODO move to another tile or room
-            Position destination = movablePos.get(choice - 1);
-            game.getBoard().moveTo(player, destination);
+        // get player's choice
+        menuNo--;
+        int choice = parseInt(1, menuNo);
 
+        // player chose to move to one of movable positions
+        if (choice <= movablePos.size()) {
+            Position destination = movablePos.get(choice - 1);
+            game.movePlayer(currentPlayer, destination);
+
+            // if player has entered a room, he can make a suggestion
             if (destination instanceof Room) {
-                // move into a room, remainingSteps = 0
+                // first update the board display
+                System.out.println(game.getBoardString());
+                // move into a room, now the player can make suggestion
+                Suggestion suggestion = makeSuggestion(game, destination);
+                // now compare the suggestion, and other players try to reject it
+                rejectSuggestion(game, currentPlayerID, suggestion);
+
+                // prompt if the player want to make accusation now
+                System.out.println("Do you want to make an accusation now?");
+                System.out.println("1. Yes");
+                System.out.println("2. No");
+                int yesNo = parseInt(1, 2);
+
+                if (yesNo == 1) {
+                    // made an accusation
+                    makeAccusation(game, currentPlayerID, currentPlayer);
+                }
+
                 remainingSteps = 0;
-                
-                // TODO now the player can make suggestion
-                
-                
-                
-                
-                
+
             } else {
                 // move to another tile, remainingSteps--
                 remainingSteps--;
             }
 
-        } else if (choice == menuNo) {
-            // TODO made an accucation
-
-            // accusation ends player's turn
+        } else if (choice == movablePos.size() + 1) {
+            // made an accusation
+            makeAccusation(game, currentPlayerID, currentPlayer);
             remainingSteps = 0;
-        } else {
-            // TODO made a suggestion
+        } else if (choice == movablePos.size() + 2) {
 
-            // suggestion ends player's turn
+            if (hasSuggestionOption && !hasNowhereToGo) {
+                // made a suggestion
+                Suggestion suggestion = makeSuggestion(game, currentPos);
+                // now compare the suggestion, and other players try to reject it
+                rejectSuggestion(game, currentPlayerID, suggestion);
+                remainingSteps = 0;
+
+            } else if (!hasSuggestionOption && hasNowhereToGo) {
+                // has nowhere to go, the player choose to end turn
+                remainingSteps = 0;
+            }
+
+        } else if (choice == movablePos.size() + 3) {
+            // has nowhere to go, the player choose to end turn
+            remainingSteps = 0;
         }
 
-        player.setRemainingSteps(remainingSteps);
+        currentPlayer.setRemainingSteps(remainingSteps);
 
         // if current player has no step left, it's next player's turn
         if (remainingSteps == 0) {
             game.currentPlayerEndTurn();
         }
+
     }
 
-    private static void gameStop() {
+    private static Suggestion makeSuggestion(Game game, Position destination) {
+
+        Location location = ((Room) destination).getRoom();
+
+        System.out.println(
+                "What suggestion do you want to make in " + location.toString() + "?");
+
+        // prompt all characters
+        for (Character c : Character.values()) {
+            System.out.println("" + (c.ordinal() + 1) + ". " + c.toString());
+        }
+
+        int choiceCharacter = parseInt(1, Character.values().length);
+
+        // get player's choice
+        Character suspect = null;
+        switch (choiceCharacter) {
+        case 1:
+            suspect = Character.Miss_Scarlet;
+            break;
+        case 2:
+            suspect = Character.Colonel_Mustard;
+            break;
+        case 3:
+            suspect = Character.Mrs_White;
+            break;
+        case 4:
+            suspect = Character.The_Reverend_Green;
+            break;
+        case 5:
+            suspect = Character.Mrs_Peacock;
+            break;
+        case 6:
+            suspect = Character.Professor_Plum;
+            break;
+        default: // dead code
+        }
+
+        System.out.println("" + suspect.toString() + " commited crime with:");
+
+        // prompt all weapons
+        for (Weapon w : Weapon.values()) {
+            System.out.println("" + (w.ordinal() + 1) + ". " + w.toString());
+        }
+
+        int choiceWeapon = parseInt(1, Weapon.values().length);
+
+        // get player's choice
+        Weapon weapon = null;
+        switch (choiceWeapon) {
+        case 1:
+            weapon = Weapon.Candlestick;
+            break;
+        case 2:
+            weapon = Weapon.Dagger;
+            break;
+        case 3:
+            weapon = Weapon.Lead_Pipe;
+            break;
+        case 4:
+            weapon = Weapon.Revolver;
+            break;
+        case 5:
+            weapon = Weapon.Rope;
+            break;
+        case 6:
+            weapon = Weapon.Spanner;
+            break;
+        default: // dead code
+        }
+
+        // move the weapon in this suggestion into this room
+        game.moveWeapon(weapon, (Room) destination);
+        // and the suspect as well
+        game.movePlayer(game.getPlayerByCharacter(suspect), (Room) destination);
+
+        // now the player has made a suggestion
+        System.out.println(
+                "Your suggestion is:\nSuspect: " + suspect.toString() + "\nWeapon: "
+                        + weapon.toString() + "\nLocation: " + location.toString());
+
+        return new Suggestion(suspect, location, weapon);
+    }
+
+    private static void rejectSuggestion(Game game, int currentPlayerID,
+            Suggestion suggestion) {
+
+        outer: for (Player p : game.getPlayers()) {
+            int playerID = p.getID();
+            // every other human-controlled player has to try to reject this suggestion
+            if (playerID != currentPlayerID && playerID != 0) {
+                List<Card> cardsInSuggetion = suggestion.asList();
+                // shuffle so that it randomly reject the first rejectable card
+                Collections.shuffle(cardsInSuggetion);
+
+                for (Card card : cardsInSuggetion) {
+                    if (game.playerHasCard(playerID, card)) {
+                        System.out.println("Player " + playerID
+                                + " rejects your suggestion with card: "
+                                + card.toString());
+                        continue outer; // only reject one card
+                    }
+                }
+
+                // this player cannot reject this suggestion
+                System.out.println(
+                        "Player " + playerID + " cannot reject your suggestion.");
+            }
+        }
+    }
+
+    private static void makeAccusation(Game game, int currentPlayerID,
+            Player currentPlayer) {
+
+        System.out.println("What accusation do you want to make:");
+
+        // prompt all characters
+        for (Character c : Character.values()) {
+            System.out.println("" + (c.ordinal() + 1) + ". " + c.toString());
+        }
+
+        int choiceCharacter = parseInt(1, Character.values().length);
+
+        // get player's choice
+        Character suspect = null;
+        switch (choiceCharacter) {
+        case 1:
+            suspect = Character.Miss_Scarlet;
+            break;
+        case 2:
+            suspect = Character.Colonel_Mustard;
+            break;
+        case 3:
+            suspect = Character.Mrs_White;
+            break;
+        case 4:
+            suspect = Character.The_Reverend_Green;
+            break;
+        case 5:
+            suspect = Character.Mrs_Peacock;
+            break;
+        case 6:
+            suspect = Character.Professor_Plum;
+            break;
+        default: // dead code
+        }
+
+        System.out.println("...commited crime with:");
+
+        // prompt all weapons
+        for (Weapon w : Weapon.values()) {
+            System.out.println("" + (w.ordinal() + 1) + ". " + w.toString());
+        }
+
+        int choiceWeapon = parseInt(1, Weapon.values().length);
+
+        // get player's choice
+        Weapon weapon = null;
+        switch (choiceWeapon) {
+        case 1:
+            weapon = Weapon.Candlestick;
+            break;
+        case 2:
+            weapon = Weapon.Dagger;
+            break;
+        case 3:
+            weapon = Weapon.Lead_Pipe;
+            break;
+        case 4:
+            weapon = Weapon.Revolver;
+            break;
+        case 5:
+            weapon = Weapon.Rope;
+            break;
+        case 6:
+            weapon = Weapon.Spanner;
+            break;
+        default: // dead code
+        }
+
+        System.out.println("...in:");
+
+        // prompt all rooms
+        for (Location l : Location.values()) {
+            System.out.println("" + (l.ordinal() + 1) + ". " + l.toString());
+        }
+
+        int choiceRoom = parseInt(1, Location.values().length);
+
+        // get player's choice
+        Location location = null;
+        switch (choiceRoom) {
+        case 1:
+            location = Location.Kitchen;
+            break;
+        case 2:
+            location = Location.Ball_room;
+            break;
+        case 3:
+            location = Location.Conservatory;
+            break;
+        case 4:
+            location = Location.Billard_Room;
+            break;
+        case 5:
+            location = Location.Library;
+            break;
+        case 6:
+            location = Location.Study;
+            break;
+        case 7:
+            location = Location.Hall;
+            break;
+        case 8:
+            location = Location.Lounge;
+            break;
+        case 9:
+            location = Location.Dining_Room;
+            break;
+        default: // dead code
+        }
+
+        // now the player has made a accusation
+        System.out.println(
+                "Your accusation is:\nSuspect: " + suspect.toString() + "\nWeapon: "
+                        + weapon.toString() + "\nLocation: " + location.toString());
+
+        Suggestion accusation = new Suggestion(suspect, location, weapon);
+
+        if (game.checkAccusation(accusation)) {
+            // win!!
+            System.out.println("You Win!");
+            game.setWinner(currentPlayer);
+        } else {
+            // the player is out
+            System.out.println("You are wrong! ");
+
+            /*
+             * TODO when a player is out, he cannot continue to play, but he has to be in
+             * game to try to reject other player's suggestion. This
+             * kickPlayerOut(currentPlayerID) method need some change
+             * 
+             */
+
+            game.kickPlayerOut(currentPlayerID);
+        }
+    }
+
+    private static void gameStop(Game game) {
         // TODO set game stop, prompt the winner
         // prompt do you want to play again blahblah
 
+        Player winner = game.getWinner();
+
+        System.out.println("Winner is Player " + winner.getID() + "!");
+
     }
 
-    private static int parseInt() {
+    private static int parseInt(int min, int max) {
         while (true) {
             String line = SCANNER.nextLine();
+
+            if (line.equals("help")) {
+                helpMessage();
+                continue;
+            }
+
             try {
                 int i = Integer.valueOf(line);
-                return i;
+                if (i >= min && i <= max) {
+                    return i;
+                } else {
+                    System.out.println(
+                            "Please choose between " + min + " and " + max + ":");
+                    continue;
+                }
             } catch (NumberFormatException e) {
-                System.out.println("Please enter an integer.");
+                System.out.println("Please enter an integer:");
                 continue;
             }
         }
+    }
+
+    private static void helpMessage() {
+        // TODO Some help message
+
     }
 
     private static int skipWhiteSpace(int index, String line) {

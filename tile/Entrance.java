@@ -73,4 +73,29 @@ public class Entrance extends Tile {
         }
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((toRoom == null) ? 0 : toRoom.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Entrance other = (Entrance) obj;
+        if (toRoom == null) {
+            if (other.toRoom != null)
+                return false;
+        } else if (!toRoom.equals(other.toRoom))
+            return false;
+        return true;
+    }
+    
 }

@@ -33,14 +33,11 @@ public class Game {
     private Board board;
     private int numPlayers;
 
-    /*
-     * a map to manage players, the key is player id. key being 0 indicates the player is
-     * not controled by anybody, i.e. a dummy token on board
-     */
-    private Map<Player, Integer> players;
+    private List<Player> players;
     private List<Card> remainingCards;
     private List<WeaponToken> weaponTokens;
     private int currentPlayerID;
+    private Player winner;
 
     // a random number generator
     private static final Random RAN = new Random();
@@ -52,29 +49,24 @@ public class Game {
     public Game(int numPlayers, int boardType) {
 
         board = new Board(StandardCluedo.BOARD_STRING);
-        players = new HashMap<>();
+        players = new ArrayList<>();
         this.numPlayers = numPlayers;
         currentPlayerID = 1;
+        winner = null;
 
         // first add and six dummy tokens on board
-        players.put(new Player(Character.Miss_Scarlet, false,
-                board.getStartPosition(Character.Miss_Scarlet)), new Integer(0));
-        players.put(
-                new Player(Character.Colonel_Mustard, false,
-                        board.getStartPosition(Character.Colonel_Mustard)),
-                new Integer(0));
-        players.put(new Player(Character.Mrs_White, false,
-                board.getStartPosition(Character.Mrs_White)), new Integer(0));
-        players.put(
-                new Player(Character.The_Reverend_Green, false,
-                        board.getStartPosition(Character.The_Reverend_Green)),
-                new Integer(0));
-        players.put(new Player(Character.Mrs_Peacock, false,
-                board.getStartPosition(Character.Mrs_Peacock)), new Integer(0));
-        players.put(
-                new Player(Character.Professor_Plum, false,
-                        board.getStartPosition(Character.Professor_Plum)),
-                new Integer(0));
+        players.add(new Player(Character.Miss_Scarlet,
+                board.getStartPosition(Character.Miss_Scarlet)));
+        players.add(new Player(Character.Colonel_Mustard,
+                board.getStartPosition(Character.Colonel_Mustard)));
+        players.add(new Player(Character.Mrs_White,
+                board.getStartPosition(Character.Mrs_White)));
+        players.add(new Player(Character.The_Reverend_Green,
+                board.getStartPosition(Character.The_Reverend_Green)));
+        players.add(new Player(Character.Mrs_Peacock,
+                board.getStartPosition(Character.Mrs_Peacock)));
+        players.add(new Player(Character.Professor_Plum,
+                board.getStartPosition(Character.Professor_Plum)));
 
         // put six weapons in random rooms
         setWeapons();
@@ -89,9 +81,9 @@ public class Game {
 
     public List<Character> getPlayableCharacters() {
         List<Character> playableCharacters = new ArrayList<>();
-        for (Entry<Player, Integer> en : players.entrySet()) {
-            if (en.getValue() == 0) {
-                playableCharacters.add(en.getKey().getToken());
+        for (Player p : players) {
+            if (p.getID() == 0) {
+                playableCharacters.add(p.getToken());
             }
         }
 
@@ -101,23 +93,18 @@ public class Game {
     }
 
     public void joinPlayer(int playerID, Character playerChoice) {
-
-        Player p = null;
-
-        for (Entry<Player, Integer> en : players.entrySet()) {
-            if (en.getKey().getToken().equals(playerChoice)) {
-                p = en.getKey();
+        for (Player p : players) {
+            if (p.getToken().equals(playerChoice)) {
+                p.setID(playerID);
                 break;
             }
         }
-
-        players.put(p, new Integer(playerID));
     }
 
-    public void playerOut(int playerID) {
-        for (Entry<Player, Integer> en : players.entrySet()) {
-            if (en.getValue() == playerID) {
-                en.getKey().setInOrOut(false);
+    public void kickPlayerOut(int playerID) {
+        for (Player p : players) {
+            if (p.getID() == playerID) {
+                p.setID(0);
                 numPlayers--;
                 break;
             }
@@ -179,9 +166,9 @@ public class Game {
         while (remainingCards.size() >= numPlayers) {
             Collections.shuffle(remainingCards);
 
-            for (Entry<Player, Integer> en : players.entrySet()) {
-                if (en.getValue() != 0) {
-                    en.getKey().drawACard(
+            for (Player p : players) {
+                if (p.getID() != 0) {
+                    p.drawACard(
                             remainingCards.remove(RAN.nextInt(remainingCards.size())));
                 }
             }
@@ -210,18 +197,62 @@ public class Game {
         }
     }
 
+    public void movePlayer(Player player, Position position) {
+        board.movePlayer(player, position);
+    }
+
+    public void moveWeapon(Weapon weapon, Room room) {
+        for (WeaponToken wt : weaponTokens) {
+            if (wt.getToken().equals(weapon)) {
+                board.moveWeapon(wt, room);
+            }
+        }
+    }
+
     public List<Card> getRemainingCards() {
         return remainingCards;
     }
 
     public Player getCurrentPlayer() {
-        for (Entry<Player, Integer> en : players.entrySet()) {
-            if (en.getValue() == currentPlayerID) {
-                return en.getKey();
+        for (Player p : players) {
+            if (p.getID() == currentPlayerID) {
+                return p;
             }
         }
 
         return null; // dead code
+    }
+
+    // public Player getNextPlayer() {
+    // for (Entry<Player, Integer> en : players.entrySet()) {
+    // if (en.getValue() == currentPlayerID) {
+    // currentPlayerID++;
+    // if (currentPlayerID > numPlayers) {
+    // currentPlayerID = 1;
+    // }
+    // return en.getKey();
+    // }
+    // }
+    //
+    // return null; // dead code
+    // }
+
+    public int getCurrentPlayerID() {
+        return currentPlayerID;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public Player getPlayerByCharacter(Character cha) {
+        for (Player p : players) {
+            if (p.getToken().equals(cha)) {
+                return p;
+            }
+        }
+
+        throw new GameError("Cannot find the player who use token: " + cha.toString());
     }
 
     public void currentPlayerEndTurn() {
@@ -245,8 +276,15 @@ public class Game {
     // return null; // dead code
     // }
 
-    public int getCurrentPlayerID() {
-        return currentPlayerID;
+    public boolean playerHasCard(int playerID, Card card) {
+
+        for (Player p : players) {
+            if (p.getID() == playerID) {
+                return p.hasCard(card);
+            }
+        }
+
+        throw new GameError("Cannot find a player with playerID " + playerID);
     }
 
     // @formatter:off
@@ -305,7 +343,7 @@ public class Game {
         }
         
         // check if any other player standing there, then it's not an option
-        for (Player existingPlayer : players.keySet()) {
+        for (Player existingPlayer : players) {
             Iterator<Position> itr = movablePos.iterator();
             while (itr.hasNext()) {
                 Position nextPos = itr.next();
@@ -330,25 +368,48 @@ public class Game {
         return roll;
     }
 
-    /**
-     *
-     * @return
-     */
-    public Suggestion getSolution() {
-        return solution;
-    }
+//    /**
+//     *
+//     * @return
+//     */
+//    public Suggestion getSolution() {
+//        return solution;
+//    }
     
     public Board getBoard() {
         return board;
     }
 
     public boolean updateAndgetGameStatus() {
-        return numPlayers > 1;
+        return numPlayers > 1 || winner == null;
     }
-
-    // public List<Player> getPlayers() {
-    // return players;
-    // }
+    
+    public void setWinner(Player player) {
+        winner = player;
+    }
+    
+    public Player getWinner() {
+        if (winner == null) {
+            // assertion
+            if (numPlayers > 1) {
+                throw new GameError("number of players shouldn't > 1");
+            }
+            
+            for (Player p : players) {
+                if (p.getID() != 0) {
+                    return p;
+                }
+            }
+            
+            throw new GameError("should at least have one player left");
+        } else {
+            return winner;            
+        }
+    }
+    
+    public boolean checkAccusation(Suggestion suggestion) {
+        return solution.equals(suggestion);
+    }
 
     public String getBoardString() {
 
@@ -356,7 +417,7 @@ public class Game {
         char[] boardChars = StandardCluedo.UI_STRING_A.toCharArray();
 
         // draw players by replacing his character on his position
-        for (Player p : players.keySet()) {
+        for (Player p : players) {
             Position pos = p.getPosition();
             if (pos instanceof Tile) {
                 Tile tile = (Tile) pos;
@@ -398,14 +459,14 @@ public class Game {
         
         // shows what cards are in the current player's hand
         Player player = null;
-        for (Entry<Player, Integer> en : players.entrySet()) {
-            if (en.getValue() == currentPlayerID) {
-                player = en.getKey();
+        for (Player p : players) {
+            if (p.getID() == currentPlayerID) {
+                player = p;
+                break;
             }
         }
         
         boardString = boardString + "[Cards in hand]:\n";
-        List<Card> cards = player.getCards();
         for (Card c : player.getCards()) {
             boardString = boardString + c.toString() + "\n";
         }

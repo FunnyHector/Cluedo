@@ -398,7 +398,7 @@ public class Board {
         return null;
     }
 
-    public void moveTo(Player player, Position position) {
+    public void movePlayer(Player player, Position position) {
         /*
          * this method shouldn't need to do sanity check, because it should always be
          * called after check validity by calling lookNorth / lookSouth / lookWest /
@@ -406,7 +406,11 @@ public class Board {
          */
         player.setPosition(position);
     }
-
+    
+    public void moveWeapon(WeaponToken weaponToken, Room room) {
+        weaponToken.setRoom(room);
+    }
+    
 //    public void moveNorth(Player player) {
 //        Tile northTile = lookNorth(player);
 //        if (northTile != null) {
@@ -468,9 +472,7 @@ public class Board {
 //        }
 //    }
 
-    public void moveWeapon(WeaponToken weaponToken, Room room) {
-        weaponToken.setRoom(room);
-    }
+
 
     // public static void main(String[] args) {
     // new Board(StandardCluedo.BOARD_STRING);

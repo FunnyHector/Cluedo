@@ -111,4 +111,45 @@ public class Room extends Position {
             throw new GameError("Shouldn't move from a room to a tile (not entrance)");
         }
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + decoIndex;
+        result = prime * result + ((decoTiles == null) ? 0 : decoTiles.hashCode());
+        result = prime * result + ((entrances == null) ? 0 : entrances.hashCode());
+        result = prime * result + ((room == null) ? 0 : room.hashCode());
+        result = prime * result + ((secPasTo == null) ? 0 : secPasTo.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Room other = (Room) obj;
+        if (decoIndex != other.decoIndex)
+            return false;
+        if (decoTiles == null) {
+            if (other.decoTiles != null)
+                return false;
+        } else if (!decoTiles.equals(other.decoTiles))
+            return false;
+        if (entrances == null) {
+            if (other.entrances != null)
+                return false;
+        } else if (!entrances.equals(other.entrances))
+            return false;
+        if (room != other.room)
+            return false;
+        if (secPasTo != other.secPasTo)
+            return false;
+        return true;
+    }
+    
 }
