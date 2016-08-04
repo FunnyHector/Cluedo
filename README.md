@@ -1,13 +1,10 @@
 # Cluedo-text
 SWEN222 Assignment 01, co-worked with Roy
 
-First beta version!!!
-OK, now it's fully functional and playable.
-
-I played a little bit, so far no crash and no obvious bugs has shown.
-
-Still need many testing against the standard Cluedo rules.
-
-Still need some tweaks and optimisation in efficiency.
-
-May need to refactor some methods.
+Fully functional text-based Cluedo
+Works to be done:
+1. One-by-one rule enforcement according to Cluedo official ruls
+2. Javadoc and comments
+3. JUnit test
+4. Testing and debugging.
+5. UML, design, report
