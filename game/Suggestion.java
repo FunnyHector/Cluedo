@@ -34,7 +34,7 @@ public class Suggestion {
         this.location = location;
         this.weapon = weapon;
     }
-    
+
     public List<Card> asList() {
         List<Card> list = new ArrayList<>();
         list.add(character);
@@ -70,5 +70,5 @@ public class Suggestion {
             return false;
         return true;
     }
- 
+
 }

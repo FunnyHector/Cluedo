@@ -6,8 +6,6 @@ import java.util.List;
 import card.Card;
 import card.Character;
 import tile.Position;
-import tile.Room;
-import tile.Tile;
 
 /**
  * This class represents a player in Cluedo game. A player can either be a
@@ -20,24 +18,20 @@ import tile.Tile;
 public class Player {
 
     private final Character token;
-    /*
-     * playerID is set to from 1 to 6, 0 indicates the player is not controlled by
-     * anybody, i.e. only a dummy token on board
-     */
-    private int playerID;
     private Position position;
     private List<Card> cards;
     private int remainingSteps;
+    private boolean isPlaying;
 
     /**
      * 
      * @param token
      * @param isInGame
      */
-    public Player(Character token, Position pos) {
+    public Player(Character token, Position pos, boolean isPlaying) {
         this.token = token;
         this.position = pos;
-        playerID = 0;
+        this.isPlaying = isPlaying;
         cards = new ArrayList<>();
     }
 
@@ -57,13 +51,13 @@ public class Player {
     public void drawACard(Card card) {
         cards.add(card);
     }
-    
-    public int getID() {
-        return playerID;
+
+    public boolean isPlaying() {
+        return isPlaying;
     }
-    
-    public void setID(int playerID) {
-        this.playerID = playerID;
+
+    public void setPlaying(boolean isPlaying) {
+        this.isPlaying = isPlaying;
     }
 
     /**
@@ -94,7 +88,7 @@ public class Player {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + playerID;
+        result = prime * result + ((token == null) ? 0 : token.hashCode());
         return result;
     }
 
@@ -107,7 +101,7 @@ public class Player {
         if (getClass() != obj.getClass())
             return false;
         Player other = (Player) obj;
-        if (playerID != other.playerID)
+        if (token != other.token)
             return false;
         return true;
     }

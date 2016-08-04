@@ -224,18 +224,6 @@ public class Board {
             }
             index++;
         }
-
-        // for (y = 0; y < board.length; y++) {
-        // for (x = 0; x < board[0].length; x++) {
-        // if (board[y][x] == null) {
-        // System.out.print(" ");
-        // } else {
-        // System.out.print(board[y][x]);
-        // }
-        // }
-        // System.out.println();
-        // }
-
     }
 
     /**
@@ -367,7 +355,7 @@ public class Board {
 
     public Room atEntranceTo(Player player) {
         Position playerPos = player.getPosition();
-    
+
         if (playerPos instanceof Entrance) {
             Entrance entrance = (Entrance) playerPos;
             return entrance.toRoom();
@@ -378,7 +366,7 @@ public class Board {
 
     public List<Entrance> lookForExit(Player player) {
         Position playerPos = player.getPosition();
-    
+
         if (playerPos instanceof Room) {
             Room room = (Room) playerPos;
             return room.getEntrances();
@@ -386,7 +374,7 @@ public class Board {
             return null;
         }
     }
-    
+
     public Room lookForSecPas(Player player) {
         Position playerPos = player.getPosition();
         if (playerPos instanceof Room) {
@@ -406,276 +394,8 @@ public class Board {
          */
         player.setPosition(position);
     }
-    
+
     public void moveWeapon(WeaponToken weaponToken, Room room) {
         weaponToken.setRoom(room);
     }
-    
-//    public void moveNorth(Player player) {
-//        Tile northTile = lookNorth(player);
-//        if (northTile != null) {
-//            player.setPosition(northTile);
-//        } else {
-//            throw new GameError(
-//                    "Cannot move north from " + player.getPosition().toString());
-//        }
-//    }
-//
-//    public void moveSouth(Player player) {
-//        Tile southTile = lookSouth(player);
-//        if (southTile != null) {
-//            player.setPosition(southTile);
-//        } else {
-//            throw new GameError(
-//                    "Cannot move south from " + player.getPosition().toString());
-//        }
-//    }
-//
-//    public void moveEast(Player player) {
-//        Tile eastTile = lookEast(player);
-//        if (eastTile != null) {
-//            player.setPosition(eastTile);
-//        } else {
-//            throw new GameError(
-//                    "Cannot move east from " + player.getPosition().toString());
-//        }
-//
-//    }
-//
-//    public void moveWest(Player player) {
-//        Tile westTile = lookWest(player);
-//        if (westTile != null) {
-//            player.setPosition(westTile);
-//        } else {
-//            throw new GameError(
-//                    "Cannot move west from " + player.getPosition().toString());
-//        }
-//    }
-//
-//    public void enterRoom(Player player) {
-//        Room room = atEntranceTo(player);
-//        if (room != null) {
-//            player.setPosition(room);
-//        } else {
-//            throw new GameError(
-//                    "Cannot enter room from " + player.getPosition().toString());
-//        }
-//    }
-//
-//    public void exitRoom(Player player, Entrance entrance) {
-//        List<Entrance> entrances = lookForExit(player);
-//        if (entrances != null && entrances.contains(entrance)) {
-//            player.setPosition(entrance);
-//        } else {
-//            throw new GameError(
-//                    "Cannot exit room from " + player.getPosition().toString());
-//        }
-//    }
-
-
-
-    // public static void main(String[] args) {
-    // new Board(StandardCluedo.BOARD_STRING);
-    //
-    //
-    // }
 }
-
-// /**
-// * This method tells whether a player can move towards south from a given position.
-// *
-// * NB: this method cannot tell whether a player can move into a room. eg. if a
-// player
-// * is standing at a tile facing an room entrance, the result will be false if this
-// * method is called.
-// *
-// * @param position
-// * @return
-// */
-// public boolean CanMoveSouth(Position position, int steps) {
-// if (position instanceof Room) {
-// return false;
-// }
-//
-// Tile tile = (Tile) position;
-//
-// int tileY = tile.getY();
-// if (tileY + steps > 24) {
-// return false;
-// }
-//
-// for (int i = 1; i <= steps; i++) {
-// Position posSouth = postions[tile.getX()][tileY + i];
-// if (posSouth == null) {
-// return false;
-// }
-// }
-//
-// return true;
-// }
-//
-// /**
-// * This method returns the position on south of the given position.
-// *
-// *
-// * @param tile
-// * @return
-// */
-// public Position southTile(Position position, int steps) {
-// if (!(position instanceof Tile)) {
-// throw new GameError(
-// "wrong method(Board.southTile()) call from a room object");
-// }
-// Tile tile = (Tile) position;
-// if (tile.getY() + steps > 24) {
-// throw new GameError("Out of board.");
-// }
-// return postions[tile.getX()][tile.getY() + steps];
-// }
-//
-// /**
-// *
-// * @param position
-// * @return
-// */
-// public boolean CanMoveNorth(Position position, int steps) {
-// if (position instanceof Room) {
-// return false;
-// }
-//
-// Tile tile = (Tile) position;
-//
-// int tileY = tile.getY();
-// if (tileY - steps < 0) {
-// return false;
-// }
-//
-// for (int i = 1; i <= steps; i++) {
-// Position posNorth = postions[tile.getX()][tileY - i];
-// if (posNorth == null) {
-// return false;
-// }
-// }
-//
-// return true;
-// }
-//
-// /**
-// *
-// * @param position
-// * @return
-// */
-// public Position northTile(Position position, int steps) {
-// if (!(position instanceof Tile)) {
-// throw new GameError(
-// "wrong method(Board.northTile()) call from a room object");
-// }
-// Tile tile = (Tile) position;
-// if (tile.getY() - steps < 0) {
-// throw new GameError("Out of board.");
-// }
-// return postions[tile.getX()][tile.getY() - steps];
-// }
-//
-// /**
-// *
-// * @param position
-// * @return
-// */
-// public boolean CanMoveEast(Position position, int steps) {
-// if (position instanceof Room) {
-// return false;
-// }
-//
-// Tile tile = (Tile) position;
-//
-// int tileX = tile.getX();
-// if (tileX + steps > 23) {
-// return false;
-// }
-//
-// for (int i = 1; i <= steps; i++) {
-// Position posEast = postions[tileX + i][tile.getY()];
-// if (posEast == null) {
-// return false;
-// }
-// }
-//
-// return true;
-// }
-//
-// /**
-// *
-// * @param position
-// * @return
-// */
-// public Position eastTile(Position position, int steps) {
-// if (!(position instanceof Tile)) {
-// throw new GameError("wrong method(Board.eastTile()) call from a room object");
-// }
-// Tile tile = (Tile) position;
-// if (tile.getX() + steps > 23) {
-// throw new GameError("Out of board.");
-// }
-// return postions[tile.getX() + steps][tile.getY()];
-// }
-//
-// /**
-// *
-// * @param position
-// * @return
-// */
-// public boolean CanMoveWest(Position position, int steps) {
-// if (position instanceof Room) {
-// return false;
-// }
-//
-// Tile tile = (Tile) position;
-//
-// int tileX = tile.getX();
-// if (tileX - steps < 0) {
-// return false;
-// }
-//
-// for (int i = 1; i <= steps; i++) {
-// Position posEast = postions[tileX - i][tile.getY()];
-// if (posEast == null) {
-// return false;
-// }
-// }
-//
-// return true;
-// }
-//
-// /**
-// *
-// * @param position
-// * @return
-// */
-// public Position westTile(Position position, int steps) {
-// if (!(position instanceof Tile)) {
-// throw new GameError("wrong method(Board.westTile()) call from a room object");
-// }
-// Tile tile = (Tile) position;
-// if (tile.getX() - steps < 0) {
-// throw new GameError("Out of board.");
-// }
-// return postions[tile.getX() - steps][tile.getY()];
-// }
-//
-// /**
-// * for debug, will be deleted
-// *
-// * @param args
-// */
-// public static void main(String[] args) {
-// if (args.length > 2) {
-// System.out.print("Please specify a game file to construct a customised"
-// + " Cluedo, or use no argument to load default cluedo.");
-// } else if (args.length < 2) {
-// new Board(StandardCluedo.BOARD_STRING);
-// } else {
-// // read the customised Cluedo file.
-// // some future work to be done
-// }
-// }

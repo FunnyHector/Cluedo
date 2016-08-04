@@ -25,11 +25,6 @@ public class Room extends Position {
     private final List<Tile> decoTiles;
     private int decoIndex = 0;
 
-    // Three tiles inside this room (three is at most we need for drawing tokens)
-//    private final Tile playerTile_1;
-//    private final Tile playerTile_2;
-//    private final Tile weaponTile;
-
     /**
      * 
      * @param room
@@ -41,9 +36,6 @@ public class Room extends Position {
         this.secPasTo = secPasTo;
         entrances = new ArrayList<>();
         decoTiles = new ArrayList<>();
-//        this.playerTile_1 = playerTile_1;
-//        this.playerTile_2 = playerTile_2;
-//        this.weaponTile = weaponTile;
     }
 
     /**
@@ -69,7 +61,7 @@ public class Room extends Position {
     public Location getSecPasTo() {
         return secPasTo;
     }
-    
+
     public List<Entrance> getEntrances() {
         return entrances;
     }
@@ -77,33 +69,32 @@ public class Room extends Position {
     public void addEntrances(Entrance entrance) {
         entrances.add(entrance);
     }
-    
+
     public void addDecoTiles(Tile decoTile) {
         decoTiles.add(decoTile);
     }
-    
+
+    // TODO this method is buggy
     public Tile getNextDecoTile() {
         int index = decoIndex;
         decoIndex++;
         if (decoIndex >= decoTiles.size()) {
-            decoIndex = 0;  // get only 
+            decoIndex = 0; // get only
         }
         return decoTiles.get(index);
     }
-    
-
 
     @Override
     public String toString() {
         return room.toString();
-        //return "" + (room.ordinal() + 1);
     }
 
     @Override
     public String optionString(Position destination) {
         if (destination instanceof Room) {
             Room destinationRoom = (Room) destination;
-            return "Take the secret passage to " + destinationRoom.getSecPasTo().toString() + ".";
+            return "Take the secret passage to "
+                    + destinationRoom.getSecPasTo().toString() + ".";
         } else if (destination instanceof Entrance) {
             Entrance exitOfRoom = (Entrance) destination;
             return "Exit room from exit (" + exitOfRoom.x + ", " + exitOfRoom.y + ").";
@@ -151,5 +142,5 @@ public class Room extends Position {
             return false;
         return true;
     }
-    
+
 }

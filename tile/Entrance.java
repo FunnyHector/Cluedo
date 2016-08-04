@@ -16,40 +16,16 @@ public class Entrance extends Tile {
         super(x, y);
         this.toRoom = toRoom;
     }
-    
+
     public Room toRoom() {
         return toRoom;
     }
-    
+
     @Override
     public String toString() {
-        /*
-        switch (toRoom.getRoom()) {
-        case Kitchen:
-            return "a";
-        case Ball_room:
-            return "b";
-        case Conservatory:
-            return "c";
-        case Billard_Room:
-            return "d";
-        case Library:
-            return "e";
-        case Study:
-            return "f";
-        case Hall:
-            return "g";
-        case Lounge:
-            return "h";
-        case Dining_Room:
-            return "i";
-        default:
-            return " ";
-        }
-        */
         return super.toString();
     }
-    
+
     @Override
     public String optionString(Position destination) {
         if (destination instanceof Tile) {
@@ -69,7 +45,8 @@ public class Entrance extends Tile {
             Room destinationRoom = (Room) destination;
             return "Enter " + destinationRoom.getRoom().toString() + ".";
         } else {
-            throw new GameError("Shouldn't move from an entrance to " + destination.toString());
+            throw new GameError(
+                    "Shouldn't move from an entrance to " + destination.toString());
         }
     }
 
@@ -97,5 +74,5 @@ public class Entrance extends Tile {
             return false;
         return true;
     }
-    
+
 }

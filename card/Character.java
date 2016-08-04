@@ -17,6 +17,25 @@ public enum Character implements Card {
         return this.name().replaceAll("_", " ");
     }
 
+    public Character nextCharacter() {
+        switch (this) {
+        case Colonel_Mustard:
+            return Mrs_White;
+        case Miss_Scarlet:
+            return Colonel_Mustard;
+        case Mrs_Peacock:
+            return Professor_Plum;
+        case Mrs_White:
+            return The_Reverend_Green;
+        case Professor_Plum:
+            return Miss_Scarlet;
+        case The_Reverend_Green:
+            return Mrs_Peacock;
+        default:
+            return null; // dead code
+        }
+    }
+
     @Override
     public char toStringOnBoard() {
         char s = ' ';

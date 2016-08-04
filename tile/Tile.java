@@ -31,9 +31,8 @@ public class Tile extends Position {
     @Override
     public String toString() {
         return "[" + x + " , " + y + "]";
-        // return "0";
     }
-    
+
     public String toStringOnBoard() {
         return "0";
     }
