@@ -13,23 +13,39 @@ import game.Suggestion;
 import tile.Position;
 import tile.Room;
 
-public class TextGUI {
+/**
+ * A text based client for Cluedo. It use console to print out game board, and players use
+ * console input to control the game process.
+ * 
+ * @author Hector
+ *
+ */
+public class TextClient {
 
+    // System.in wrapped in scanner to get user input.
     private static final Scanner SCANNER = new Scanner(System.in);
 
+    /**
+     * Main function of this programme.
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
-
+        // show some welcome message
         welcomeMsg();
-
+        // set up the game, dealing card, joining players, etc.
         Game game = setupGame();
-
+        // game running!
         runGame(game);
-
+        // when game stops, some clean-up process.
         gameStop(game);
 
         SCANNER.close();
     }
 
+    /**
+     * This method shows some welcome message
+     */
     private static void welcomeMsg() {
         System.out.println("==============Cluedo text-based client v0.1==============");
 
@@ -37,20 +53,24 @@ public class TextGUI {
 
     }
 
+    /**
+     * This function initialises the game, creates solutions, deals cards, and joins
+     * players.
+     * 
+     * @return --- the initialised, running game
+     */
     private static Game setupGame() {
-
         // set how many players
         System.out.println("How many players?");
         int numPlayers = parseInt(CluedoConfigs.MIN_PLAYER, CluedoConfigs.MAX_PLAYER);
-
         Game game = new Game(numPlayers);
 
         // let players choose which character to play with
-        // int playerID = 0;
         int playerIndex = 0;
         while (playerIndex != numPlayers) {
             playerIndex++;
             // list all choosable cards
+            // so I don't really have a good way to print 1st, 2nd, 3rd, 4th elegantly....
             if (playerIndex == 1) {
                 System.out.println("Please choose the 1st character:");
             } else if (playerIndex == 2) {
@@ -72,7 +92,7 @@ public class TextGUI {
 
             // join this player in
             game.joinPlayer(playableCharacters.get(choice - 1));
-            choice = 0;
+            choice = 0; // reset
         }
 
         // create solution, and deal cards
@@ -81,16 +101,27 @@ public class TextGUI {
         return game;
     }
 
+    /**
+     * Run the game
+     * 
+     * @param game
+     *            --- the game
+     */
     private static void runGame(Game game) {
-
         while (game.isGameRunning()) {
             // print board
             System.out.println(game.getBoardString());
-            // prompt possible moves, and player choose to make move
             go(game);
         }
     }
 
+    /**
+     * This method represents a single step of game process. A single step means: system
+     * prompt options to the player, and the player choose an option to act.
+     * 
+     * @param game
+     *            --- the running game
+     */
     private static void go(Game game) {
 
         Character currentPlayer = game.getCurrentPlayer();
@@ -98,7 +129,7 @@ public class TextGUI {
 
         System.out.println(currentPlayer.toString() + "'s move.");
 
-        // if this player hasn't roll a dice
+        // if this player hasn't roll a dice, roll dice
         if (remainingSteps == 0) {
             int roll = game.rollDice(currentPlayer);
             System.out.println("You rolled " + roll + ".");
@@ -107,13 +138,14 @@ public class TextGUI {
 
         System.out.println("You have " + remainingSteps + " steps left.");
 
+        // check what positions the player can move to
         Position currentPos = game.getPlayerPosition(currentPlayer);
         List<Position> movablePos = game.getMovablePositions(currentPlayer);
-        int menuNo = 1;
 
         // two helper flags
         boolean hasSuggestionOption = false;
         boolean hasNowhereToGo = false;
+        int menuNo = 1; // menu number
 
         // prompt options of movable positions
         for (Position destination : movablePos) {
@@ -125,14 +157,14 @@ public class TextGUI {
         System.out.println("" + menuNo + ". Make accusation.");
         menuNo++;
 
-        // prompt make suggestion if the player is in a room
+        // prompt suggestion option if the player is in a room
         if (currentPos instanceof Room) {
             System.out.println("" + menuNo + ". Make suggestion.");
             hasSuggestionOption = true;
             menuNo++;
         }
 
-        // means the player is blocked by other players, so he cannot move
+        // if the player has no position to move (blocked by others)
         if (movablePos.isEmpty()) {
             System.out.println("" + menuNo + ". Nowhere to move, end turn.");
             hasNowhereToGo = true;
@@ -143,8 +175,10 @@ public class TextGUI {
         menuNo--;
         int choice = parseInt(1, menuNo);
 
-        // player chose to move to one of movable positions
         if (choice <= movablePos.size()) {
+            // player chose to move to one of movable positions
+
+            // move the player
             Position destination = movablePos.get(choice - 1);
             game.movePlayer(currentPlayer, destination);
 
@@ -161,8 +195,8 @@ public class TextGUI {
                 System.out.println("Do you want to make an accusation now?");
                 System.out.println("1. Yes");
                 System.out.println("2. No");
-                int yesNo = parseInt(1, 2);
 
+                int yesNo = parseInt(1, 2);
                 if (yesNo == 1) {
                     // made an accusation
                     makeAccusation(game, currentPlayer);
@@ -176,23 +210,24 @@ public class TextGUI {
             }
 
         } else if (choice == movablePos.size() + 1) {
-            // made an accusation
+            // player chose to make an accusation
             makeAccusation(game, currentPlayer);
             remainingSteps = 0;
+
         } else if (choice == movablePos.size() + 2) {
 
             if (hasSuggestionOption && !hasNowhereToGo) {
-                // made a suggestion
+                // player chose to make a suggestion
                 Suggestion suggestion = makeSuggestion(game, currentPos);
-                // now compare the suggestion, and other players try to reject it
+                // now other players try to reject it
                 rejectSuggestion(game, currentPlayer, suggestion);
 
                 // prompt if the player want to make accusation now
                 System.out.println("Do you want to make an accusation now?");
                 System.out.println("1. Yes");
                 System.out.println("2. No");
-                int yesNo = parseInt(1, 2);
 
+                int yesNo = parseInt(1, 2);
                 if (yesNo == 1) {
                     // made an accusation
                     makeAccusation(game, currentPlayer);
@@ -210,17 +245,26 @@ public class TextGUI {
             remainingSteps = 0;
         }
 
+        // update the player's remaining steps
         game.setRemainingSteps(currentPlayer, remainingSteps);
 
         // if current player has no step left, it's next player's turn
         if (remainingSteps == 0) {
             game.currentPlayerEndTurn();
         }
-
     }
 
+    /**
+     * This method let the player to make a suggestion.
+     * 
+     * @param game
+     *            --- the running game
+     * @param destination
+     *            --- where to move to
+     * @return --- the suggestion made
+     */
     private static Suggestion makeSuggestion(Game game, Position destination) {
-
+        // safe cast
         Location location = ((Room) destination).getRoom();
 
         System.out.println(
@@ -303,6 +347,16 @@ public class TextGUI {
         return new Suggestion(suspect, location, weapon);
     }
 
+    /**
+     * This method let other players try to reject the suggestion made by current player.
+     * 
+     * @param game
+     *            --- the running game
+     * @param currentPlayer
+     *            --- current player, the player who made a suggestion
+     * @param suggestion
+     *            --- the suggestion
+     */
     private static void rejectSuggestion(Game game, Character currentPlayer,
             Suggestion suggestion) {
 
@@ -311,17 +365,25 @@ public class TextGUI {
             if (c != currentPlayer && !game.playerHandEmpty(c)) {
                 Card rejectedCard = game.playerRejectSuggestion(c, suggestion);
                 if (rejectedCard != null) {
+                    // reject !
                     System.out
                             .println(c.toString() + " rejects your suggestion with card: "
                                     + rejectedCard.toString());
                 } else {
-                    // this player cannot reject this suggestion
+                    // cannot reject this suggestion
                     System.out.println(c.toString() + " cannot reject your suggestion.");
                 }
             }
         }
     }
 
+    /**
+     * This method let the player make an accusation. If the accusation is correct, win;
+     * if wrong, the player is out.
+     * 
+     * @param game
+     * @param currentPlayer
+     */
     private static void makeAccusation(Game game, Character currentPlayer) {
 
         System.out.println("What accusation do you want to make:");
@@ -432,62 +494,85 @@ public class TextGUI {
         default: // dead code
         }
 
-        // now the player has made a accusation
+        // the player has made an accusation
         System.out.println(
                 "Your accusation is:\nSuspect: " + suspect.toString() + "\nWeapon: "
                         + weapon.toString() + "\nLocation: " + location.toString());
 
         Suggestion accusation = new Suggestion(suspect, location, weapon);
 
+        // now we should check whether the accusation is correct
         if (game.checkAccusation(accusation)) {
             // win!!
             System.out.println("You Win!");
             game.setWinner(currentPlayer);
         } else {
             // the player is out
-            System.out.println("You are wrong! ");
+            System.out.println("You are wrong!");
             game.kickPlayerOut(currentPlayer);
         }
     }
 
+    /**
+     * This method ends the game, give players an option to restart a new game.
+     * 
+     * @param game
+     *            --- the running game
+     */
     private static void gameStop(Game game) {
         // TODO set game stop, prompt the winner
         // prompt do you want to play again blahblah
 
         Character winner = game.getWinner();
 
-        System.out.println("Winner is Player " + winner.toString() + "!");
-
+        System.out.println("Winner is " + winner.toString() + "!");
     }
 
+    /**
+     * This helper method parse user's input as integer, and limits the maximum and
+     * minimum boundary of it.
+     * 
+     * @param min
+     *            --- the minimum boundary of input as an integer
+     * @param max
+     *            --- the maximum boundary of input as an integer
+     * @return --- the parsed integer
+     */
     private static int parseInt(int min, int max) {
         while (true) {
             String line = SCANNER.nextLine();
-
+            // if user asked for help, print out help message
             if (line.equals("help")) {
                 helpMessage();
                 continue;
             }
 
             try {
+                // parse the input
                 int i = Integer.valueOf(line);
                 if (i >= min && i <= max) {
+                    // a good input
                     return i;
                 } else {
+                    // a out of boundary input, let the user retry.
                     System.out.println(
                             "Please choose between " + min + " and " + max + ":");
                     continue;
                 }
             } catch (NumberFormatException e) {
+                // the input is not an integer
                 System.out.println("Please enter an integer:");
                 continue;
             }
         }
     }
 
+    /**
+     * This method print out help message, including the legend, and how to interact with
+     * the client.
+     */
     private static void helpMessage() {
         // TODO Some help message
 
     }
-
 }

@@ -104,6 +104,51 @@ public class Game {
     }
 
     /**
+     * This method randomly choose one character, one room, and one weapon to create a
+     * solution, then shuffles all remaining cards, and deal them evenly to all players.
+     */
+    public void creatSolutionAndDealCards() {
+        remainingCards = new ArrayList<>();
+    
+        // let's get all Character cards first
+        List<Character> characterCards = new ArrayList<>(
+                Arrays.asList(Character.values()));
+        // randomly choose one as the murderer
+        Character solCharacter = characterCards
+                .remove(RAN.nextInt(characterCards.size()));
+        // then put the rest character cards in the card pile
+        remainingCards.addAll(characterCards);
+    
+        // then let's get all Location cards
+        List<Location> locationCards = new ArrayList<>(Arrays.asList(Location.values()));
+        // randomly choose one as the crime scene
+        Location solLocation = locationCards.remove(RAN.nextInt(locationCards.size()));
+        // then put the rest location cards in the card pile
+        remainingCards.addAll(locationCards);
+    
+        // then let's get all Weapon cards
+        List<Weapon> weaponCards = new ArrayList<>(Arrays.asList(Weapon.values()));
+        // randomly choose one as the murder weapon
+        Weapon solWeapon = weaponCards.remove(RAN.nextInt(weaponCards.size()));
+        // then put the rest location cards in the card pile
+        remainingCards.addAll(weaponCards);
+    
+        // now we have a solution
+        solution = new Suggestion(solCharacter, solLocation, solWeapon);
+    
+        // last, deal cards randomly and evenly to all players
+        while (remainingCards.size() >= numPlayers) {
+            Collections.shuffle(remainingCards); // MAXIMUM RANDOMNESS = ANARCHY !!
+            for (Player p : players) {
+                if (p.isPlaying()) {
+                    p.drawACard(
+                            remainingCards.remove(RAN.nextInt(remainingCards.size())));
+                }
+            }
+        }
+    }
+
+    /**
      * Get all playable characters, i.e. those who hasn't been chosen by any player yet.
      * 
      * @return --- all playable characters as a list
@@ -140,51 +185,45 @@ public class Game {
     public void kickPlayerOut(Character character) {
         players.get(character.ordinal()).setPlaying(false);
         numPlayers--;
-    }
-
-    /**
-     * This method randomly choose one character, one room, and one weapon to create a
-     * solution, then shuffles all remaining cards, and deal them evenly to all players.
-     */
-    public void creatSolutionAndDealCards() {
-        remainingCards = new ArrayList<>();
-
-        // let's get all Character cards first
-        List<Character> characterCards = new ArrayList<>(
-                Arrays.asList(Character.values()));
-        // randomly choose one as the murderer
-        Character solCharacter = characterCards
-                .remove(RAN.nextInt(characterCards.size()));
-        // then put the rest character cards in the card pile
-        remainingCards.addAll(characterCards);
-
-        // then let's get all Location cards
-        List<Location> locationCards = new ArrayList<>(Arrays.asList(Location.values()));
-        // randomly choose one as the crime scene
-        Location solLocation = locationCards.remove(RAN.nextInt(locationCards.size()));
-        // then put the rest location cards in the card pile
-        remainingCards.addAll(locationCards);
-
-        // then let's get all Weapon cards
-        List<Weapon> weaponCards = new ArrayList<>(Arrays.asList(Weapon.values()));
-        // randomly choose one as the murder weapon
-        Weapon solWeapon = weaponCards.remove(RAN.nextInt(weaponCards.size()));
-        // then put the rest location cards in the card pile
-        remainingCards.addAll(weaponCards);
-
-        // now we have a solution
-        solution = new Suggestion(solCharacter, solLocation, solWeapon);
-
-        // last, deal cards randomly and evenly to all players
-        while (remainingCards.size() >= numPlayers) {
-            Collections.shuffle(remainingCards); // MAXIMUM RANDOMNESS = ANARCHY !!
+        if (numPlayers == 1) {
             for (Player p : players) {
                 if (p.isPlaying()) {
-                    p.drawACard(
-                            remainingCards.remove(RAN.nextInt(remainingCards.size())));
+                    setWinner(p.getToken());
                 }
             }
         }
+    }
+
+    /**
+     * Get the player who need to move.
+     * 
+     * @return --- the current player
+     */
+    public Character getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    /**
+     * let current player end turn.
+     */
+    public void currentPlayerEndTurn() {
+        Player player = getPlayerByCharacter(currentPlayer);
+        while (!player.isPlaying()) {
+            // if this character is kicked out or not controlled by a player, skip him
+            currentPlayer = currentPlayer.nextCharacter();
+            player = getPlayerByCharacter(currentPlayer);
+        }
+    }
+
+    /**
+     * Get the player's position.
+     * 
+     * @param character
+     *            --- the player
+     * @return --- the player's position
+     */
+    public Position getPlayerPosition(Character character) {
+        return getPlayerByCharacter(character).getPosition();
     }
 
     /**
@@ -226,36 +265,26 @@ public class Game {
     }
 
     /**
-     * Get the player who need to move.
-     * 
-     * @return --- the current player
-     */
-    public Character getCurrentPlayer() {
-        Player player = getPlayerByCharacter(currentPlayer);
-        while (!player.isPlaying()) {
-            // if this character is kicked out or not controlled by a player, skip him
-            currentPlayer = currentPlayer.nextCharacter();
-            player = getPlayerByCharacter(currentPlayer);
-        }
-        return currentPlayer;
-    }
-
-    /**
-     * A helper method to get the corresponding Player of given Character.
+     * Get how many steps left for the player to move.
      * 
      * @param character
-     *            --- the given character
-     * @return
+     *            --- the player
+     * @return --- how many steps left for the player to move.
      */
-    private Player getPlayerByCharacter(Character character) {
-        return players.get(character.ordinal());
+    public int getRemainingSteps(Character character) {
+        return getPlayerByCharacter(character).getRemainingSteps();
     }
 
     /**
-     * let current player end turn.
+     * Set how many steps left for the player to move.
+     * 
+     * @param character
+     *            --- the player
+     * @param remainingSteps
+     *            --- how many steps left for the player to move.
      */
-    public void currentPlayerEndTurn() {
-        currentPlayer = currentPlayer.nextCharacter();
+    public void setRemainingSteps(Character character, int remainingSteps) {
+        getPlayerByCharacter(character).setRemainingSteps(remainingSteps);
     }
 
     /**
@@ -313,6 +342,17 @@ public class Game {
     }
 
     /**
+     * Check whether the given suggestion is wrong.
+     * 
+     * @param suggestion
+     *            --- the suggestion to check
+     * @return --- true if it's a correct accusation; false if wrong
+     */
+    public boolean checkAccusation(Suggestion suggestion) {
+        return solution.equals(suggestion);
+    }
+
+    /**
      * Let the player roll dices.
      *
      * @return --- the number rolled
@@ -322,40 +362,6 @@ public class Game {
         int roll = RAN.nextInt(5 * CluedoConfigs.NUM_DICE + 1) + CluedoConfigs.NUM_DICE;
         getPlayerByCharacter(character).setRemainingSteps(roll);
         return roll;
-    }
-
-    /**
-     * Get how many steps left for the player to move.
-     * 
-     * @param character
-     *            --- the player
-     * @return --- how many steps left for the player to move.
-     */
-    public int getRemainingSteps(Character character) {
-        return getPlayerByCharacter(character).getRemainingSteps();
-    }
-
-    /**
-     * Set how many steps left for the player to move.
-     * 
-     * @param character
-     *            --- the player
-     * @param remainingSteps
-     *            --- how many steps left for the player to move.
-     */
-    public void setRemainingSteps(Character character, int remainingSteps) {
-        getPlayerByCharacter(character).setRemainingSteps(remainingSteps);
-    }
-
-    /**
-     * Get the player's position.
-     * 
-     * @param character
-     *            --- the player
-     * @return --- the player's position
-     */
-    public Position getPlayerPosition(Character character) {
-        return getPlayerByCharacter(character).getPosition();
     }
 
     /**
@@ -432,17 +438,7 @@ public class Game {
      * @return --- true if game is still running, there is no winner yet; false if not.
      */
     public boolean isGameRunning() {
-        return numPlayers > 1 || winner == null;
-    }
-
-    /**
-     * Set a player as winner.
-     * 
-     * @param character
-     *            --- the player
-     */
-    public void setWinner(Character character) {
-        winner = character;
+        return winner == null;
     }
 
     /**
@@ -456,13 +452,13 @@ public class Game {
             if (numPlayers > 1) {
                 throw new GameError("number of players shouldn't > 1");
             }
-
+    
             for (Player p : players) {
                 if (p.isPlaying()) {
                     return p.getToken();
                 }
             }
-
+    
             throw new GameError("should at least have one player left");
         } else {
             return winner;
@@ -470,14 +466,13 @@ public class Game {
     }
 
     /**
-     * Check whether the given suggestion is wrong.
+     * Set a player as winner.
      * 
-     * @param suggestion
-     *            --- the suggestion to check
-     * @return --- true if it's a correct accusation; false if wrong
+     * @param character
+     *            --- the player
      */
-    public boolean checkAccusation(Suggestion suggestion) {
-        return solution.equals(suggestion);
+    public void setWinner(Character character) {
+        winner = character;
     }
 
     /**
@@ -488,7 +483,7 @@ public class Game {
      */
     public String getBoardString() {
 
-        // first clear
+        // first clear the StringBuilder
         BOARD_STRING.delete(0, BOARD_STRING.length());
 
         BOARD_STRING.append("=======Game Board=======\n");
@@ -502,13 +497,16 @@ public class Game {
         for (Player p : players) {
             Position pos = p.getPosition();
             if (pos instanceof Tile) {
+                // normal tile
                 Tile tile = (Tile) pos;
                 int index = tile.x + tile.y * width;
                 boardChars[index] = p.getToken().toStringOnBoard();
             } else if (pos instanceof Room) {
+                // inside a room
                 Room room = (Room) pos;
                 Tile decoTile = room.getNextDecoTile();
                 int index = decoTile.x + decoTile.y * width;
+                // find a empty space to draw the player inside the room.
                 while (boardChars[index] != ' ') {
                     decoTile = room.getNextDecoTile();
                     index = decoTile.x + decoTile.y * width;
@@ -555,4 +553,14 @@ public class Game {
         return BOARD_STRING.toString();
     }
 
+    /**
+     * A helper method to get the corresponding Player of given Character.
+     * 
+     * @param character
+     *            --- the given character
+     * @return
+     */
+    private Player getPlayerByCharacter(Character character) {
+        return players.get(character.ordinal());
+    }
 }
