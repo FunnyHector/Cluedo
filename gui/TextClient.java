@@ -95,8 +95,12 @@ public class TextClient {
             choice = 0; // reset
         }
 
-        // create solution, and deal cards
-        game.creatSolutionAndDealCards();
+        // set which character is first to move
+        game.setPlayerMoveFirst();
+        // create solution
+        game.creatSolution();
+        // evenly deal cards
+        game.dealCard();
 
         return game;
     }
@@ -514,17 +518,14 @@ public class TextClient {
     }
 
     /**
-     * This method ends the game, give players an option to restart a new game.
+     * This method ends the game, prompt the winner give players an option to restart a new game.
      * 
      * @param game
      *            --- the running game
      */
     private static void gameStop(Game game) {
         // TODO set game stop, prompt the winner
-        // prompt do you want to play again blahblah
-
         Character winner = game.getWinner();
-
         System.out.println("Winner is " + winner.toString() + "!");
     }
 
@@ -568,11 +569,16 @@ public class TextClient {
     }
 
     /**
-     * This method print out help message, including the legend, and how to interact with
-     * the client.
+     * This method print out help message, now it only displays the legend
      */
     private static void helpMessage() {
-        // TODO Some help message
-
+        String s = "[Legend]\n"
+                + "Characters are represented as a single upper-case character:\n"
+                + "Miss Scarlet:\t\tS\nColonel Mustard:\tM\nMrs White:\t\tW\n"
+                + "The Reverend Green:\tG\nMrs Peacock:\t\tC\nProfessor Plum:\t\tP\n"
+                + "Weapon are represented as a single lower-case character:\n"
+                + "Candlestick:\t\tc\nDagger:\t\t\td\nLead Pipe:\t\tp\n"
+                + "Revolver:\t\tg\nRope:\t\t\tr\nSpanner:\t\ts\n";
+        System.out.println(s);
     }
 }

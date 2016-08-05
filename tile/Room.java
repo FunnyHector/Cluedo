@@ -121,7 +121,7 @@ public class Room extends Position {
         if (destination instanceof Room) {
             Room destinationRoom = (Room) destination;
             return "Take the secret passage to "
-                    + destinationRoom.getSecPasTo().toString() + ".";
+                    + destinationRoom.toString() + ".";
         } else if (destination instanceof Entrance) {
             Entrance exitOfRoom = (Entrance) destination;
             return "Exit room from exit (" + exitOfRoom.x + ", " + exitOfRoom.y + ").";

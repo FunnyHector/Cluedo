@@ -56,8 +56,6 @@ public class Game {
         board = new Board();
         players = new ArrayList<>(Character.values().length);
         this.numPlayers = numPlayers;
-        // Miss Scarlet always roll first
-        currentPlayer = Character.Miss_Scarlet;
         winner = null;
 
         // then add all six dummy tokens on board
@@ -107,9 +105,9 @@ public class Game {
      * This method randomly choose one character, one room, and one weapon to create a
      * solution, then shuffles all remaining cards, and deal them evenly to all players.
      */
-    public void creatSolutionAndDealCards() {
+    public void creatSolution() {
         remainingCards = new ArrayList<>();
-    
+
         // let's get all Character cards first
         List<Character> characterCards = new ArrayList<>(
                 Arrays.asList(Character.values()));
@@ -118,25 +116,30 @@ public class Game {
                 .remove(RAN.nextInt(characterCards.size()));
         // then put the rest character cards in the card pile
         remainingCards.addAll(characterCards);
-    
+
         // then let's get all Location cards
         List<Location> locationCards = new ArrayList<>(Arrays.asList(Location.values()));
         // randomly choose one as the crime scene
         Location solLocation = locationCards.remove(RAN.nextInt(locationCards.size()));
         // then put the rest location cards in the card pile
         remainingCards.addAll(locationCards);
-    
+
         // then let's get all Weapon cards
         List<Weapon> weaponCards = new ArrayList<>(Arrays.asList(Weapon.values()));
         // randomly choose one as the murder weapon
         Weapon solWeapon = weaponCards.remove(RAN.nextInt(weaponCards.size()));
         // then put the rest location cards in the card pile
         remainingCards.addAll(weaponCards);
-    
+
         // now we have a solution
         solution = new Suggestion(solCharacter, solLocation, solWeapon);
-    
-        // last, deal cards randomly and evenly to all players
+    }
+
+    /**
+     * This method deals cards evenly to players
+     */
+    public void dealCard() {
+        // deal cards randomly and evenly to all players
         while (remainingCards.size() >= numPlayers) {
             Collections.shuffle(remainingCards); // MAXIMUM RANDOMNESS = ANARCHY !!
             for (Player p : players) {
@@ -145,6 +148,14 @@ public class Game {
                             remainingCards.remove(RAN.nextInt(remainingCards.size())));
                 }
             }
+        }
+    }
+
+    public void setPlayerMoveFirst() {
+        currentPlayer = Character.Miss_Scarlet;
+        while (!getPlayerByCharacter(currentPlayer).isPlaying()) {
+            // if this character is kicked out or not controlled by a player, skip him
+            currentPlayer = currentPlayer.nextCharacter();
         }
     }
 
@@ -207,11 +218,10 @@ public class Game {
      * let current player end turn.
      */
     public void currentPlayerEndTurn() {
-        Player player = getPlayerByCharacter(currentPlayer);
-        while (!player.isPlaying()) {
+        currentPlayer = currentPlayer.nextCharacter();
+        while (!getPlayerByCharacter(currentPlayer).isPlaying()) {
             // if this character is kicked out or not controlled by a player, skip him
             currentPlayer = currentPlayer.nextCharacter();
-            player = getPlayerByCharacter(currentPlayer);
         }
     }
 
@@ -452,13 +462,13 @@ public class Game {
             if (numPlayers > 1) {
                 throw new GameError("number of players shouldn't > 1");
             }
-    
+
             for (Player p : players) {
                 if (p.isPlaying()) {
                     return p.getToken();
                 }
             }
-    
+
             throw new GameError("should at least have one player left");
         } else {
             return winner;
@@ -549,7 +559,7 @@ public class Game {
         }
 
         BOARD_STRING.append("========================\n");
-
+        BOARD_STRING.append("Type \"help\" for help\n");
         return BOARD_STRING.toString();
     }
 
