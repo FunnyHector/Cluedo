@@ -400,8 +400,10 @@ public class Game {
 
         // if the player is in a room, get the exits
         List<Entrance> entrances = board.lookForExit(player);
-        for (Entrance e : entrances) {
-            movablePos.add(e);
+        if (entrances != null && !entrances.isEmpty()) {
+            for (Entrance e : entrances) {
+                movablePos.add(e);
+            }
         }
 
         // if the player is in a room, and there is a secret passage
@@ -470,15 +472,20 @@ public class Game {
     /**
      * Check whether the given suggestion is wrong.
      * 
-     * 
-     * 
-     * @param suggestion  --- the suggestion to check
-     * @return   --- true if 
+     * @param suggestion
+     *            --- the suggestion to check
+     * @return --- true if it's a correct accusation; false if wrong
      */
     public boolean checkAccusation(Suggestion suggestion) {
         return solution.equals(suggestion);
     }
 
+    /**
+     * This method returns the ASCII, text-based game board as a String. On this board,
+     * players' position, weapon's position are updated.
+     * 
+     * @return --- the text-based game board to print in console
+     */
     public String getBoardString() {
 
         // first clear
@@ -486,7 +493,7 @@ public class Game {
 
         BOARD_STRING.append("=======Game Board=======\n");
 
-        int width = CluedoConfigs.BOARD_WIDTH;
+        int width = CluedoConfigs.BOARD_WIDTH + 1;
 
         // get the canvas first
         char[] boardChars = CluedoConfigs.UI_STRING_A.toCharArray();
