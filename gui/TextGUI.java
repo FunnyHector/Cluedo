@@ -7,15 +7,13 @@ import card.Card;
 import card.Character;
 import card.Location;
 import card.Weapon;
+import configs.CluedoConfigs;
 import game.Game;
 import game.Suggestion;
 import tile.Position;
 import tile.Room;
 
-public class ClientTxt {
-
-    private static final int MIN_PLAYER = 3;
-    private static final int MAX_PLAYER = 6;
+public class TextGUI {
 
     private static final Scanner SCANNER = new Scanner(System.in);
 
@@ -43,7 +41,7 @@ public class ClientTxt {
 
         // set how many players
         System.out.println("How many players?");
-        int numPlayers = parseInt(MIN_PLAYER, MAX_PLAYER);
+        int numPlayers = parseInt(CluedoConfigs.MIN_PLAYER, CluedoConfigs.MAX_PLAYER);
 
         Game game = new Game(numPlayers);
 
@@ -85,7 +83,7 @@ public class ClientTxt {
 
     private static void runGame(Game game) {
 
-        while (game.updateAndgetGameStatus()) {
+        while (game.isGameRunning()) {
             // print board
             System.out.println(game.getBoardString());
             // prompt possible moves, and player choose to make move
@@ -309,8 +307,8 @@ public class ClientTxt {
             Suggestion suggestion) {
 
         for (Character c : Character.values()) {
-            // as long as this player has drawn cards, he can reject;
-            if (c != currentPlayer && game.playerHasCard(c)) {
+            // as long as this player has drawn cards, he can attempt to reject;
+            if (c != currentPlayer && !game.playerHandEmpty(c)) {
                 Card rejectedCard = game.playerRejectSuggestion(c, suggestion);
                 if (rejectedCard != null) {
                     System.out

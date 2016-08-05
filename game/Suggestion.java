@@ -9,24 +9,28 @@ import card.Location;
 import card.Weapon;
 
 /**
- * This class represents a suggestion made by player, or the solution selected at the
- * beginning of the game, i.e. it's a combination of one character, one room, and one
- * weapon.
+ * This class represents a combination of one Character, one Location, and one Weapon.
+ * Essentially it could be a suggestion or an accusation made by a player, or the solution
+ * selected at beginning.
  * 
  * @author Hector
- *
+ * 
  */
 public class Suggestion {
 
-    private Character character;
-    private Location location;
-    private Weapon weapon;
+    private final Character character;
+    private final Location location;
+    private final Weapon weapon;
 
     /**
+     * Construct a suggestion with one Character, one Location, and one Weapon.
      * 
      * @param character
+     *            --- the involved Character
      * @param location
+     *            --- the involved Location
      * @param weapon
+     *            --- the involved weapon
      */
     public Suggestion(Character character, Location location, Weapon weapon) {
         super();
@@ -35,6 +39,11 @@ public class Suggestion {
         this.weapon = weapon;
     }
 
+    /**
+     * Convert this suggestion to a list of three cards.
+     * 
+     * @return --- this suggestion as a list of three cards.
+     */
     public List<Card> asList() {
         List<Card> list = new ArrayList<>();
         list.add(character);

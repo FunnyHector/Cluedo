@@ -2,7 +2,10 @@ package card;
 
 /**
  * This enum class represents a Room card in Cluedo game. There are nine rooms, Kitchen,
- * Ball room, Conservatory, Billard Room, Library, Study, Hall, Lounge, and Dining Room.
+ * Ball room, Conservatory, Billard Room, Library, Study, Hall, Lounge, and Dining
+ * Room.<br>
+ * <br>
+ * Note that this class is also used to symbolically represent the Room position in game.
  * 
  * @author Hector
  *

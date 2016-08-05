@@ -9,7 +9,7 @@ import java.util.Random;
 
 import card.Location;
 import card.Weapon;
-import rules.StandardCluedo;
+import configs.CluedoConfigs;
 import tile.Entrance;
 import tile.Position;
 import tile.Room;
@@ -18,42 +18,49 @@ import card.Card;
 import card.Character;
 
 /**
- * This class represents all status of a Cluedo game.
+ * This class represents a running Cluedo game.
  *
  * @author Hector
  *
  */
 public class Game {
 
+    // the solution created at beginning
     private Suggestion solution;
+    // the game board
     private Board board;
+    // number of players
     private int numPlayers;
-
+    // all six players (including dummy tokens) as a list
     private List<Player> players;
+    // after cards are evenly dealt, all remaining cards are in this list.
     private List<Card> remainingCards;
+    // all six weapon tokens as a list
     private List<WeaponToken> weaponTokens;
+    // which character is currently acting
     private Character currentPlayer;
+    // who is the winner
     private Character winner;
-
     // a random number generator
     private static final Random RAN = new Random();
-
     // a StringBuilder to manipulate strings
     private static StringBuilder BOARD_STRING = new StringBuilder();
 
     /**
-     *
+     * Construct the game.
+     * 
      * @param numPlayer
+     *            --- how many (human controlled) players are playing.
      */
     public Game(int numPlayers) {
-
-        board = new Board(StandardCluedo.BOARD_STRING);
+        board = new Board();
         players = new ArrayList<>(Character.values().length);
         this.numPlayers = numPlayers;
+        // Miss Scarlet always roll first
         currentPlayer = Character.Miss_Scarlet;
         winner = null;
 
-        // first add and six dummy tokens on board
+        // then add all six dummy tokens on board
         players.add(new Player(Character.Miss_Scarlet,
                 board.getStartPosition(Character.Miss_Scarlet), false));
         players.add(new Player(Character.Colonel_Mustard,
@@ -67,76 +74,13 @@ public class Game {
         players.add(new Player(Character.Professor_Plum,
                 board.getStartPosition(Character.Professor_Plum), false));
 
-        // put six weapons in random rooms
+        // last, put six weapons in random rooms
         setWeapons();
     }
 
-    public List<Character> getPlayableCharacters() {
-        List<Character> playableCharacters = new ArrayList<>();
-        for (Player p : players) {
-            if (!p.isPlaying()) {
-                playableCharacters.add(p.getToken());
-            }
-        }
-
-        playableCharacters.sort((c1, c2) -> c1.ordinal() - c2.ordinal());
-
-        return playableCharacters;
-    }
-
-    public void joinPlayer(Character playerChoice) {
-        players.get(playerChoice.ordinal()).setPlaying(true);
-    }
-
-    public void kickPlayerOut(Character playerChoice) {
-        players.get(playerChoice.ordinal()).setPlaying(false);
-        numPlayers--;
-    }
-
     /**
-     * This method randomly choose a character, a room, and a weapon to create a solution,
-     * then shuffles all remaining cards, and deal them evenly to all players.
-     *
-     *
+     * This method randomly put six weapons in random rooms.
      */
-    public void creatSolutionAndDealCards() {
-
-        remainingCards = new ArrayList<>();
-
-        List<Character> characterCards = new ArrayList<>(
-                Arrays.asList(Character.values()));
-        Character solCharacter = characterCards
-                .remove(RAN.nextInt(characterCards.size()));
-        remainingCards.addAll(characterCards);
-
-        // get a random location card as solution, put the other cards into card
-        // pile.
-        List<Location> locationCards = new ArrayList<>(Arrays.asList(Location.values()));
-        Location solLocation = locationCards.remove(RAN.nextInt(locationCards.size()));
-        remainingCards.addAll(locationCards);
-
-        // get a random weapon card as solution, put the other cards into card
-        // pile.
-        List<Weapon> weaponCards = new ArrayList<>(Arrays.asList(Weapon.values()));
-        Weapon solWeapon = weaponCards.remove(RAN.nextInt(weaponCards.size()));
-        remainingCards.addAll(weaponCards);
-
-        // create a solution
-        solution = new Suggestion(solCharacter, solLocation, solWeapon);
-
-        // now deal cards evenly to all players
-        while (remainingCards.size() >= numPlayers) {
-            Collections.shuffle(remainingCards);
-
-            for (Player p : players) {
-                if (p.isPlaying()) {
-                    p.drawACard(
-                            remainingCards.remove(RAN.nextInt(remainingCards.size())));
-                }
-            }
-        }
-    }
-
     private void setWeapons() {
 
         weaponTokens = new ArrayList<>();
@@ -144,10 +88,10 @@ public class Game {
         List<Weapon> weaponList = new ArrayList<>(Arrays.asList(Weapon.values()));
 
         // nine rooms
-        List<Room> roomList = new ArrayList<>(Arrays.asList(StandardCluedo.KITCHEN,
-                StandardCluedo.BALL_ROOM, StandardCluedo.CONSERVATORY,
-                StandardCluedo.BILLARD_ROOM, StandardCluedo.LIBRARY, StandardCluedo.STUDY,
-                StandardCluedo.HALL, StandardCluedo.LOUNGE, StandardCluedo.DINING_ROOM));
+        List<Room> roomList = new ArrayList<>(Arrays.asList(CluedoConfigs.KITCHEN,
+                CluedoConfigs.BALL_ROOM, CluedoConfigs.CONSERVATORY,
+                CluedoConfigs.BILLARD_ROOM, CluedoConfigs.LIBRARY, CluedoConfigs.STUDY,
+                CluedoConfigs.HALL, CluedoConfigs.LOUNGE, CluedoConfigs.DINING_ROOM));
 
         // randomly distribute weapons
         for (int i = 0; i < 6; i++) {
@@ -159,10 +103,110 @@ public class Game {
         }
     }
 
+    /**
+     * Get all playable characters, i.e. those who hasn't been chosen by any player yet.
+     * 
+     * @return --- all playable characters as a list
+     */
+    public List<Character> getPlayableCharacters() {
+        List<Character> playableCharacters = new ArrayList<>();
+
+        for (Player p : players) {
+            if (!p.isPlaying()) {
+                // only those who hasn't been chosen
+                playableCharacters.add(p.getToken());
+            }
+        }
+
+        return playableCharacters;
+    }
+
+    /**
+     * Set the given player as human controlled
+     * 
+     * @param playerChoice
+     *            --- the character chosen by a player
+     */
+    public void joinPlayer(Character playerChoice) {
+        players.get(playerChoice.ordinal()).setPlaying(true);
+    }
+
+    /**
+     * Kick the given player out, so he / she cannot play any more.
+     * 
+     * @param character
+     *            --- the character to be kicked out
+     */
+    public void kickPlayerOut(Character character) {
+        players.get(character.ordinal()).setPlaying(false);
+        numPlayers--;
+    }
+
+    /**
+     * This method randomly choose one character, one room, and one weapon to create a
+     * solution, then shuffles all remaining cards, and deal them evenly to all players.
+     */
+    public void creatSolutionAndDealCards() {
+        remainingCards = new ArrayList<>();
+
+        // let's get all Character cards first
+        List<Character> characterCards = new ArrayList<>(
+                Arrays.asList(Character.values()));
+        // randomly choose one as the murderer
+        Character solCharacter = characterCards
+                .remove(RAN.nextInt(characterCards.size()));
+        // then put the rest character cards in the card pile
+        remainingCards.addAll(characterCards);
+
+        // then let's get all Location cards
+        List<Location> locationCards = new ArrayList<>(Arrays.asList(Location.values()));
+        // randomly choose one as the crime scene
+        Location solLocation = locationCards.remove(RAN.nextInt(locationCards.size()));
+        // then put the rest location cards in the card pile
+        remainingCards.addAll(locationCards);
+
+        // then let's get all Weapon cards
+        List<Weapon> weaponCards = new ArrayList<>(Arrays.asList(Weapon.values()));
+        // randomly choose one as the murder weapon
+        Weapon solWeapon = weaponCards.remove(RAN.nextInt(weaponCards.size()));
+        // then put the rest location cards in the card pile
+        remainingCards.addAll(weaponCards);
+
+        // now we have a solution
+        solution = new Suggestion(solCharacter, solLocation, solWeapon);
+
+        // last, deal cards randomly and evenly to all players
+        while (remainingCards.size() >= numPlayers) {
+            Collections.shuffle(remainingCards); // MAXIMUM RANDOMNESS = ANARCHY !!
+            for (Player p : players) {
+                if (p.isPlaying()) {
+                    p.drawACard(
+                            remainingCards.remove(RAN.nextInt(remainingCards.size())));
+                }
+            }
+        }
+    }
+
+    /**
+     * Move a character to the given position.
+     * 
+     * @param character
+     *            --- the character to be moved
+     * @param position
+     *            --- where to move
+     */
     public void movePlayer(Character character, Position position) {
         board.movePlayer(getPlayerByCharacter(character), position);
     }
 
+    /**
+     * Move a weapon to the given room.
+     * 
+     * @param weapon
+     *            --- the character to be moved
+     * @param room
+     *            --- which room to move into.
+     */
     public void moveWeapon(Weapon weapon, Room room) {
         for (WeaponToken wt : weaponTokens) {
             if (wt.getToken().equals(weapon)) {
@@ -171,37 +215,88 @@ public class Game {
         }
     }
 
+    /**
+     * Get the remaining cards as a list. Note that the returned list could be empty if
+     * all cards are dealt.
+     * 
+     * @return --- the remaining cards as a list
+     */
     public List<Card> getRemainingCards() {
         return remainingCards;
     }
 
+    /**
+     * Get the player who need to move.
+     * 
+     * @return --- the current player
+     */
     public Character getCurrentPlayer() {
         Player player = getPlayerByCharacter(currentPlayer);
-
         while (!player.isPlaying()) {
+            // if this character is kicked out or not controlled by a player, skip him
             currentPlayer = currentPlayer.nextCharacter();
             player = getPlayerByCharacter(currentPlayer);
         }
-
         return currentPlayer;
     }
 
-    private Player getPlayerByCharacter(Character cha) {
-        return players.get(cha.ordinal());
+    /**
+     * A helper method to get the corresponding Player of given Character.
+     * 
+     * @param character
+     *            --- the given character
+     * @return
+     */
+    private Player getPlayerByCharacter(Character character) {
+        return players.get(character.ordinal());
     }
 
+    /**
+     * let current player end turn.
+     */
     public void currentPlayerEndTurn() {
         currentPlayer = currentPlayer.nextCharacter();
     }
 
+    /**
+     * Check whether the given character has the given card in hand.
+     * 
+     * @param character
+     *            --- the character
+     * @param card
+     *            --- the card
+     * @return --- true if he has; false is he has not
+     */
     public boolean playerHasCard(Character character, Card card) {
         return getPlayerByCharacter(character).hasCard(card);
     }
 
-    public boolean playerHasCard(Character player) {
-        return !getPlayerByCharacter(player).getCards().isEmpty();
+    /**
+     * check whether the player's hand is empty. As long as the player is
+     * human-controlled, his hand is not empty, so he can attempt to reject.
+     * 
+     * @param player
+     *            --- the player
+     * @return --- true is the player has no card; false if not.
+     */
+    public boolean playerHandEmpty(Character player) {
+        return !getPlayerByCharacter(player).isPlaying();
     }
 
+    /**
+     * Let the player attempt to reject the given suggestion. This method will return the
+     * first card that can be rejected. With the same player and the same suggestion, each
+     * time the method should return different possible result, because the order of
+     * checking process is random. If the player cannot reject the given suggestion, null
+     * will be returned.
+     * 
+     * @param player
+     *            --- the player
+     * @param suggestion
+     *            --- the suggestion to check
+     * @return --- the card that can prove the suggestion wrong; or null if the player
+     *         cannot reject it.
+     */
     public Card playerRejectSuggestion(Character player, Suggestion suggestion) {
 
         List<Card> cardsInSuggetion = suggestion.asList();
@@ -218,56 +313,73 @@ public class Game {
     }
 
     /**
-     * Roll two dices, gives a random number between 2 to 12
+     * Let the player roll dices.
      *
-     * @return
+     * @return --- the number rolled
      */
     public int rollDice(Character character) {
-        // two dices can roll out 2 - 12;
-        int roll = RAN.nextInt(11) + 2;
+        // e.g. two dices can roll out 2 - 12;
+        int roll = RAN.nextInt(5 * CluedoConfigs.NUM_DICE + 1) + CluedoConfigs.NUM_DICE;
         getPlayerByCharacter(character).setRemainingSteps(roll);
         return roll;
     }
 
+    /**
+     * Get how many steps left for the player to move.
+     * 
+     * @param character
+     *            --- the player
+     * @return --- how many steps left for the player to move.
+     */
     public int getRemainingSteps(Character character) {
         return getPlayerByCharacter(character).getRemainingSteps();
     }
 
+    /**
+     * Set how many steps left for the player to move.
+     * 
+     * @param character
+     *            --- the player
+     * @param remainingSteps
+     *            --- how many steps left for the player to move.
+     */
     public void setRemainingSteps(Character character, int remainingSteps) {
         getPlayerByCharacter(character).setRemainingSteps(remainingSteps);
     }
 
+    /**
+     * Get the player's position.
+     * 
+     * @param character
+     *            --- the player
+     * @return --- the player's position
+     */
     public Position getPlayerPosition(Character character) {
         return getPlayerByCharacter(character).getPosition();
     }
 
-    // @formatter:off
     /**
-     * The Position in the list returned will be of a certain order, which is:
+     * This method checks the given character's position, and returns all possible
+     * positions to move to. The positions in the list returned will be of a certain
+     * order, which is: north tile -> east tile -> south tile -> west tile -> room if
+     * standing at an entrance -> exits (entrances) if in a room -> room if via the secret
+     * passage in current room. Any position that cannot be accessible will not be added
+     * in this list. In particular, a tile on which has another player standing will not
+     * be added in.<br>
+     * <br>
+     * This ensured order is to make the option menu more predictable.
      * 
-     * north tile
-     * east tile
-     * south tile
-     * west tile
-     * room if standing at an entrance
-     * exits (entrances) if in a room
-     * room which can go to via the secret passage of current room
-     * 
-     * 
-     * 
-     * 
-     * @param player
-     * @return
+     * @param character
+     *            --- the player
+     * @return --- a list of positions that are all movable.
      */
-    // @formatter:off
     public List<Position> getMovablePositions(Character character) {
-        
+
         Player player = getPlayerByCharacter(character);
-        
-        // Position playerPos = player.getPosition();
+
         List<Position> movablePos = new ArrayList<>();
 
-        // if there are TILEs in four directions
+        // if there are tiles in four directions
         if (board.lookNorth(player) != null) {
             movablePos.add(board.lookNorth(player));
         }
@@ -285,26 +397,25 @@ public class Game {
         if (board.atEntranceTo(player) != null) {
             movablePos.add(board.atEntranceTo(player));
         }
-        
+
         // if the player is in a room, get the exits
         List<Entrance> entrances = board.lookForExit(player);
-        if (entrances != null && !entrances.isEmpty()) {
-            for (Entrance e : entrances) {
-                movablePos.add(e);
-            }
+        for (Entrance e : entrances) {
+            movablePos.add(e);
         }
-        
+
         // if the player is in a room, and there is a secret passage
         if (board.lookForSecPas(player) != null) {
             movablePos.add(board.lookForSecPas(player));
         }
-        
+
         // check if any other player standing there, then it's not an option
         for (Player existingPlayer : players) {
             Iterator<Position> itr = movablePos.iterator();
             while (itr.hasNext()) {
                 Position nextPos = itr.next();
-                if (nextPos instanceof Tile && nextPos.equals(existingPlayer.getPosition())) {
+                if (nextPos instanceof Tile
+                        && nextPos.equals(existingPlayer.getPosition())) {
                     itr.remove();
                 }
             }
@@ -313,61 +424,87 @@ public class Game {
         return movablePos;
     }
 
-    public boolean updateAndgetGameStatus() {
+    /**
+     * Whether game has a winner (i.e. game end)
+     * 
+     * @return --- true if game is still running, there is no winner yet; false if not.
+     */
+    public boolean isGameRunning() {
         return numPlayers > 1 || winner == null;
     }
-    
+
+    /**
+     * Set a player as winner.
+     * 
+     * @param character
+     *            --- the player
+     */
     public void setWinner(Character character) {
         winner = character;
     }
-    
+
+    /**
+     * Get the winner.
+     * 
+     * @return --- winner
+     */
     public Character getWinner() {
         if (winner == null) {
             // assertion
             if (numPlayers > 1) {
                 throw new GameError("number of players shouldn't > 1");
             }
-            
+
             for (Player p : players) {
                 if (p.isPlaying()) {
                     return p.getToken();
                 }
             }
-            
+
             throw new GameError("should at least have one player left");
         } else {
-            return winner;            
+            return winner;
         }
     }
-    
+
+    /**
+     * Check whether the given suggestion is wrong.
+     * 
+     * 
+     * 
+     * @param suggestion  --- the suggestion to check
+     * @return   --- true if 
+     */
     public boolean checkAccusation(Suggestion suggestion) {
         return solution.equals(suggestion);
     }
 
     public String getBoardString() {
-        
+
         // first clear
         BOARD_STRING.delete(0, BOARD_STRING.length());
-        
+
         BOARD_STRING.append("=======Game Board=======\n");
-        
+
+        int width = CluedoConfigs.BOARD_WIDTH;
+
         // get the canvas first
-        char[] boardChars = StandardCluedo.UI_STRING_A.toCharArray();
+        char[] boardChars = CluedoConfigs.UI_STRING_A.toCharArray();
 
         // draw players by replacing his character on his position
         for (Player p : players) {
             Position pos = p.getPosition();
             if (pos instanceof Tile) {
                 Tile tile = (Tile) pos;
-                int index = tile.x + tile.y * 25;
+                int index = tile.x + tile.y * width;
                 boardChars[index] = p.getToken().toStringOnBoard();
             } else if (pos instanceof Room) {
                 Room room = (Room) pos;
                 Tile decoTile = room.getNextDecoTile();
-                int index = decoTile.x + decoTile.y * 25;
+                int index = decoTile.x + decoTile.y * width;
                 while (boardChars[index] != ' ') {
                     decoTile = room.getNextDecoTile();
-                    index = decoTile.x + decoTile.y * 25;
+                    index = decoTile.x + decoTile.y * width;
                 }
                 boardChars[index] = p.getToken().toStringOnBoard();
             }
@@ -377,10 +514,10 @@ public class Game {
         for (WeaponToken w : weaponTokens) {
             Room room = w.getRoom();
             Tile decoTile = room.getNextDecoTile();
-            int index = decoTile.x + decoTile.y * 25;
+            int index = decoTile.x + decoTile.y * width;
             while (boardChars[index] != ' ') {
                 decoTile = room.getNextDecoTile();
-                index = decoTile.x + decoTile.y * 25;
+                index = decoTile.x + decoTile.y * width;
             }
             boardChars[index] = w.getToken().toStringOnBoard();
         }
@@ -396,16 +533,16 @@ public class Game {
                 BOARD_STRING.append("\n");
             }
         }
-        
+
         // shows what cards are in the current player's hand
         Player player = getPlayerByCharacter(currentPlayer);
-        
+
         BOARD_STRING.append("[Cards in hand]:\n");
         for (Card c : player.getCards()) {
             BOARD_STRING.append(c.toString());
             BOARD_STRING.append("\n");
         }
-        
+
         BOARD_STRING.append("========================\n");
 
         return BOARD_STRING.toString();

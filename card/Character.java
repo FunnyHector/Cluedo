@@ -3,7 +3,9 @@ package card;
 /**
  * This enum class represents a character card in Cluedo game. There are six characters,
  * Miss Scarlet, Colonel Mustard, Mrs White, The Reverend Green, Mrs Peacock, and
- * Professor Plum. Each of them has a unique starting position on board.
+ * Professor Plum. Each of them has a unique starting position on board.<br>
+ * <br>
+ * Note that this class is also used to symbolically represent the player in game.
  * 
  * @author Hector
  * 
@@ -17,6 +19,12 @@ public enum Character implements Card {
         return this.name().replaceAll("_", " ");
     }
 
+    /**
+     * This method returns the next character in turn. When current character ends turn,
+     * It's useful for the game to know who the next acting character is.
+     * 
+     * @return --- the next character in turn.
+     */
     public Character nextCharacter() {
         switch (this) {
         case Colonel_Mustard:

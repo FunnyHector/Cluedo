@@ -10,11 +10,10 @@ package card;
 public interface Card {
 
     /**
-     * This is an alternative version of toString() method who returns a single character
+     * This is an alternative version of toString() method which returns a single char
      * String to print a symbol on text-based graphical board.
      * 
-     * @return --- a single character String to print a symbol on text-based graphical
-     *         board.
+     * @return --- a single char String to print a symbol on text-based graphical board.
      */
     public char toStringOnBoard();
 

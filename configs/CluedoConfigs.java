@@ -1,22 +1,82 @@
-package rules;
+package configs;
 
 import card.Location;
 import tile.Room;
 
-public class StandardCluedo {
-
-    // nine rooms
+/**
+ * This class contains most of configurations to construct a game board. All fields
+ * and methods are static to use.
+ * 
+ * @author Hector
+ *
+ */
+public class CluedoConfigs {
+    /**
+     * The number of dices used in game
+     */
+    public static final int NUM_DICE = 2;
+    /**
+     * Minimum player needed
+     */
+    public static final int MIN_PLAYER = 3;
+    /**
+     * Maximum player to join into game.
+     */
+    public static final int MAX_PLAYER = 6;
+    /**
+     * the horizontal boundary coordinate of Cluedo game board.
+     */
+    public static final int BOARD_WIDTH = 24;
+    /**
+     * the vertical boundary coordinate of Cluedo game board.
+     */
+    public static final int BOARD_HEIGHT = 25;
+    /**
+     * The static object of Kitchen
+     */
     public static final Room KITCHEN = new Room(Location.Kitchen, Location.Study);
+    /**
+     * The static object of ball room
+     */
     public static final Room BALL_ROOM = new Room(Location.Ball_room, null);
+    /**
+     * The static object of conservatory
+     */
     public static final Room CONSERVATORY = new Room(Location.Conservatory,
             Location.Lounge);
+    /**
+     * The static object of billard room
+     */
     public static final Room BILLARD_ROOM = new Room(Location.Billard_Room, null);
+    /**
+     * The static object of Library
+     */
     public static final Room LIBRARY = new Room(Location.Library, null);
+    /**
+     * The static object of study room
+     */
     public static final Room STUDY = new Room(Location.Study, Location.Kitchen);
+    /**
+     * The static object of hall
+     */
     public static final Room HALL = new Room(Location.Hall, null);
+    /**
+     * The static object of lounge
+     */
     public static final Room LOUNGE = new Room(Location.Lounge, Location.Conservatory);
+    /**
+     * The static object of dining room
+     */
     public static final Room DINING_ROOM = new Room(Location.Dining_Room, null);
 
+    /**
+     * This method take into the symbolic location (Card object), and returns the
+     * corresponding Room object.
+     * 
+     * @param loc
+     *            --- symbolic location (Card object)
+     * @return --- the corresponding, static Room object
+     */
     public static Room getRoom(Location loc) {
         switch (loc) {
         case Ball_room:
@@ -43,7 +103,10 @@ public class StandardCluedo {
     }
 
     // @formatter:off
-    // a string used to print out text-based UI
+    
+    /**
+     *  a string used to print out text-based UI. This is used as a canvas.
+     */
     public static final String UI_STRING_A = 
             "■■■■■■■■■ ■■■■ ■■■■■■■■■\n" +
             "┌KIT─□■   ┌──┐   ■┌CSTY┐\n" + 
@@ -56,11 +119,11 @@ public class StandardCluedo {
             "■                 ┌────┐\n" +
             "┌───┐             →    B\n" + 
             "D   └──┐  ┌───┐   │    L\n" +
-            "I      │  │CRI│   │    D\n" + 
-            "N      ←  │ME │   └───↑┘\n" +
-            "I      │  │SCE│        ■\n" + 
-            "N      │  │NE │   ┌─↓─┐■\n" +
-            "└─────↑┘  │   │  ┌┘   └┐\n" + 
+            "I      │  │B  │   │    D\n" + 
+            "N      ←  │A M│   └───↑┘\n" +
+            "I      │  │S E│        ■\n" + 
+            "N      │  │E N│   ┌─↓─┐■\n" +
+            "└─────↑┘  │  T│  ┌┘   └┐\n" + 
             "■         └───┘  →     │\n" +
             "                 └┐   ┌┘\n" + 
             "■        ┌─↓↓─┐   └LIB┘■\n" +
@@ -71,7 +134,12 @@ public class StandardCluedo {
             "U    ┌┘  │    │  └┐    │\n" + 
             "N─G─E┘■ ■└HALL┘■ ■└STUDY\n";
 
-    // an alternative string used to print out text-based UI
+    /**
+     *  an alternative string used to print out text-based UI. It uses two characters to
+     *  represent one tile position, so that the ASCII board is not so skinny.<br>
+     *  <br>
+     *  NOTE: it's not used currently.
+     */
     public static final String UI_STRING_B = 
             "■■■■■■■■■■■■■■■■■■  ■■■■■■■■  ■■■■■■■■■■■■■■■■■■\n" +
             "┌──────────□■■      ┌──────┐      ■■┌──────────┐\n" + 
@@ -100,11 +168,23 @@ public class StandardCluedo {
             "└──────────┘■■  ■■└──────────┘■■  ■■└──────────┘\n";
 
     
-    /*
-     * a string used to construct the board. This could be defined outside of source code,
-     * for instance in a .txt file, but since Cluedo is brand-registered, and the board
-     * layout is not so much modifiable under those game rules, so it's easier to be put
-     * just here.
+    /**
+     * a string used to construct the board.<br>
+     * <br>
+     * '0' : walkable tiles, tiles that are out of all rooms.<br>
+     * ' ' : (space) represents walls and unenterable tiles.<br>
+     * 1-9 : represents nine rooms on board.<br>
+     * '!' : (shift + 1) represents Scarlet's start position.<br>
+     * '@' : (shift + 2) represents Mustard's start position.<br>
+     * '#' : (shift + 3) represents White's start position.<br>
+     * '$' : (shift + 4) represents Green's start position.<br>
+     * '%' : (shift + 5) represents Peacock's start position.<br>
+     * '^' : (shift + 6) represents Plum's start position.<br>
+     * a-i : represents entrance to each room, 'a' is entrance to room '1',
+     * 'b' to room '2', and so on.<br>
+     * A-I : represents decorative tiles in each room, which has no functionality
+     * on board, only indicates where to draw player token and weapon token. 'A' 
+     * marks where to draw in room '1', 'b' to room '2', and so on.<br>
      */
     public static final String BOARD_STRING = 
             "         #    $         \n" +

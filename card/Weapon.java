@@ -2,7 +2,9 @@ package card;
 
 /**
  * This enum class represents a Weapon card in Cluedo game. There are six weapons,
- * Candlestick, Dagger, Lead Pipe, Revolver, Rope, and Spanner.
+ * Candlestick, Dagger, Lead Pipe, Revolver, Rope, and Spanner.<br>
+ * <br>
+ * Note that this class is also used to symbolically represent the weapon token in game.
  * 
  * @author Hector
  *

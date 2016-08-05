@@ -23,13 +23,18 @@ public class Room extends Position {
     private final List<Entrance> entrances;
     // a collection of decorative tiles for drawing tokens
     private final List<Tile> decoTiles;
+    // used to prevent from two tokens occupying the same position
     private int decoIndex = 0;
 
     /**
+     * Construct a Room with current location and the location where the secret passage
+     * lead to if applicable
      * 
      * @param room
+     *            --- this room
      * @param secPasTo
-     * @param entrances
+     *            --- the room that the secret passage lead to. null if this room has no
+     *            secret passage
      */
     public Room(Location room, Location secPasTo) {
         this.room = room;
@@ -39,54 +44,76 @@ public class Room extends Position {
     }
 
     /**
+     * What room is it?
      * 
-     * @return
+     * @return --- this room
      */
     public Location getRoom() {
         return room;
     }
 
     /**
+     * Does this room has a secret passage to somewhere?
      * 
-     * @return
+     * @return --- true for yes; false for no
      */
     public boolean hasSecPas() {
         return secPasTo != null;
     }
 
     /**
+     * Which room does the secret passage lead to?
      * 
-     * @return
+     * @return --- the room that the secret passage lead to. null if this room has no
+     *         secret passage
      */
     public Location getSecPasTo() {
         return secPasTo;
     }
 
+    /**
+     * What entrances / exits are there in this room?
+     * 
+     * @return --- all entrances / exits as a list
+     */
     public List<Entrance> getEntrances() {
         return entrances;
     }
 
+    /**
+     * Add an entrance to this room.
+     * 
+     * @param entrance
+     *            --- An entrance tile of this room
+     */
     public void addEntrances(Entrance entrance) {
         entrances.add(entrance);
     }
 
+    /**
+     * Add a decorative tile to this room.
+     * 
+     * @param decoTile
+     *            --- a tile that is used to display a character token or weapon token.
+     *            It's used only for a nicer text gui.
+     */
     public void addDecoTiles(Tile decoTile) {
         decoTiles.add(decoTile);
     }
 
-    // TODO this method is buggy
+    /**
+     * return a decorative tile
+     * 
+     * @return --- a decorative tile
+     */
     public Tile getNextDecoTile() {
+        // TODO this method is buggy
         int index = decoIndex;
         decoIndex++;
         if (decoIndex >= decoTiles.size()) {
-            decoIndex = 0; // get only
+            decoIndex = 0;
         }
         return decoTiles.get(index);
-    }
-
-    @Override
-    public String toString() {
-        return room.toString();
     }
 
     @Override
@@ -101,6 +128,11 @@ public class Room extends Position {
         } else {
             throw new GameError("Shouldn't move from a room to a tile (not entrance)");
         }
+    }
+
+    @Override
+    public String toString() {
+        return room.toString();
     }
 
     @Override

@@ -1,40 +1,44 @@
 package tile;
 
+import configs.CluedoConfigs;
+import game.Board;
 import game.GameError;
 
 /**
- * This class represents a single tile on Cluedo game board (tiles that are out of rooms).
+ * This class represents a single tile on Cluedo game board (i.e. tiles that are out of
+ * rooms).
  * 
  * @author Hector
- *
+ * 
  */
 public class Tile extends Position {
 
-    // the coordinates of this tile
+    /**
+     * the coordinates of this tile
+     */
     public final int x, y;
 
     /**
+     * Takes the coordinates and construct a Tile. Coordinate are checked against board's
+     * width and height.
      * 
      * @param x
+     *            --- horizontal coordinate
      * @param y
+     *            --- vertical coordinate
      */
     public Tile(int x, int y) {
         super();
-        if (x < 0 || x > 23 || y < 0 || y > 24) {
+
+        // sanity check
+        int width = CluedoConfigs.BOARD_WIDTH;
+        int height = CluedoConfigs.BOARD_HEIGHT;
+        if (x < 0 || x > width - 1 || y < 0 || y > height - 1) {
             throw new GameError("Invalid Coordinates");
         }
 
         this.x = x;
         this.y = y;
-    }
-
-    @Override
-    public String toString() {
-        return "[" + x + " , " + y + "]";
-    }
-
-    public String toStringOnBoard() {
-        return "0";
     }
 
     @Override
@@ -50,11 +54,17 @@ public class Tile extends Position {
             } else if (destinationTile.y - this.y == -1) {
                 return "Move north.";
             } else {
-                throw new GameError("Shouldn't move two tiles away once");
+                throw new GameError("Shouldn't move more than one tile once");
             }
         } else {
-            throw new GameError("Shouldn't move from a tile to a room");
+            throw new GameError(
+                    "Shouldn't move from a tile to a room. Use \"Entrance\" tile");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "[" + x + " , " + y + "]";
     }
 
     @Override

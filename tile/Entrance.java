@@ -3,27 +3,39 @@ package tile;
 import game.GameError;
 
 /**
- * 
+ * This class represents a special type of Tile, which is the tile at the entrance of a
+ * room. Only from this type of Tile, a player can enter a room. Player cannot enter any
+ * room from normal Tiles.
  * 
  * @author Hector
  *
  */
 public class Entrance extends Tile {
 
+    // The room that the player can enter from this entrance tile.
     private Room toRoom;
 
+    /**
+     * Construct an entrance tile.
+     * 
+     * @param x
+     *            --- horizontal coordinate
+     * @param y
+     *            --- vertical coordinate
+     * @param toRoom
+     *            --- The room that the player can enter from this entrance tile.
+     */
     public Entrance(int x, int y, Room toRoom) {
         super(x, y);
         this.toRoom = toRoom;
     }
 
+    /**
+     * Get the room that the player can enter from this entrance tile.
+     * @return  --- The room that the player can enter from this entrance tile.
+     */
     public Room toRoom() {
         return toRoom;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
     }
 
     @Override
@@ -48,6 +60,11 @@ public class Entrance extends Tile {
             throw new GameError(
                     "Shouldn't move from an entrance to " + destination.toString());
         }
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
     }
 
     @Override
