@@ -32,7 +32,8 @@ public class Entrance extends Tile {
 
     /**
      * Get the room that the player can enter from this entrance tile.
-     * @return  --- The room that the player can enter from this entrance tile.
+     * 
+     * @return --- The room that the player can enter from this entrance tile.
      */
     public Room toRoom() {
         return toRoom;

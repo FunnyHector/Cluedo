@@ -452,9 +452,13 @@ public class Board {
     }
 
     /**
-     * This method moves player to another given position. Note that this method does no
-     * sanity checks, so it should be always guarded by calling lookNorth / lookSouth /
-     * lookWest / lookEast / atEntrance / lookForExit in advance.
+     * This method set player's position to another given position, which could be any
+     * position on board. In other worlds, this method is not always a reasonable move in
+     * normal Cluedo game.<br>
+     * <br>
+     * Note that this method does no sanity checks, so it should be always guarded by
+     * calling lookNorth / lookSouth / lookWest / lookEast / atEntrance / lookForExit in
+     * advance.
      * 
      * @param player
      *            --- the player

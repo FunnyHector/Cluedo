@@ -1,7 +1,9 @@
 package tile;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import card.Location;
 import game.GameError;
@@ -20,7 +22,7 @@ public class Room extends Position {
     // The end of the secret passage if this room has one. null if it doesn't have one.
     private final Location secPasTo;
     // a collection of entrance tiles only on which a player can enter this room.
-    private final List<Entrance> entrances;
+    private final Set<Entrance> entrances;
     // a collection of decorative tiles for drawing tokens
     private final List<Tile> decoTiles;
     // used to prevent from two tokens occupying the same position
@@ -39,7 +41,7 @@ public class Room extends Position {
     public Room(Location room, Location secPasTo) {
         this.room = room;
         this.secPasTo = secPasTo;
-        entrances = new ArrayList<>();
+        entrances = new HashSet<>();
         decoTiles = new ArrayList<>();
     }
 
@@ -77,7 +79,7 @@ public class Room extends Position {
      * @return --- all entrances / exits as a list
      */
     public List<Entrance> getEntrances() {
-        return entrances;
+        return new ArrayList<>(entrances);
     }
 
     /**
@@ -120,8 +122,7 @@ public class Room extends Position {
     public String optionString(Position destination) {
         if (destination instanceof Room) {
             Room destinationRoom = (Room) destination;
-            return "Take the secret passage to "
-                    + destinationRoom.toString() + ".";
+            return "Take the secret passage to " + destinationRoom.toString() + ".";
         } else if (destination instanceof Entrance) {
             Entrance exitOfRoom = (Entrance) destination;
             return "Exit room from exit (" + exitOfRoom.x + ", " + exitOfRoom.y + ").";
@@ -139,9 +140,6 @@ public class Room extends Position {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + decoIndex;
-        result = prime * result + ((decoTiles == null) ? 0 : decoTiles.hashCode());
-        result = prime * result + ((entrances == null) ? 0 : entrances.hashCode());
         result = prime * result + ((room == null) ? 0 : room.hashCode());
         result = prime * result + ((secPasTo == null) ? 0 : secPasTo.hashCode());
         return result;
@@ -156,18 +154,6 @@ public class Room extends Position {
         if (getClass() != obj.getClass())
             return false;
         Room other = (Room) obj;
-        if (decoIndex != other.decoIndex)
-            return false;
-        if (decoTiles == null) {
-            if (other.decoTiles != null)
-                return false;
-        } else if (!decoTiles.equals(other.decoTiles))
-            return false;
-        if (entrances == null) {
-            if (other.entrances != null)
-                return false;
-        } else if (!entrances.equals(other.entrances))
-            return false;
         if (room != other.room)
             return false;
         if (secPasTo != other.secPasTo)

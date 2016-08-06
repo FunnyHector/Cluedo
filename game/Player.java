@@ -118,6 +118,9 @@ public class Player {
      *            --- the number of remaining steps
      */
     public void setRemainingSteps(int remaingingSteps) {
+        if (remaingingSteps < 0) {
+            throw new GameError("Remaining steps should be at least 0.");
+        }
         remainingSteps = remaingingSteps;
     }
 

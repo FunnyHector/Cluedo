@@ -115,7 +115,7 @@ public class TextClient {
         while (game.isGameRunning()) {
             // print board
             System.out.println(game.getBoardString());
-            go(game);
+            StepRun(game);
         }
     }
 
@@ -126,7 +126,7 @@ public class TextClient {
      * @param game
      *            --- the running game
      */
-    private static void go(Game game) {
+    private static void StepRun(Game game) {
 
         Character currentPlayer = game.getCurrentPlayer();
         int remainingSteps = game.getRemainingSteps(currentPlayer);
@@ -193,7 +193,7 @@ public class TextClient {
                 // move into a room, now the player can make suggestion
                 Suggestion suggestion = makeSuggestion(game, destination);
                 // now compare the suggestion, and other players try to reject it
-                rejectSuggestion(game, currentPlayer, suggestion);
+                System.out.println(game.rejectSuggestion(suggestion));
 
                 // prompt if the player want to make accusation now
                 System.out.println("Do you want to make an accusation now?");
@@ -224,7 +224,7 @@ public class TextClient {
                 // player chose to make a suggestion
                 Suggestion suggestion = makeSuggestion(game, currentPos);
                 // now other players try to reject it
-                rejectSuggestion(game, currentPlayer, suggestion);
+                System.out.println(game.rejectSuggestion(suggestion));
 
                 // prompt if the player want to make accusation now
                 System.out.println("Do you want to make an accusation now?");
@@ -338,47 +338,15 @@ public class TextClient {
         default: // dead code
         }
 
-        // move the weapon in this suggestion into this room
-        game.moveWeapon(weapon, (Room) destination);
-        // and the suspect as well
-        game.movePlayer(suspect, (Room) destination);
+        Suggestion suggestion = new Suggestion(suspect, location, weapon);
+        game.makeSuggestion(suggestion);
 
         // now the player has made a suggestion
         System.out.println(
                 "Your suggestion is:\nSuspect: " + suspect.toString() + "\nWeapon: "
                         + weapon.toString() + "\nLocation: " + location.toString());
 
-        return new Suggestion(suspect, location, weapon);
-    }
-
-    /**
-     * This method let other players try to reject the suggestion made by current player.
-     * 
-     * @param game
-     *            --- the running game
-     * @param currentPlayer
-     *            --- current player, the player who made a suggestion
-     * @param suggestion
-     *            --- the suggestion
-     */
-    private static void rejectSuggestion(Game game, Character currentPlayer,
-            Suggestion suggestion) {
-
-        for (Character c : Character.values()) {
-            // as long as this player has drawn cards, he can attempt to reject;
-            if (c != currentPlayer && !game.playerHandEmpty(c)) {
-                Card rejectedCard = game.playerRejectSuggestion(c, suggestion);
-                if (rejectedCard != null) {
-                    // reject !
-                    System.out
-                            .println(c.toString() + " rejects your suggestion with card: "
-                                    + rejectedCard.toString());
-                } else {
-                    // cannot reject this suggestion
-                    System.out.println(c.toString() + " cannot reject your suggestion.");
-                }
-            }
-        }
+        return suggestion;
     }
 
     /**
@@ -509,16 +477,15 @@ public class TextClient {
         if (game.checkAccusation(accusation)) {
             // win!!
             System.out.println("You Win!");
-            game.setWinner(currentPlayer);
         } else {
             // the player is out
             System.out.println("You are wrong!");
-            game.kickPlayerOut(currentPlayer);
         }
     }
 
     /**
-     * This method ends the game, prompt the winner give players an option to restart a new game.
+     * This method ends the game, prompt the winner give players an option to restart a
+     * new game.
      * 
      * @param game
      *            --- the running game
@@ -545,6 +512,7 @@ public class TextClient {
             // if user asked for help, print out help message
             if (line.equals("help")) {
                 helpMessage();
+                System.out.println("Please choose between " + min + " and " + max + ":");
                 continue;
             }
 

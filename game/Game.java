@@ -53,6 +53,11 @@ public class Game {
      *            --- how many (human controlled) players are playing.
      */
     public Game(int numPlayers) {
+        if (numPlayers < CluedoConfigs.MIN_PLAYER
+                || numPlayers > CluedoConfigs.MAX_PLAYER) {
+            throw new GameError("Invalid number of players");
+        }
+
         board = new Board();
         players = new ArrayList<>(Character.values().length);
         this.numPlayers = numPlayers;
@@ -136,9 +141,23 @@ public class Game {
     }
 
     /**
-     * This method deals cards evenly to players
+     * Get the solution
+     * 
+     * @return --- the solution
+     */
+    public Suggestion getSolution() {
+        return solution;
+    }
+
+    /**
+     * This method deals cards evenly to players. Note that this method should be called
+     * after the solution is created.
      */
     public void dealCard() {
+        if (remainingCards == null) {
+            throw new GameError("The solution should be created before dealing cards.");
+        }
+
         // deal cards randomly and evenly to all players
         while (remainingCards.size() >= numPlayers) {
             Collections.shuffle(remainingCards); // MAXIMUM RANDOMNESS = ANARCHY !!
@@ -151,6 +170,9 @@ public class Game {
         }
     }
 
+    /**
+     * This method sets who the first character is to move.
+     */
     public void setPlayerMoveFirst() {
         currentPlayer = Character.Miss_Scarlet;
         while (!getPlayerByCharacter(currentPlayer).isPlaying()) {
@@ -215,6 +237,17 @@ public class Game {
     }
 
     /**
+     * A helper method to get the corresponding Player of given Character.
+     * 
+     * @param character
+     *            --- the given character
+     * @return
+     */
+    public Player getPlayerByCharacter(Character character) {
+        return players.get(character.ordinal());
+    }
+
+    /**
      * let current player end turn.
      */
     public void currentPlayerEndTurn() {
@@ -256,7 +289,7 @@ public class Game {
      * @param room
      *            --- which room to move into.
      */
-    public void moveWeapon(Weapon weapon, Room room) {
+    private void moveWeapon(Weapon weapon, Room room) {
         for (WeaponToken wt : weaponTokens) {
             if (wt.getToken().equals(weapon)) {
                 board.moveWeapon(wt, room);
@@ -311,55 +344,70 @@ public class Game {
     }
 
     /**
-     * check whether the player's hand is empty. As long as the player is
-     * human-controlled, his hand is not empty, so he can attempt to reject.
+     * This method let current player make a suggestion. It merely just move the suspect
+     * and weapon in the given suggestion into the mentioned location.
      * 
-     * @param player
-     *            --- the player
-     * @return --- true is the player has no card; false if not.
+     * @param suggestion
+     *            --- the suggestion
      */
-    public boolean playerHandEmpty(Character player) {
-        return !getPlayerByCharacter(player).isPlaying();
+    public void makeSuggestion(Suggestion suggestion) {
+        moveWeapon(suggestion.weapon, CluedoConfigs.getRoom(suggestion.location));
+        movePlayer(suggestion.character, CluedoConfigs.getRoom(suggestion.location));
     }
 
     /**
-     * Let the player attempt to reject the given suggestion. This method will return the
-     * first card that can be rejected. With the same player and the same suggestion, each
-     * time the method should return different possible result, because the order of
-     * checking process is random. If the player cannot reject the given suggestion, null
-     * will be returned.
+     * This method examines the given suggestion, let other players try to reject it, and
+     * returns a String that represents other player's "voice", which is whether or not
+     * they can reject it.
      * 
-     * @param player
-     *            --- the player
      * @param suggestion
-     *            --- the suggestion to check
-     * @return --- the card that can prove the suggestion wrong; or null if the player
-     *         cannot reject it.
+     *            --- the suggestion
+     * @return --- a string for text output, represents whether or not another player can
+     *         reject the given suggestion.
      */
-    public Card playerRejectSuggestion(Character player, Suggestion suggestion) {
-
+    public String rejectSuggestion(Suggestion suggestion) {
+        String rejectMsg = "";
         List<Card> cardsInSuggetion = suggestion.asList();
         // shuffle so that it randomly reject the first rejectable card
         Collections.shuffle(cardsInSuggetion);
 
-        for (Card card : cardsInSuggetion) {
-            if (playerHasCard(player, card)) {
-                return card; // only reject one card
+        outer: for (Player p : players) {
+            // as long as this player has drawn cards, he can attempt to reject;
+            if (p.getToken() != currentPlayer && !p.getCards().isEmpty()) {
+                for (Card card : cardsInSuggetion) {
+                    if (p.getCards().contains(card)) {
+                        rejectMsg = rejectMsg + p.getToken().toString()
+                                + " rejects your suggestion with card: " + card.toString()
+                                + "\n";
+                        continue outer; // only reject one card
+                    }
+                }
+                rejectMsg = rejectMsg + p.getToken().toString()
+                        + " cannot reject your suggestion.\n";
             }
         }
 
-        return null;
+        return rejectMsg;
     }
 
     /**
-     * Check whether the given suggestion is wrong.
+     * This method checks the accusation. If it is correct, current player wins; if wrong,
+     * current player is out.
      * 
-     * @param suggestion
-     *            --- the suggestion to check
-     * @return --- true if it's a correct accusation; false if wrong
+     * @param accusation
+     *            --- the accusation
+     * @return --- true if correct; false if not.
      */
-    public boolean checkAccusation(Suggestion suggestion) {
-        return solution.equals(suggestion);
+    public boolean checkAccusation(Suggestion accusation) {
+        if (solution.equals(accusation)) {
+            // win!!
+            setWinner(currentPlayer);
+            return true;
+        } else {
+            // the player is out
+            kickPlayerOut(currentPlayer);
+            return false;
+        }
     }
 
     /**
@@ -457,22 +505,7 @@ public class Game {
      * @return --- winner
      */
     public Character getWinner() {
-        if (winner == null) {
-            // assertion
-            if (numPlayers > 1) {
-                throw new GameError("number of players shouldn't > 1");
-            }
-
-            for (Player p : players) {
-                if (p.isPlaying()) {
-                    return p.getToken();
-                }
-            }
-
-            throw new GameError("should at least have one player left");
-        } else {
-            return winner;
-        }
+        return winner;
     }
 
     /**
@@ -483,6 +516,15 @@ public class Game {
      */
     public void setWinner(Character character) {
         winner = character;
+    }
+
+    /**
+     * Get all weapon tokens as a list
+     * 
+     * @return --- all weapon tokens
+     */
+    public List<WeaponToken> getWeaponTokens() {
+        return weaponTokens;
     }
 
     /**
@@ -561,16 +603,5 @@ public class Game {
         BOARD_STRING.append("========================\n");
         BOARD_STRING.append("Type \"help\" for help\n");
         return BOARD_STRING.toString();
-    }
-
-    /**
-     * A helper method to get the corresponding Player of given Character.
-     * 
-     * @param character
-     *            --- the given character
-     * @return
-     */
-    private Player getPlayerByCharacter(Character character) {
-        return players.get(character.ordinal());
     }
 }

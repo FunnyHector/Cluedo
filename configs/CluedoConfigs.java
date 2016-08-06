@@ -4,8 +4,8 @@ import card.Location;
 import tile.Room;
 
 /**
- * This class contains most of configurations to construct a game board. All fields
- * and methods are static to use.
+ * This class contains most of configurations to construct a game board. All fields and
+ * methods are static to use.
  * 
  * @author Hector
  *
