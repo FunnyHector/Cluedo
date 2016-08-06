@@ -2,20 +2,17 @@ package test;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
 
-import card.Card;
 import card.Character;
 import card.Location;
 import card.Weapon;
 import configs.CluedoConfigs;
 import game.Game;
-import game.Player;
 import game.Suggestion;
 import game.WeaponToken;
 import tile.Entrance;

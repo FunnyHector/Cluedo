@@ -1,7 +1,6 @@
 package tile;
 
 import configs.CluedoConfigs;
-import game.Board;
 import game.GameError;
 
 /**

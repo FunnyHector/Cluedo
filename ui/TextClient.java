@@ -1,9 +1,8 @@
-package gui;
+package ui;
 
 import java.util.List;
 import java.util.Scanner;
 
-import card.Card;
 import card.Character;
 import card.Location;
 import card.Weapon;

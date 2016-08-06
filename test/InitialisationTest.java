@@ -10,13 +10,11 @@ import configs.CluedoConfigs;
 import game.Game;
 import game.GameError;
 import game.Player;
-import tile.Room;
 import tile.Tile;
 
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,6 +58,7 @@ public class InitialisationTest {
 
         for (int i = 0; i < xCoords.length; i++) {
             try {
+                @SuppressWarnings("unused")
                 Tile tile = new Tile(xCoords[i], yCoords[i]);
                 fail("invalid coordinates to construct tiles");
             } catch (GameError e) {
