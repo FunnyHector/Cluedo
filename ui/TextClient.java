@@ -6,7 +6,7 @@ import java.util.Scanner;
 import card.Character;
 import card.Location;
 import card.Weapon;
-import configs.CluedoConfigs;
+import configs.Configs;
 import game.Game;
 import game.Suggestion;
 import tile.Position;
@@ -61,8 +61,8 @@ public class TextClient {
     private static Game setupGame() {
         // set how many players
         System.out.println("How many players?");
-        int numPlayers = parseInt(CluedoConfigs.MIN_PLAYER, CluedoConfigs.MAX_PLAYER);
-        Game game = new Game(numPlayers);
+        int numPlayers = parseInt(Configs.MIN_PLAYER, Configs.MAX_PLAYER);
+        Game game = new Game(numPlayers, Configs.NUM_DICE);
 
         // let players choose which character to play with
         int playerIndex = 0;
@@ -134,9 +134,14 @@ public class TextClient {
 
         // if this player hasn't roll a dice, roll dice
         if (remainingSteps == 0) {
-            int roll = game.rollDice(currentPlayer);
-            System.out.println("You rolled " + roll + ".");
-            remainingSteps = game.getRemainingSteps(currentPlayer);
+            int[] roll = game.rollDice(currentPlayer);
+            int total = 0;
+            for (int i = 0; i < roll.length; i++) {
+                total += roll[i];
+            }
+            System.out.println("You rolled " + total + ".");
+            game.setRemainingSteps(currentPlayer, total);
+            remainingSteps = total;
         }
 
         System.out.println("You have " + remainingSteps + " steps left.");

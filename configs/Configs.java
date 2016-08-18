@@ -10,7 +10,7 @@ import tile.Room;
  * @author Hector
  *
  */
-public class CluedoConfigs {
+public class Configs {
     /**
      * The number of dices used in game
      */

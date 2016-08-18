@@ -9,7 +9,7 @@ import java.util.Random;
 
 import card.Location;
 import card.Weapon;
-import configs.CluedoConfigs;
+import configs.Configs;
 import tile.Entrance;
 import tile.Position;
 import tile.Room;
@@ -31,6 +31,8 @@ public class Game {
     private Board board;
     // number of players
     private int numPlayers;
+    // number of dices
+    private int numDices;
     // all six players (including dummy tokens) as a list
     private List<Player> players;
     // after cards are evenly dealt, all remaining cards are in this list.
@@ -52,9 +54,8 @@ public class Game {
      * @param numPlayer
      *            --- how many (human controlled) players are playing.
      */
-    public Game(int numPlayers) {
-        if (numPlayers < CluedoConfigs.MIN_PLAYER
-                || numPlayers > CluedoConfigs.MAX_PLAYER) {
+    public Game(int numPlayers, int numDices) {
+        if (numPlayers < Configs.MIN_PLAYER || numPlayers > Configs.MAX_PLAYER) {
             throw new GameError("Invalid number of players");
         }
 
@@ -77,6 +78,8 @@ public class Game {
         players.add(new Player(Character.Professor_Plum,
                 board.getStartPosition(Character.Professor_Plum), false));
 
+        this.numDices = numDices;
+
         // last, put six weapons in random rooms
         setWeapons();
     }
@@ -91,10 +94,10 @@ public class Game {
         List<Weapon> weaponList = new ArrayList<>(Arrays.asList(Weapon.values()));
 
         // nine rooms
-        List<Room> roomList = new ArrayList<>(Arrays.asList(CluedoConfigs.KITCHEN,
-                CluedoConfigs.BALL_ROOM, CluedoConfigs.CONSERVATORY,
-                CluedoConfigs.BILLARD_ROOM, CluedoConfigs.LIBRARY, CluedoConfigs.STUDY,
-                CluedoConfigs.HALL, CluedoConfigs.LOUNGE, CluedoConfigs.DINING_ROOM));
+        List<Room> roomList = new ArrayList<>(
+                Arrays.asList(Configs.KITCHEN, Configs.BALL_ROOM, Configs.CONSERVATORY,
+                        Configs.BILLARD_ROOM, Configs.LIBRARY, Configs.STUDY,
+                        Configs.HALL, Configs.LOUNGE, Configs.DINING_ROOM));
 
         // randomly distribute weapons
         for (int i = 0; i < 6; i++) {
@@ -351,8 +354,8 @@ public class Game {
      *            --- the suggestion
      */
     public void makeSuggestion(Suggestion suggestion) {
-        moveWeapon(suggestion.weapon, CluedoConfigs.getRoom(suggestion.location));
-        movePlayer(suggestion.character, CluedoConfigs.getRoom(suggestion.location));
+        moveWeapon(suggestion.weapon, Configs.getRoom(suggestion.location));
+        movePlayer(suggestion.character, Configs.getRoom(suggestion.location));
     }
 
     /**
@@ -415,10 +418,15 @@ public class Game {
      *
      * @return --- the number rolled
      */
-    public int rollDice(Character character) {
+    public int[] rollDice(Character character) {
         // e.g. two dices can roll out 2 - 12;
-        int roll = RAN.nextInt(5 * CluedoConfigs.NUM_DICE + 1) + CluedoConfigs.NUM_DICE;
-        getPlayerByCharacter(character).setRemainingSteps(roll);
+        int[] roll = new int[numDices];
+        for (int i = 0; i < numDices; i++) {
+            roll[i] = RAN.nextInt(6) + 1;
+        }
+
+        // XXX should not need this
+        // getPlayerByCharacter(character).setRemainingSteps(roll);
         return roll;
     }
 
@@ -540,10 +548,10 @@ public class Game {
 
         BOARD_STRING.append("=======Game Board=======\n");
 
-        int width = CluedoConfigs.BOARD_WIDTH + 1;
+        int width = Configs.BOARD_WIDTH + 1;
 
         // get the canvas first
-        char[] boardChars = CluedoConfigs.UI_STRING_A.toCharArray();
+        char[] boardChars = Configs.UI_STRING_A.toCharArray();
 
         // draw players by replacing his character on his position
         for (Player p : players) {

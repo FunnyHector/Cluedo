@@ -11,7 +11,7 @@ import org.junit.Test;
 import card.Character;
 import card.Location;
 import card.Weapon;
-import configs.CluedoConfigs;
+import configs.Configs;
 import game.Game;
 import game.Suggestion;
 import game.WeaponToken;
@@ -26,8 +26,8 @@ public class GameRunTest {
      */
     @Test
     public void playerCycling() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
 
             game.joinPlayer(Character.Colonel_Mustard);
             game.joinPlayer(Character.The_Reverend_Green);
@@ -56,10 +56,10 @@ public class GameRunTest {
      */
     @Test
     public void moveOptionInRoom() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
 
             for (Character c : Character.values()) {
-                Game game = new Game(numPlayers);
+                Game game = new Game(numPlayers, Configs.NUM_DICE);
 
                 for (int i = 0; i < numPlayers; i++) {
                     game.joinPlayer(Character.values()[i]);
@@ -72,14 +72,14 @@ public class GameRunTest {
                 // ============== test lounge ===============
 
                 // put the player in lounge
-                game.movePlayer(c, CluedoConfigs.LOUNGE);
+                game.movePlayer(c, Configs.LOUNGE);
                 List<Position> positions = game.getMovablePositions(c);
                 // secret passage
-                if (!positions.contains(CluedoConfigs.CONSERVATORY)) {
+                if (!positions.contains(Configs.CONSERVATORY)) {
                     fail("Should be able to go to CONSERVATORY");
                 }
                 // exit
-                Entrance exit = new Entrance(6, 18, CluedoConfigs.LOUNGE);
+                Entrance exit = new Entrance(6, 18, Configs.LOUNGE);
                 if (!positions.contains(exit)) {
                     fail("Should be able to exit lounge");
                 }
@@ -91,7 +91,7 @@ public class GameRunTest {
 
                 positions = game.getMovablePositions(c);
                 // secret passage
-                if (!positions.contains(CluedoConfigs.CONSERVATORY)) {
+                if (!positions.contains(Configs.CONSERVATORY)) {
                     fail("Should be able to go to CONSERVATORY");
                 }
                 // exit
@@ -104,17 +104,17 @@ public class GameRunTest {
                 // ==================try ball room again=================
 
                 // put the player in lounge
-                game.movePlayer(c, CluedoConfigs.BALL_ROOM);
+                game.movePlayer(c, Configs.BALL_ROOM);
                 positions = game.getMovablePositions(c);
                 // no secret passage, choose a room to test
-                if (positions.contains(CluedoConfigs.HALL)) {
+                if (positions.contains(Configs.HALL)) {
                     fail("Should not be able to go to HALL");
                 }
                 // there are 4 exits in ball room
-                Entrance exit_1 = new Entrance(7, 5, CluedoConfigs.BALL_ROOM);
-                Entrance exit_2 = new Entrance(9, 8, CluedoConfigs.BALL_ROOM);
-                Entrance exit_3 = new Entrance(14, 8, CluedoConfigs.BALL_ROOM);
-                Entrance exit_4 = new Entrance(16, 5, CluedoConfigs.BALL_ROOM);
+                Entrance exit_1 = new Entrance(7, 5, Configs.BALL_ROOM);
+                Entrance exit_2 = new Entrance(9, 8, Configs.BALL_ROOM);
+                Entrance exit_3 = new Entrance(14, 8, Configs.BALL_ROOM);
+                Entrance exit_4 = new Entrance(16, 5, Configs.BALL_ROOM);
                 if (!positions.contains(exit_1)) {
                     fail("Should be able to exit lounge from (7,5)");
                 }
@@ -161,10 +161,10 @@ public class GameRunTest {
      */
     @Test
     public void moveOptionOnTile() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
 
             for (Character c : Character.values()) {
-                Game game = new Game(numPlayers);
+                Game game = new Game(numPlayers, Configs.NUM_DICE);
 
                 for (int i = 0; i < numPlayers; i++) {
                     game.joinPlayer(Character.values()[i]);
@@ -214,10 +214,10 @@ public class GameRunTest {
      */
     @Test
     public void moveOptionOnEntrance() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
 
             for (Character c : Character.values()) {
-                Game game = new Game(numPlayers);
+                Game game = new Game(numPlayers, Configs.NUM_DICE);
 
                 for (int i = 0; i < numPlayers; i++) {
                     game.joinPlayer(Character.values()[i]);
@@ -230,7 +230,7 @@ public class GameRunTest {
                 // ============== test kitchen's entrance ===============
 
                 // put the player in kitchen
-                Entrance entrToKit = new Entrance(4, 7, CluedoConfigs.KITCHEN);
+                Entrance entrToKit = new Entrance(4, 7, Configs.KITCHEN);
                 Tile southTile = new Tile(4, 8);
                 Tile eastTile = new Tile(5, 7);
                 Tile westTile = new Tile(3, 7);
@@ -244,14 +244,14 @@ public class GameRunTest {
                     }
                 }
                 // enter kitchen
-                if (!positions.contains(CluedoConfigs.KITCHEN)) {
+                if (!positions.contains(Configs.KITCHEN)) {
                     fail("Should be able to go into KITCHEN");
                 }
                 assertEquals("In lounge there should be 4 positions to move to", 4,
                         positions.size());
 
                 // put another player in kitchen, that should block nothing
-                game.movePlayer(c.nextCharacter(), CluedoConfigs.KITCHEN);
+                game.movePlayer(c.nextCharacter(), Configs.KITCHEN);
                 positions = game.getMovablePositions(c);
                 // test 3 directions
                 for (Tile t : Arrays.asList(southTile, eastTile, westTile)) {
@@ -260,7 +260,7 @@ public class GameRunTest {
                     }
                 }
                 // enter kitchen
-                if (!positions.contains(CluedoConfigs.KITCHEN)) {
+                if (!positions.contains(Configs.KITCHEN)) {
                     fail("Should be able to go into KITCHEN");
                 }
                 assertEquals("In lounge there should be 4 positions to move to", 4,
@@ -274,8 +274,8 @@ public class GameRunTest {
      */
     @Test
     public void validMove() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -305,8 +305,8 @@ public class GameRunTest {
      */
     @Test
     public void boardBoundary() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -336,8 +336,8 @@ public class GameRunTest {
      */
     @Test
     public void ghostThroughWall() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -352,7 +352,7 @@ public class GameRunTest {
             game.movePlayer(currentPlayer, testTile);
             List<Position> positions = game.getMovablePositions(currentPlayer);
 
-            if (positions.contains(CluedoConfigs.KITCHEN)) {
+            if (positions.contains(Configs.KITCHEN)) {
                 fail("Should be able to ghost through wall to kitchen");
             }
             assertEquals("There should be 3 positions to move to", 3, positions.size());
@@ -364,8 +364,8 @@ public class GameRunTest {
      */
     @Test
     public void correctAccusationWins() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -396,8 +396,8 @@ public class GameRunTest {
      */
     @Test
     public void wrongAccuserOut() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -430,8 +430,8 @@ public class GameRunTest {
      */
     @Test
     public void lastSurvivorWin() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -463,8 +463,8 @@ public class GameRunTest {
 
     @Test
     public void suggestionMovesCharacterAndWeapon() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -489,7 +489,7 @@ public class GameRunTest {
             for (Character ch : Character.values()) {
                 if (ch == c) {
                     if (!game.getPlayerByCharacter(ch).getPosition()
-                            .equals(CluedoConfigs.getRoom(l))) {
+                            .equals(Configs.getRoom(l))) {
                         fail("Player mentioned in suggestion should be moved in the mentioned room");
                     }
                 }
@@ -497,7 +497,7 @@ public class GameRunTest {
 
             for (WeaponToken wt : game.getWeaponTokens()) {
                 if (wt.getToken() == w) {
-                    if (!wt.getRoom().equals(CluedoConfigs.getRoom(l))) {
+                    if (!wt.getRoom().equals(Configs.getRoom(l))) {
                         fail("weapon mentioned in suggestion should be moved in the mentioned room");
                     }
                 }

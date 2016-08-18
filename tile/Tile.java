@@ -1,6 +1,6 @@
 package tile;
 
-import configs.CluedoConfigs;
+import configs.Configs;
 import game.GameError;
 
 /**
@@ -30,8 +30,8 @@ public class Tile extends Position {
         super();
 
         // sanity check
-        int width = CluedoConfigs.BOARD_WIDTH;
-        int height = CluedoConfigs.BOARD_HEIGHT;
+        int width = Configs.BOARD_WIDTH;
+        int height = Configs.BOARD_HEIGHT;
         if (x < 0 || x > width - 1 || y < 0 || y > height - 1) {
             throw new GameError("Invalid Coordinates");
         }

@@ -1,5 +1,7 @@
 package card;
 
+import game.GameError;
+
 /**
  * This enum class represents a Weapon card in Cluedo game. There are six weapons,
  * Candlestick, Dagger, Lead Pipe, Revolver, Rope, and Spanner.<br>
@@ -43,6 +45,41 @@ public enum Weapon implements Card {
         default:
         }
         return s;
+    }
+
+    /**
+     * Return the size of this Enumeration class, i.e. how many weapons inside.
+     * 
+     * @return --- the size of this Enumeration class, i.e. how many weapons inside.
+     */
+    public int size() {
+        return 6;
+    }
+
+    /**
+     * Get the weapon whose ordinal is index.
+     * 
+     * @param index
+     *            --- the index (ordinal)
+     * @return --- the weapon at the given index (ordinal)
+     */
+    public Weapon get(int index) {
+        switch (index) {
+        case 0:
+            return Candlestick;
+        case 1:
+            return Dagger;
+        case 2:
+            return Lead_Pipe;
+        case 3:
+            return Revolver;
+        case 4:
+            return Rope;
+        case 5:
+            return Spanner;
+        default:
+            throw new GameError("Invalid index.");
+        }
     }
 
 }

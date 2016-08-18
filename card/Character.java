@@ -1,5 +1,7 @@
 package card;
 
+import game.GameError;
+
 /**
  * This enum class represents a character card in Cluedo game. There are six characters,
  * Miss Scarlet, Colonel Mustard, Mrs White, The Reverend Green, Mrs Peacock, and
@@ -71,4 +73,38 @@ public enum Character implements Card {
         return s;
     }
 
+    /**
+     * Return the size of this Enumeration class, i.e. how many characters inside.
+     * 
+     * @return --- the size of this Enumeration class, i.e. how many characters inside.
+     */
+    public static int size() {
+        return 6;
+    }
+
+    /**
+     * Get the character whose ordinal is index.
+     * 
+     * @param index
+     *            --- the index (ordinal)
+     * @return --- the character at the given index (ordinal)
+     */
+    public static Character get(int index) {
+        switch (index) {
+        case 0:
+            return Miss_Scarlet;
+        case 1:
+            return Colonel_Mustard;
+        case 2:
+            return Mrs_White;
+        case 3:
+            return The_Reverend_Green;
+        case 4:
+            return Mrs_Peacock;
+        case 5:
+            return Professor_Plum;
+        default:
+            throw new GameError("Invalid index.");
+        }
+    }
 }

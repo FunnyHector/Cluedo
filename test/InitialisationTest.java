@@ -6,7 +6,7 @@ import card.Card;
 import card.Character;
 import card.Location;
 import card.Weapon;
-import configs.CluedoConfigs;
+import configs.Configs;
 import game.Game;
 import game.GameError;
 import game.Player;
@@ -26,8 +26,8 @@ public class InitialisationTest {
      */
     @Test
     public void numPlayers() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
 
             for (int i = 0; i < numPlayers; i++) {
                 Character c = Character.values()[i];
@@ -51,10 +51,8 @@ public class InitialisationTest {
     @Test
     public void validTile() {
 
-        int[] xCoords = { -1, -5, 5, CluedoConfigs.BOARD_WIDTH,
-                CluedoConfigs.BOARD_WIDTH + 1 };
-        int[] yCoords = { 5, -5, -1, CluedoConfigs.BOARD_WIDTH,
-                CluedoConfigs.BOARD_WIDTH + 1 };
+        int[] xCoords = { -1, -5, 5, Configs.BOARD_WIDTH, Configs.BOARD_WIDTH + 1 };
+        int[] yCoords = { 5, -5, -1, Configs.BOARD_WIDTH, Configs.BOARD_WIDTH + 1 };
 
         for (int i = 0; i < xCoords.length; i++) {
             try {
@@ -71,7 +69,7 @@ public class InitialisationTest {
      */
     @Test
     public void validDiceRoll() {
-        Game game = new Game(3);
+        Game game = new Game(3, Configs.NUM_DICE);
         game.joinPlayer(Character.Miss_Scarlet);
         game.joinPlayer(Character.Mrs_White);
         game.joinPlayer(Character.Mrs_Peacock);
@@ -79,13 +77,15 @@ public class InitialisationTest {
         game.dealCard();
         game.setPlayerMoveFirst();
 
-        int diceRoll;
+        int[] diceRoll;
         // let's roll...100 times...
         for (int i = 0; i < 100; i++) {
             diceRoll = game.rollDice(game.getCurrentPlayer());
-
-            if (diceRoll < CluedoConfigs.NUM_DICE
-                    || diceRoll > CluedoConfigs.NUM_DICE * 6) {
+            int total = 0;
+            for (int j = 0; j < diceRoll.length; j++) {
+                total += diceRoll[i];
+            }
+            if (total < Configs.NUM_DICE || total > Configs.NUM_DICE * 6) {
                 fail("Strange dice!!!");
             }
         }
@@ -97,8 +97,8 @@ public class InitialisationTest {
      */
     @Test
     public void choosingCharacter() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
 
             game.joinPlayer(Character.Miss_Scarlet);
             game.joinPlayer(Character.Mrs_White);
@@ -125,8 +125,8 @@ public class InitialisationTest {
      */
     @Test
     public void creatSolution() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
 
             List<Player> players = new ArrayList<>();
 
@@ -170,8 +170,8 @@ public class InitialisationTest {
      */
     @Test
     public void dealingCards() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
 
             List<Player> players = new ArrayList<>();
 
@@ -233,8 +233,8 @@ public class InitialisationTest {
      */
     @Test
     public void noDuplicateCards() {
-        for (int numPlayers = CluedoConfigs.MIN_PLAYER; numPlayers <= CluedoConfigs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers);
+        for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             List<Player> players = new ArrayList<>();
             Set<Card> cardPile = new HashSet<>();
             for (int i = 0; i < numPlayers; i++) {

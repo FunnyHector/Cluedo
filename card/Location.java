@@ -1,5 +1,7 @@
 package card;
 
+import game.GameError;
+
 /**
  * This enum class represents a Room card in Cluedo game. There are nine rooms, Kitchen,
  * Ball room, Conservatory, Billard Room, Library, Study, Hall, Lounge, and Dining
@@ -22,5 +24,46 @@ public enum Location implements Card {
     @Override
     public char toStringOnBoard() {
         return ' ';
+    }
+
+    /**
+     * Return the size of this Enumeration class, i.e. how many locations inside.
+     * 
+     * @return --- the size of this Enumeration class, i.e. how many locations inside.
+     */
+    public int size() {
+        return 9;
+    }
+
+    /**
+     * Get the location whose ordinal is index.
+     * 
+     * @param index
+     *            --- the index (ordinal)
+     * @return --- the location at the given index (ordinal)
+     */
+    public Location get(int index) {
+        switch (index) {
+        case 0:
+            return Kitchen;
+        case 1:
+            return Ball_room;
+        case 2:
+            return Conservatory;
+        case 3:
+            return Billard_Room;
+        case 4:
+            return Library;
+        case 5:
+            return Study;
+        case 6:
+            return Hall;
+        case 7:
+            return Lounge;
+        case 8:
+            return Dining_Room;
+        default:
+            throw new GameError("Invalid index.");
+        }
     }
 }

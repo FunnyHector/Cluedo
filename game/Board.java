@@ -7,7 +7,7 @@ import tile.Position;
 import tile.Room;
 import tile.Tile;
 import card.Character;
-import configs.CluedoConfigs;
+import configs.Configs;
 
 /**
  * This class represents a Cluedo game board.
@@ -33,9 +33,9 @@ public class Board {
      */
     public Board() {
 
-        String boardString = CluedoConfigs.BOARD_STRING;
-        int height = CluedoConfigs.BOARD_HEIGHT;
-        int width = CluedoConfigs.BOARD_WIDTH;
+        String boardString = Configs.BOARD_STRING;
+        int height = Configs.BOARD_HEIGHT;
+        int width = Configs.BOARD_WIDTH;
 
         board = new Position[height][width];
         int index = 0; // index to track chars
@@ -66,31 +66,31 @@ public class Board {
 
             // 1-9 represents nine rooms on board.
             case '1':
-                board[y][x] = CluedoConfigs.KITCHEN;
+                board[y][x] = Configs.KITCHEN;
                 break;
             case '2':
-                board[y][x] = CluedoConfigs.BALL_ROOM;
+                board[y][x] = Configs.BALL_ROOM;
                 break;
             case '3':
-                board[y][x] = CluedoConfigs.CONSERVATORY;
+                board[y][x] = Configs.CONSERVATORY;
                 break;
             case '4':
-                board[y][x] = CluedoConfigs.BILLARD_ROOM;
+                board[y][x] = Configs.BILLARD_ROOM;
                 break;
             case '5':
-                board[y][x] = CluedoConfigs.LIBRARY;
+                board[y][x] = Configs.LIBRARY;
                 break;
             case '6':
-                board[y][x] = CluedoConfigs.STUDY;
+                board[y][x] = Configs.STUDY;
                 break;
             case '7':
-                board[y][x] = CluedoConfigs.HALL;
+                board[y][x] = Configs.HALL;
                 break;
             case '8':
-                board[y][x] = CluedoConfigs.LOUNGE;
+                board[y][x] = Configs.LOUNGE;
                 break;
             case '9':
-                board[y][x] = CluedoConfigs.DINING_ROOM;
+                board[y][x] = Configs.DINING_ROOM;
                 break;
 
             /*
@@ -128,49 +128,49 @@ public class Board {
              * 'b' to room '2', and so on.
              */
             case 'a':
-                Entrance entrToKitchen = new Entrance(x, y, CluedoConfigs.KITCHEN);
+                Entrance entrToKitchen = new Entrance(x, y, Configs.KITCHEN);
                 board[y][x] = entrToKitchen;
-                CluedoConfigs.KITCHEN.addEntrances(entrToKitchen);
+                Configs.KITCHEN.addEntrances(entrToKitchen);
                 break;
             case 'b':
-                Entrance entrToBall = new Entrance(x, y, CluedoConfigs.BALL_ROOM);
+                Entrance entrToBall = new Entrance(x, y, Configs.BALL_ROOM);
                 board[y][x] = entrToBall;
-                CluedoConfigs.BALL_ROOM.addEntrances(entrToBall);
+                Configs.BALL_ROOM.addEntrances(entrToBall);
                 break;
             case 'c':
-                Entrance entrToCSVY = new Entrance(x, y, CluedoConfigs.CONSERVATORY);
+                Entrance entrToCSVY = new Entrance(x, y, Configs.CONSERVATORY);
                 board[y][x] = entrToCSVY;
-                CluedoConfigs.CONSERVATORY.addEntrances(entrToCSVY);
+                Configs.CONSERVATORY.addEntrances(entrToCSVY);
                 break;
             case 'd':
-                Entrance entrToBLDR = new Entrance(x, y, CluedoConfigs.BILLARD_ROOM);
+                Entrance entrToBLDR = new Entrance(x, y, Configs.BILLARD_ROOM);
                 board[y][x] = entrToBLDR;
-                CluedoConfigs.BILLARD_ROOM.addEntrances(entrToBLDR);
+                Configs.BILLARD_ROOM.addEntrances(entrToBLDR);
                 break;
             case 'e':
-                Entrance entrToLBRY = new Entrance(x, y, CluedoConfigs.LIBRARY);
+                Entrance entrToLBRY = new Entrance(x, y, Configs.LIBRARY);
                 board[y][x] = entrToLBRY;
-                CluedoConfigs.LIBRARY.addEntrances(entrToLBRY);
+                Configs.LIBRARY.addEntrances(entrToLBRY);
                 break;
             case 'f':
-                Entrance entrToSTDY = new Entrance(x, y, CluedoConfigs.STUDY);
+                Entrance entrToSTDY = new Entrance(x, y, Configs.STUDY);
                 board[y][x] = entrToSTDY;
-                CluedoConfigs.STUDY.addEntrances(entrToSTDY);
+                Configs.STUDY.addEntrances(entrToSTDY);
                 break;
             case 'g':
-                Entrance entrToHall = new Entrance(x, y, CluedoConfigs.HALL);
+                Entrance entrToHall = new Entrance(x, y, Configs.HALL);
                 board[y][x] = entrToHall;
-                CluedoConfigs.HALL.addEntrances(entrToHall);
+                Configs.HALL.addEntrances(entrToHall);
                 break;
             case 'h':
-                Entrance entrToLounge = new Entrance(x, y, CluedoConfigs.LOUNGE);
+                Entrance entrToLounge = new Entrance(x, y, Configs.LOUNGE);
                 board[y][x] = entrToLounge;
-                CluedoConfigs.LOUNGE.addEntrances(entrToLounge);
+                Configs.LOUNGE.addEntrances(entrToLounge);
                 break;
             case 'i':
-                Entrance entrToDining = new Entrance(x, y, CluedoConfigs.DINING_ROOM);
+                Entrance entrToDining = new Entrance(x, y, Configs.DINING_ROOM);
                 board[y][x] = entrToDining;
-                CluedoConfigs.DINING_ROOM.addEntrances(entrToDining);
+                Configs.DINING_ROOM.addEntrances(entrToDining);
                 break;
 
             /*
@@ -182,47 +182,47 @@ public class Board {
             case 'A':
                 Tile decoTile_A = new Tile(x, y);
                 board[y][x] = decoTile_A;
-                CluedoConfigs.KITCHEN.addDecoTiles(decoTile_A);
+                Configs.KITCHEN.addDecoTiles(decoTile_A);
                 break;
             case 'B':
                 Tile decoTile_B = new Tile(x, y);
                 board[y][x] = decoTile_B;
-                CluedoConfigs.BALL_ROOM.addDecoTiles(decoTile_B);
+                Configs.BALL_ROOM.addDecoTiles(decoTile_B);
                 break;
             case 'C':
                 Tile decoTile_C = new Tile(x, y);
                 board[y][x] = decoTile_C;
-                CluedoConfigs.CONSERVATORY.addDecoTiles(decoTile_C);
+                Configs.CONSERVATORY.addDecoTiles(decoTile_C);
                 break;
             case 'D':
                 Tile decoTile_D = new Tile(x, y);
                 board[y][x] = decoTile_D;
-                CluedoConfigs.BILLARD_ROOM.addDecoTiles(decoTile_D);
+                Configs.BILLARD_ROOM.addDecoTiles(decoTile_D);
                 break;
             case 'E':
                 Tile decoTile_E = new Tile(x, y);
                 board[y][x] = decoTile_E;
-                CluedoConfigs.LIBRARY.addDecoTiles(decoTile_E);
+                Configs.LIBRARY.addDecoTiles(decoTile_E);
                 break;
             case 'F':
                 Tile decoTile_F = new Tile(x, y);
                 board[y][x] = decoTile_F;
-                CluedoConfigs.STUDY.addDecoTiles(decoTile_F);
+                Configs.STUDY.addDecoTiles(decoTile_F);
                 break;
             case 'G':
                 Tile decoTile_G = new Tile(x, y);
                 board[y][x] = decoTile_G;
-                CluedoConfigs.HALL.addDecoTiles(decoTile_G);
+                Configs.HALL.addDecoTiles(decoTile_G);
                 break;
             case 'H':
                 Tile decoTile_H = new Tile(x, y);
                 board[y][x] = decoTile_H;
-                CluedoConfigs.LOUNGE.addDecoTiles(decoTile_H);
+                Configs.LOUNGE.addDecoTiles(decoTile_H);
                 break;
             case 'I':
                 Tile decoTile_I = new Tile(x, y);
                 board[y][x] = decoTile_I;
-                CluedoConfigs.DINING_ROOM.addDecoTiles(decoTile_I);
+                Configs.DINING_ROOM.addDecoTiles(decoTile_I);
                 break;
 
             default:
@@ -319,7 +319,7 @@ public class Board {
         }
         Tile playerTile = (Tile) playerPos;
         // boundary check
-        if (playerTile.y + 1 > CluedoConfigs.BOARD_HEIGHT - 1) {
+        if (playerTile.y + 1 > Configs.BOARD_HEIGHT - 1) {
             return null;
         }
         // this method should not return a Room
@@ -349,7 +349,7 @@ public class Board {
         }
         Tile playerTile = (Tile) playerPos;
         // boundary check
-        if (playerTile.x + 1 > CluedoConfigs.BOARD_WIDTH - 1) {
+        if (playerTile.x + 1 > Configs.BOARD_WIDTH - 1) {
             return null;
         }
         // this method should not return a Room
@@ -445,7 +445,7 @@ public class Board {
         if (playerPos instanceof Room) {
             Room room = (Room) playerPos;
             if (room.hasSecPas()) {
-                return CluedoConfigs.getRoom(room.getSecPasTo());
+                return Configs.getRoom(room.getSecPasTo());
             }
         }
         return null;
