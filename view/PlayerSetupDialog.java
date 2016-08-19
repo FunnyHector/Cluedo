@@ -25,6 +25,10 @@ import ui.GUIClient;
 
 public class PlayerSetupDialog extends JDialog {
 
+    public static final Dimension PIC_DIMENSION = new Dimension(
+            PlayerPanelCanvas.PROFILE_IMG[0].getIconWidth(),
+            PlayerPanelCanvas.PROFILE_IMG[0].getIconHeight());
+
     public PlayerSetupDialog(GUIClient parent, Window windowForComponent, String string) {
         super(windowForComponent, string);
 
@@ -36,14 +40,16 @@ public class PlayerSetupDialog extends JDialog {
             protected void paintComponent(Graphics g) {
                 for (JRadioButton b : rButtonList) {
                     if (b.isSelected()) {
-                        g.drawImage(PlayerPanelCanvas.PROFILE_IMG[Integer
-                                .parseInt(b.getActionCommand())], 0, 0, null);
+                        g.drawImage(
+                                PlayerPanelCanvas.PROFILE_IMG[Integer
+                                        .parseInt(b.getActionCommand())].getImage(),
+                                0, 0, this);
                         break;
                     }
                 }
             }
         };
-        cardDisplay.setPreferredSize(new Dimension(230, 330));
+        cardDisplay.setPreferredSize(PIC_DIMENSION);
         // this prevents a bug where the component won't be drawn until it is resized.
         cardDisplay.setVisible(true);
 

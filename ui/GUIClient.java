@@ -72,24 +72,7 @@ public class GUIClient extends JFrame implements ActionListener, KeyListener {
 
     private static final String IMAGE_PATH = "resources/";
 
-    public static final Image[] CHARACTER_IMG = {
-            loadImage("Character_Miss_Scarlet.png"),
-            loadImage("Character_Colonel_Mustard.png"),
-            loadImage("Character_Mrs_White.png"),
-            loadImage("Character_The_Reverend_Green.png"),
-            loadImage("Character_Mrs_Peacock.png"),
-            loadImage("Character_Professor_Plum.png") };
 
-    public static final Image[] Weapon_IMAGES = { loadImage("Weapon_Candlestick.png"),
-            loadImage("Weapon_Dagger.png"), loadImage("Weapon_Lead_Pipe.png"),
-            loadImage("Weapon_Revolver.png"), loadImage("Weapon_Rope.png"),
-            loadImage("Weapon_Spanner.png") };
-
-    public static final Image[] Location_IMAGES = { loadImage("Location_Kitchen.png"),
-            loadImage("Location_Ball_room.png"), loadImage("Location_Conservatory.png"),
-            loadImage("Location_Billard_Room.png"), loadImage("Location_Library.png"),
-            loadImage("Location_Study.png"), loadImage("Location_Hall.png"),
-            loadImage("Location_Lounge.png"), loadImage("Location_Dining_Room.png") };
 
     public static final Image INIT_SCREEN = loadImage("Initial_Screen.png");
 
@@ -308,6 +291,10 @@ public class GUIClient extends JFrame implements ActionListener, KeyListener {
 
     public void setNumDices(int numDices) {
         this.numDices = numDices;
+    }
+    
+    public int getNumDices() {
+        return numDices;
     }
 
     public void setNobrainerMode(boolean nobrainer) {
