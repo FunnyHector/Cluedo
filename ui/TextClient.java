@@ -62,7 +62,7 @@ public class TextClient {
         // set how many players
         System.out.println("How many players?");
         int numPlayers = parseInt(Configs.MIN_PLAYER, Configs.MAX_PLAYER);
-        Game game = new Game(numPlayers, Configs.NUM_DICE);
+        Game game = new Game(numPlayers, Configs.NUM_DICE, false);
 
         // let players choose which character to play with
         int playerIndex = 0;
@@ -137,7 +137,7 @@ public class TextClient {
             int[] roll = game.rollDice(currentPlayer);
             int total = 0;
             for (int i = 0; i < roll.length; i++) {
-                total += roll[i];
+                total += (roll[i] + 1);
             }
             System.out.println("You rolled " + total + ".");
             game.setRemainingSteps(currentPlayer, total);
@@ -343,7 +343,7 @@ public class TextClient {
         }
 
         Suggestion suggestion = new Suggestion(suspect, weapon, location);
-        game.makeSuggestion(suggestion);
+        game.moveTokensInvolvedInSuggestion(suggestion);
 
         // now the player has made a suggestion
         System.out.println(

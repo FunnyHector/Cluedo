@@ -14,10 +14,10 @@ import card.Weapon;
 import configs.Configs;
 import game.Game;
 import game.Suggestion;
-import game.WeaponToken;
 import tile.Entrance;
 import tile.Position;
 import tile.Tile;
+import view.token.WeaponToken;
 
 public class GameRunTest {
 
@@ -27,7 +27,7 @@ public class GameRunTest {
     @Test
     public void playerCycling() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
 
             game.joinPlayer(Character.Colonel_Mustard);
             game.joinPlayer(Character.The_Reverend_Green);
@@ -59,7 +59,7 @@ public class GameRunTest {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
 
             for (Character c : Character.values()) {
-                Game game = new Game(numPlayers, Configs.NUM_DICE);
+                Game game = new Game(numPlayers, Configs.NUM_DICE, false);
 
                 for (int i = 0; i < numPlayers; i++) {
                     game.joinPlayer(Character.values()[i]);
@@ -164,7 +164,7 @@ public class GameRunTest {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
 
             for (Character c : Character.values()) {
-                Game game = new Game(numPlayers, Configs.NUM_DICE);
+                Game game = new Game(numPlayers, Configs.NUM_DICE, false);
 
                 for (int i = 0; i < numPlayers; i++) {
                     game.joinPlayer(Character.values()[i]);
@@ -217,7 +217,7 @@ public class GameRunTest {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
 
             for (Character c : Character.values()) {
-                Game game = new Game(numPlayers, Configs.NUM_DICE);
+                Game game = new Game(numPlayers, Configs.NUM_DICE, false);
 
                 for (int i = 0; i < numPlayers; i++) {
                     game.joinPlayer(Character.values()[i]);
@@ -275,7 +275,7 @@ public class GameRunTest {
     @Test
     public void validMove() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -306,7 +306,7 @@ public class GameRunTest {
     @Test
     public void boardBoundary() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -337,7 +337,7 @@ public class GameRunTest {
     @Test
     public void ghostThroughWall() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -365,7 +365,7 @@ public class GameRunTest {
     @Test
     public void correctAccusationWins() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -397,7 +397,7 @@ public class GameRunTest {
     @Test
     public void wrongAccuserOut() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -431,7 +431,7 @@ public class GameRunTest {
     @Test
     public void lastSurvivorWin() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -464,7 +464,7 @@ public class GameRunTest {
     @Test
     public void suggestionMovesCharacterAndWeapon() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
             for (int i = 0; i < numPlayers; i++) {
                 game.joinPlayer(Character.values()[i]);
             }
@@ -484,7 +484,7 @@ public class GameRunTest {
             Location l = Location.values()[ran.nextInt(Location.values().length)];
             Suggestion randomAccusation = new Suggestion(c, w, l);
 
-            game.makeSuggestion(randomAccusation);
+            game.moveTokensInvolvedInSuggestion(randomAccusation);
 
             for (Character ch : Character.values()) {
                 if (ch == c) {
@@ -497,7 +497,8 @@ public class GameRunTest {
 
             for (WeaponToken wt : game.getWeaponTokens()) {
                 if (wt.getToken() == w) {
-                    if (!wt.getRoom().equals(Configs.getRoom(l))) {
+                    if (!Configs.getRoom(wt.getRoomTile().getRoom())
+                            .equals(Configs.getRoom(l))) {
                         fail("weapon mentioned in suggestion should be moved in the mentioned room");
                     }
                 }

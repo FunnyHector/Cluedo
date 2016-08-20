@@ -114,6 +114,7 @@ public class PlayerSetupDialog extends JDialog {
 
             for (JRadioButton b : rButtonList) {
                 if (b.isSelected()) {
+                    selectedCharacters.add(Integer.parseInt(b.getActionCommand()));
 
                     if (confirm.getText().equals("Start")) {
                         PlayerSetupDialog.this.dispose();
@@ -129,7 +130,6 @@ public class PlayerSetupDialog extends JDialog {
                         parent.startGame();
                     }
 
-                    selectedCharacters.add(Integer.parseInt(b.getActionCommand()));
                     b.setSelected(false);
                     b.setEnabled(false);
                     confirm.setEnabled(false);

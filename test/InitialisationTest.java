@@ -27,7 +27,7 @@ public class InitialisationTest {
     @Test
     public void numPlayers() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
 
             for (int i = 0; i < numPlayers; i++) {
                 Character c = Character.values()[i];
@@ -69,7 +69,7 @@ public class InitialisationTest {
      */
     @Test
     public void validDiceRoll() {
-        Game game = new Game(3, Configs.NUM_DICE);
+        Game game = new Game(3, Configs.NUM_DICE, false);
         game.joinPlayer(Character.Miss_Scarlet);
         game.joinPlayer(Character.Mrs_White);
         game.joinPlayer(Character.Mrs_Peacock);
@@ -98,7 +98,7 @@ public class InitialisationTest {
     @Test
     public void choosingCharacter() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
 
             game.joinPlayer(Character.Miss_Scarlet);
             game.joinPlayer(Character.Mrs_White);
@@ -126,7 +126,7 @@ public class InitialisationTest {
     @Test
     public void creatSolution() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
 
             List<Player> players = new ArrayList<>();
 
@@ -171,7 +171,7 @@ public class InitialisationTest {
     @Test
     public void dealingCards() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
 
             List<Player> players = new ArrayList<>();
 
@@ -234,7 +234,7 @@ public class InitialisationTest {
     @Test
     public void noDuplicateCards() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE);
+            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
             List<Player> players = new ArrayList<>();
             Set<Card> cardPile = new HashSet<>();
             for (int i = 0; i < numPlayers; i++) {

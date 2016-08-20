@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -18,9 +19,14 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 
 import card.Character;
 import card.Weapon;
+import tile.Position;
+import tile.Room;
 import card.Location;
 import ui.GUIClient;
 
@@ -68,13 +74,19 @@ public class SuggestionDialog extends JDialog {
 
         JPanel characterPanel = new JPanel();
         characterPanel.setLayout(new BoxLayout(characterPanel, BoxLayout.Y_AXIS));
-        characterPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        characterPanel.setBorder(BorderFactory
+                .createTitledBorder(
+                        BorderFactory.createCompoundBorder(
+                                BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
+                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
+                        "Who?", TitledBorder.LEFT, TitledBorder.TOP));
 
         List<JRadioButton> rButtonList = new ArrayList<>();
 
         JLabel cardDisplay = new JLabel(PlayerPanelCanvas.CHARACTER_IMG[0]);
 
         cardDisplay.setPreferredSize(CARD_DIMENSION);
+        cardDisplay.setAlignmentY(CENTER_ALIGNMENT);
         // this prevents a bug where the component won't be drawn until it is resized.
         cardDisplay.setVisible(true);
 
@@ -82,6 +94,7 @@ public class SuggestionDialog extends JDialog {
         ButtonGroup radioButtonGroup = new ButtonGroup();
         JPanel radioButtonsPanel = new JPanel();
         radioButtonsPanel.setLayout(new BoxLayout(radioButtonsPanel, BoxLayout.Y_AXIS));
+        radioButtonsPanel.setAlignmentY(CENTER_ALIGNMENT);
 
         ActionListener al = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -99,6 +112,7 @@ public class SuggestionDialog extends JDialog {
             JRadioButton rButton = new JRadioButton(c.toString(), false);
             rButton.setActionCommand(String.valueOf(i));
             rButton.addActionListener(al);
+            rButton.setAlignmentX(LEFT_ALIGNMENT);
             if (i == 0) {
                 rButton.setSelected(true);
             }
@@ -167,13 +181,20 @@ public class SuggestionDialog extends JDialog {
         JPanel weaponPanel = new JPanel();
 
         weaponPanel.setLayout(new BoxLayout(weaponPanel, BoxLayout.Y_AXIS));
-        weaponPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        weaponPanel.setBorder(BorderFactory
+                .createTitledBorder(
+                        BorderFactory.createCompoundBorder(
+                                BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
+                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
+                        "...commited crime with weapon?", TitledBorder.CENTER,
+                        TitledBorder.TOP));
 
         List<JRadioButton> rButtonList = new ArrayList<>();
 
         JLabel cardDisplay = new JLabel(PlayerPanelCanvas.WEAPON_IMG[0]);
 
         cardDisplay.setPreferredSize(CARD_DIMENSION);
+        cardDisplay.setAlignmentY(CENTER_ALIGNMENT);
         // this prevents a bug where the component won't be drawn until it is resized.
         cardDisplay.setVisible(true);
 
@@ -181,6 +202,7 @@ public class SuggestionDialog extends JDialog {
         ButtonGroup radioButtonGroup = new ButtonGroup();
         JPanel radioButtonsPanel = new JPanel();
         radioButtonsPanel.setLayout(new BoxLayout(radioButtonsPanel, BoxLayout.Y_AXIS));
+        radioButtonsPanel.setAlignmentY(CENTER_ALIGNMENT);
 
         ActionListener al = new ActionListener() {
 
@@ -199,6 +221,7 @@ public class SuggestionDialog extends JDialog {
             JRadioButton rButton = new JRadioButton(w.toString(), false);
             rButton.setActionCommand(String.valueOf(i));
             rButton.addActionListener(al);
+            rButton.setAlignmentX(LEFT_ALIGNMENT);
             if (i == 0) {
                 rButton.setSelected(true);
             }
@@ -267,13 +290,19 @@ public class SuggestionDialog extends JDialog {
         JPanel locationPanel = new JPanel();
 
         locationPanel.setLayout(new BoxLayout(locationPanel, BoxLayout.Y_AXIS));
-        locationPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        locationPanel.setBorder(BorderFactory
+                .createTitledBorder(
+                        BorderFactory.createCompoundBorder(
+                                BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
+                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
+                        "...in which room?", TitledBorder.RIGHT, TitledBorder.TOP));
 
         List<JRadioButton> rButtonList = new ArrayList<>();
 
         JLabel cardDisplay = new JLabel(PlayerPanelCanvas.LOCATION_IMG[0]);
 
         cardDisplay.setPreferredSize(CARD_DIMENSION);
+        cardDisplay.setAlignmentY(CENTER_ALIGNMENT);
         // this prevents a bug where the component won't be drawn until it is resized.
         cardDisplay.setVisible(true);
 
@@ -281,6 +310,7 @@ public class SuggestionDialog extends JDialog {
         ButtonGroup radioButtonGroup = new ButtonGroup();
         JPanel radioButtonsPanel = new JPanel();
         radioButtonsPanel.setLayout(new BoxLayout(radioButtonsPanel, BoxLayout.Y_AXIS));
+        radioButtonsPanel.setAlignmentY(CENTER_ALIGNMENT);
 
         ActionListener al = new ActionListener() {
 
@@ -299,6 +329,7 @@ public class SuggestionDialog extends JDialog {
             JRadioButton rButton = new JRadioButton(l.toString(), false);
             rButton.setActionCommand(String.valueOf(i));
             rButton.addActionListener(al);
+            rButton.setAlignmentX(LEFT_ALIGNMENT);
 
             if (i == 0) {
                 rButton.setSelected(true);
@@ -311,13 +342,26 @@ public class SuggestionDialog extends JDialog {
         }
 
         if (!isAccusation) {
-            for (JRadioButton button : rButtonList) {
 
-                // TODO get current player's room
-                // then only select that room
-                // disable other room
+            Character currentPlayer = gui.getCurrentPlayer();
+            Position pos = gui.getPlayerPosition(currentPlayer);
+            if (pos instanceof Room) {
+                Room room = (Room) pos;
 
+                Location loc = room.getRoom();
+
+                for (JRadioButton button : rButtonList) {
+                    // disable other rooms, only current room is selectable
+                    if (Integer.parseInt(button.getActionCommand()) == loc.ordinal()) {
+                        button.setEnabled(true);
+                        button.setSelected(true);
+                    } else {
+                        button.setEnabled(false);
+                        button.setSelected(false);
+                    }
+                }
             }
+
         }
 
         // the middle panel to hold radio buttons and card display

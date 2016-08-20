@@ -1,11 +1,15 @@
 package game;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import card.Location;
 import card.Weapon;
@@ -13,7 +17,10 @@ import configs.Configs;
 import tile.Entrance;
 import tile.Position;
 import tile.Room;
+import tile.RoomTile;
 import tile.Tile;
+import view.BoardCanvas;
+import view.token.WeaponToken;
 import card.Card;
 import card.Character;
 
@@ -37,16 +44,26 @@ public class Game {
     private List<Player> players;
     // after cards are evenly dealt, all remaining cards are in this list.
     private List<Card> remainingCards;
-    // all six weapon tokens as a list
-    private List<WeaponToken> weaponTokens;
+    // a random number generator
+    private static final Random RAN = new Random();
+    // all six weapon tokens as a static final array
+    private WeaponToken[] weaponTokens;
+
     // which character is currently acting
     private Character currentPlayer;
     // who is the winner
     private Character winner;
-    // a random number generator
-    private static final Random RAN = new Random();
     // a StringBuilder to manipulate strings
     private static StringBuilder BOARD_STRING = new StringBuilder();
+
+    // public static enum Direction {
+    // NORTH, EAST, SOUTH, WEST
+    // };
+    //
+    // public static enum MoveOption {
+    // NORTH, EAST, SOUTH, WEST, KITCHEN, BALL_ROOM, CONSERVATORY, BILLARD_ROOM, LIBRARY,
+    // STUDY, HALL, LOUNGE, DINING_ROOM
+    // };
 
     /**
      * Construct the game.
@@ -54,12 +71,12 @@ public class Game {
      * @param numPlayer
      *            --- how many (human controlled) players are playing.
      */
-    public Game(int numPlayers, int numDices) {
+    public Game(int numPlayers, int numDices, boolean isGUI) {
         if (numPlayers < Configs.MIN_PLAYER || numPlayers > Configs.MAX_PLAYER) {
             throw new GameError("Invalid number of players");
         }
 
-        board = new Board();
+        board = new Board(isGUI);
         players = new ArrayList<>(Character.values().length);
         this.numPlayers = numPlayers;
         winner = null;
@@ -81,32 +98,26 @@ public class Game {
         this.numDices = numDices;
 
         // last, put six weapons in random rooms
-        setWeapons();
+        weaponTokens = createWeaponTokens();
     }
 
     /**
      * This method randomly put six weapons in random rooms.
      */
-    private void setWeapons() {
-
-        weaponTokens = new ArrayList<>();
-        // six weapons
-        List<Weapon> weaponList = new ArrayList<>(Arrays.asList(Weapon.values()));
+    private WeaponToken[] createWeaponTokens() {
 
         // nine rooms
-        List<Room> roomList = new ArrayList<>(
-                Arrays.asList(Configs.KITCHEN, Configs.BALL_ROOM, Configs.CONSERVATORY,
-                        Configs.BILLARD_ROOM, Configs.LIBRARY, Configs.STUDY,
-                        Configs.HALL, Configs.LOUNGE, Configs.DINING_ROOM));
+        List<Location> roomList = new ArrayList<>(Arrays.asList(Location.values()));
 
-        // randomly distribute weapons
-        for (int i = 0; i < 6; i++) {
-            int weaponNo = RAN.nextInt(weaponList.size());
+        WeaponToken[] weaponTokens = new WeaponToken[Weapon.values().length];
+        for (Weapon w : Weapon.values()) {
             int roomNo = RAN.nextInt(roomList.size());
-            WeaponToken weaponToken = new WeaponToken(weaponList.remove(weaponNo),
-                    roomList.remove(roomNo));
-            weaponTokens.add(weaponToken);
+            RoomTile roomTile = board.getAvailableRoomTile(roomList.remove(roomNo));
+            WeaponToken weaponToken = new WeaponToken(
+                    BoardCanvas.WEAPON_TOKEN_IMG[w.ordinal()], w, roomTile);
+            weaponTokens[w.ordinal()] = weaponToken;
         }
+        return weaponTokens;
     }
 
     /**
@@ -285,6 +296,21 @@ public class Game {
         return board.getPosition(x, y);
     }
 
+    public RoomTile getAvailableRoomTile(Location location) {
+        return board.getAvailableRoomTile(location);
+    }
+
+    /**
+     * get the start position of given character.
+     * 
+     * @param character
+     *            --- the character
+     * @return --- the start position of this character
+     */
+    public Tile getStartPosition(Character character) {
+        return board.getStartPosition(character);
+    }
+
     /**
      * Move a character to the given position.
      * 
@@ -302,13 +328,13 @@ public class Game {
      * 
      * @param weapon
      *            --- the character to be moved
-     * @param room
-     *            --- which room to move into.
+     * @param roomTile
+     *            --- which room to move into, and on which tile is this token put
      */
-    private void moveWeapon(Weapon weapon, Room room) {
+    public void moveWeapon(Weapon weapon, RoomTile roomTile) {
         for (WeaponToken wt : weaponTokens) {
             if (wt.getToken().equals(weapon)) {
-                board.moveWeapon(wt, room);
+                board.moveWeapon(wt, roomTile);
             }
         }
     }
@@ -360,14 +386,14 @@ public class Game {
     }
 
     /**
-     * This method let current player make a suggestion. It merely just move the suspect
-     * and weapon in the given suggestion into the mentioned location.
+     * This method moves the suspect and weapon in the given suggestion into the mentioned
+     * location.
      * 
      * @param suggestion
      *            --- the suggestion
      */
-    public void makeSuggestion(Suggestion suggestion) {
-        moveWeapon(suggestion.weapon, Configs.getRoom(suggestion.location));
+    public void moveTokensInvolvedInSuggestion(Suggestion suggestion) {
+        moveWeapon(suggestion.weapon, board.getAvailableRoomTile(suggestion.location));
         movePlayer(suggestion.character, Configs.getRoom(suggestion.location));
     }
 
@@ -429,13 +455,15 @@ public class Game {
     /**
      * Let the player roll dices.
      *
-     * @return --- the number rolled
+     * @return --- an array of integer, whose length is the number of dice, and each
+     *         number is the rolled number of individual dice. Here we use 0 to 5 to
+     *         represents 1 - 6 (for simplicity when calling graphical update)
      */
     public int[] rollDice(Character character) {
         // e.g. two dices can roll out 2 - 12;
         int[] roll = new int[numDices];
         for (int i = 0; i < numDices; i++) {
-            roll[i] = RAN.nextInt(6) + 1;
+            roll[i] = RAN.nextInt(6);
         }
 
         return roll;
@@ -527,6 +555,14 @@ public class Game {
         return winner;
     }
 
+    public Board getBoard() {
+        return board;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
     /**
      * Set a player as winner.
      * 
@@ -542,7 +578,7 @@ public class Game {
      * 
      * @return --- all weapon tokens
      */
-    public List<WeaponToken> getWeaponTokens() {
+    public WeaponToken[] getWeaponTokens() {
         return weaponTokens;
     }
 
@@ -588,11 +624,11 @@ public class Game {
 
         // draw the weapon tokens by replacing its character on his position
         for (WeaponToken w : weaponTokens) {
-            Room room = w.getRoom();
-            Tile decoTile = room.getNextDecoTile();
+            RoomTile roomTile = w.getRoomTile();
+            Tile decoTile = Configs.getRoom(roomTile.getRoom()).getNextDecoTile();
             int index = decoTile.x + decoTile.y * width;
             while (boardChars[index] != ' ') {
-                decoTile = room.getNextDecoTile();
+                decoTile = Configs.getRoom(roomTile.getRoom()).getNextDecoTile();
                 index = decoTile.x + decoTile.y * width;
             }
             boardChars[index] = w.getToken().toStringOnBoard();

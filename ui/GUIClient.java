@@ -1,74 +1,51 @@
 package ui;
 
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.LayoutManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
-import java.awt.image.ImageObserver;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
+import game.Board;
 import game.Game;
 import game.GameError;
+import game.Player;
 import game.Suggestion;
+import tile.Entrance;
 import tile.Position;
+import tile.Room;
+import tile.RoomTile;
+import tile.Tile;
 import view.BoardCanvas;
 import view.CustomMenu;
 import view.NumberSetupDialog;
 import view.PlayerPanelCanvas;
 import view.PlayerSetupDialog;
 import view.SuggestionDialog;
+import view.token.CharacterToken;
+import view.token.WeaponToken;
 import card.Card;
 import card.Character;
 import card.Location;
@@ -79,6 +56,9 @@ public class GUIClient extends JFrame implements KeyListener {
     private static final String IMAGE_PATH = "resources/";
     public static final Image INIT_SCREEN = loadImage("Initial_Screen.png");
     public static final Image GAME_BOARD = loadImage("Game_Board.png");
+    public static final ImageIcon CORRECT = new ImageIcon(loadImage("Icon_Correct.png"));
+    public static final ImageIcon INCORRECT = new ImageIcon(
+            loadImage("Icon_Incorrect.png"));
 
     public static final int HEIGHT = BoardCanvas.BOARD_IMG_HEIGHT
             + BoardCanvas.PADDING_TOP + BoardCanvas.PADDING_DOWN;
@@ -110,11 +90,11 @@ public class GUIClient extends JFrame implements KeyListener {
     private boolean noBrainer;
 
     public GUIClient() {
-        initialise();
+        welcomeScreen();
     }
 
     @SuppressWarnings("serial")
-    private void initialise() {
+    private void welcomeScreen() {
 
         this.setTitle("Cluedo");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -154,7 +134,7 @@ public class GUIClient extends JFrame implements KeyListener {
     public void createNewGame(int numPlayers, int numDices) {
         this.numPlayers = numPlayers;
         this.numDices = numDices;
-        game = new Game(numPlayers, numDices);
+        game = new Game(numPlayers, numDices, true);
     }
 
     /**
@@ -240,6 +220,11 @@ public class GUIClient extends JFrame implements KeyListener {
 
     }
 
+    public void update() {
+        gameBoardPanel.update();
+        playerPanel.update();
+    }
+
     private TitledBorder creatTitledBorder(String string) {
         return BorderFactory
                 .createTitledBorder(
@@ -255,7 +240,13 @@ public class GUIClient extends JFrame implements KeyListener {
     }
 
     public void makeSuggestion(Character c, Weapon w, Location l) {
-        game.makeSuggestion(new Suggestion(c, w, l));
+        Suggestion suggestion = new Suggestion(c, w, l);
+        game.moveTokensInvolvedInSuggestion(suggestion);
+        String s = game.rejectSuggestion(suggestion);
+
+        JOptionPane.showMessageDialog(window, s, "Message from other players",
+                JOptionPane.INFORMATION_MESSAGE);
+
     }
 
     public void popUpAccusation() {
@@ -264,17 +255,77 @@ public class GUIClient extends JFrame implements KeyListener {
     }
 
     public void makeAccusation(Character c, Weapon w, Location l) {
-        game.checkAccusation(new Suggestion(c, w, l));
+        boolean isCorrect = game.checkAccusation(new Suggestion(c, w, l));
+        if (isCorrect) {
+            int choice = JOptionPane.showConfirmDialog(window,
+                    "Your accusation is correct.\nCongratulations, you are the winner!\nDo you want to play again?",
+                    "Correct", JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE, CORRECT);
 
+            if (choice == JOptionPane.OK_OPTION) {
+                setupNumPlayers();
+            }
+
+        } else {
+            JOptionPane.showMessageDialog(window,
+                    "Your accusation is WRONG, you are out!", "Incorrect",
+                    JOptionPane.ERROR_MESSAGE, INCORRECT);
+        }
     }
 
     /**
      * Let the player roll dices.
      *
-     * @return --- the number rolled
+     * @return --- an array of integer, whose length is the number of dice, and each
+     *         number is the rolled number of individual dice. Here we use 0 to 5 to
+     *         represents 1 - 6 (for simplicity when calling graphical update)
      */
     public int[] rollDice(Character character) {
         return game.rollDice(character);
+    }
+
+    /**
+     * let current player end turn.
+     */
+    public void currentPlayerEndTurn() {
+        game.currentPlayerEndTurn();
+    }
+
+    /**
+     * Move a character to the given position.
+     * 
+     * @param character
+     *            --- the character to be moved
+     * @param position
+     *            --- where to move
+     */
+    public void movePlayer(Character character, Position position) {
+
+        game.movePlayer(character, position);
+        CharacterToken[] characterTokens = gameBoardPanel.getCharacterTokens();
+
+        if (position instanceof Tile) {
+            Tile tile = (Tile) position;
+            characterTokens[character.ordinal()].moveToTile(tile);
+        } else if (position instanceof Room) {
+            Room room = (Room) position;
+            RoomTile destRoomTile = getAvailableRoomTile(room.getRoom());
+            characterTokens[character.ordinal()].setRoomTile(destRoomTile);
+        }
+    }
+
+    /**
+     * Move a weapon to the given room.
+     * 
+     * @param weapon
+     *            --- the character to be moved
+     * @param roomTile
+     *            --- which room to move into, and on which tile is this token put
+     */
+    public void moveWeapon(Weapon weapon, RoomTile roomTile) {
+        game.moveWeapon(weapon, roomTile);
+        WeaponToken[] weaponTokens = game.getWeaponTokens();
+        weaponTokens[weapon.ordinal()].setRoomTile(roomTile);
     }
 
     public int getNumPlayers() {
@@ -283,6 +334,34 @@ public class GUIClient extends JFrame implements KeyListener {
 
     public int getNumDices() {
         return numDices;
+    }
+
+    public Board getBoard() {
+        return game.getBoard();
+    }
+
+    public List<Player> getPlayers() {
+        return game.getPlayers();
+    }
+
+    /**
+     * A helper method to get the corresponding Player of given Character.
+     * 
+     * @param character
+     *            --- the given character
+     * @return
+     */
+    public Player getPlayerByCharacter(Character character) {
+        return game.getPlayerByCharacter(character);
+    }
+
+    /**
+     * Get all weapon tokens as a list
+     * 
+     * @return --- all weapon tokens
+     */
+    public WeaponToken[] getWeaponTokens() {
+        return game.getWeaponTokens();
     }
 
     /**
@@ -311,6 +390,32 @@ public class GUIClient extends JFrame implements KeyListener {
         return game.getPosition(x, y);
     }
 
+    public RoomTile getAvailableRoomTile(Location location) {
+        return game.getAvailableRoomTile(location);
+    }
+
+    /**
+     * get the start position of given character.
+     * 
+     * @param character
+     *            --- the character
+     * @return --- the start position of this character
+     */
+    public Tile getStartPosition(Character character) {
+        return game.getStartPosition(character);
+    }
+
+    /**
+     * Get the player's position.
+     * 
+     * @param character
+     *            --- the player
+     * @return --- the player's position
+     */
+    public Position getPlayerPosition(Character character) {
+        return game.getPlayerPosition(character);
+    }
+
     /**
      * Get the player who need to move.
      * 
@@ -329,6 +434,37 @@ public class GUIClient extends JFrame implements KeyListener {
      */
     public int getRemainingSteps(Character character) {
         return game.getRemainingSteps(character);
+    }
+
+    /**
+     * Set how many steps left for the player to move.
+     * 
+     * @param character
+     *            --- the player
+     * @param remainingSteps
+     *            --- how many steps left for the player to move.
+     */
+    public void setRemainingSteps(Character character, int remainingSteps) {
+        game.setRemainingSteps(character, remainingSteps);
+    }
+
+    /**
+     * This method checks the given character's position, and returns all possible
+     * positions to move to. The positions in the list returned will be of a certain
+     * order, which is: north tile -> east tile -> south tile -> west tile -> room if
+     * standing at an entrance -> exits (entrances) if in a room -> room if via the secret
+     * passage in current room. Any position that cannot be accessible will not be added
+     * in this list. In particular, a tile on which has another player standing will not
+     * be added in.<br>
+     * <br>
+     * This ensured order is to make the option menu more predictable.
+     * 
+     * @param character
+     *            --- the player
+     * @return --- a list of positions that are all movable.
+     */
+    public List<Position> getMovablePositions(Character character) {
+        return game.getMovablePositions(character);
     }
 
     @Override

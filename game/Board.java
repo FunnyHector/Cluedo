@@ -1,13 +1,18 @@
 package game;
 
+import java.awt.Point;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import tile.Entrance;
 import tile.Position;
 import tile.Room;
+import tile.RoomTile;
 import tile.Tile;
-import tile.VoidPosition;
+import view.token.WeaponToken;
 import card.Character;
+import card.Location;
 import configs.Configs;
 
 /**
@@ -29,14 +34,16 @@ public class Board {
     private static Tile peacockStart;
     private static Tile plumStart;
 
-    private static final VoidPosition NULL_POSITION = new VoidPosition();
-
     /**
      * Construct a board.
      */
-    public Board() {
-
-        String boardString = Configs.BOARD_STRING_TXT;
+    public Board(boolean isGUI) {
+        String boardString;
+        if (isGUI) {
+            boardString = Configs.BOARD_STRING_GUI;
+        } else {
+            boardString = Configs.BOARD_STRING_TXT;
+        }
         int height = Configs.BOARD_HEIGHT;
         int width = Configs.BOARD_WIDTH;
 
@@ -69,31 +76,31 @@ public class Board {
 
             // 1-9 represents nine rooms on board.
             case '1':
-                board[y][x] = Configs.KITCHEN;
+                board[y][x] = new RoomTile(Configs.KITCHEN, x, y);
                 break;
             case '2':
-                board[y][x] = Configs.BALL_ROOM;
+                board[y][x] = new RoomTile(Configs.BALL_ROOM, x, y);
                 break;
             case '3':
-                board[y][x] = Configs.CONSERVATORY;
+                board[y][x] = new RoomTile(Configs.CONSERVATORY, x, y);
                 break;
             case '4':
-                board[y][x] = Configs.BILLARD_ROOM;
+                board[y][x] = new RoomTile(Configs.BILLARD_ROOM, x, y);
                 break;
             case '5':
-                board[y][x] = Configs.LIBRARY;
+                board[y][x] = new RoomTile(Configs.LIBRARY, x, y);
                 break;
             case '6':
-                board[y][x] = Configs.STUDY;
+                board[y][x] = new RoomTile(Configs.STUDY, x, y);
                 break;
             case '7':
-                board[y][x] = Configs.HALL;
+                board[y][x] = new RoomTile(Configs.HALL, x, y);
                 break;
             case '8':
-                board[y][x] = Configs.LOUNGE;
+                board[y][x] = new RoomTile(Configs.LOUNGE, x, y);
                 break;
             case '9':
-                board[y][x] = Configs.DINING_ROOM;
+                board[y][x] = new RoomTile(Configs.DINING_ROOM, x, y);
                 break;
 
             /*
@@ -228,11 +235,6 @@ public class Board {
                 Configs.DINING_ROOM.addDecoTiles(decoTile_I);
                 break;
 
-            // this is another way of representing null. It's more convenient in GUI.
-            case 'x':
-                board[y][x] = NULL_POSITION;
-                break;
-
             default:
                 throw new GameError("Invalid board string, unknow character:"
                         + boardString.charAt(index));
@@ -278,6 +280,20 @@ public class Board {
         default:
             return null; // dead code
         }
+    }
+
+    public RoomTile getAvailableRoomTile(Location location) {
+        for (int y = 0; y < board.length; y++) {
+            for (int x = 0; x < board[0].length; x++) {
+                if (board[y][x] instanceof RoomTile) {
+                    RoomTile roomTile = (RoomTile) board[y][x];
+                    if (roomTile.getRoom() == location && !roomTile.isHoldingToken()) {
+                        return roomTile;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -487,7 +503,7 @@ public class Board {
      * @param room
      *            --- where to move to
      */
-    public void moveWeapon(WeaponToken weaponToken, Room room) {
-        weaponToken.setRoom(room);
+    public void moveWeapon(WeaponToken weaponToken, RoomTile roomTile) {
+        weaponToken.setRoomTile(roomTile);
     }
 }

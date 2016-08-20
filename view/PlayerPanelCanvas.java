@@ -17,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -28,8 +29,14 @@ import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import configs.Configs;
+import game.Player;
+import tile.Entrance;
+import tile.Position;
+import tile.Room;
+import tile.Tile;
 import ui.GUIClient;
 import card.Card;
 import card.Character;
@@ -119,16 +126,30 @@ public class PlayerPanelCanvas extends JPanel {
 
     private GUIClient gui;
 
-    private Character currentPlayer;
-
     private List<Card> remainingCards;
+    private JPanel remainingCardsPanel;
     private List<Card> cardsInHand;
+    private JPanel cardsInHandPanel;
 
-    JPanel remainingCardsPanel;
     private JLabel profileLabel;
-    private JLabel[] diceButtons;
-    private JLabel remainingSteps;
-    JPanel cardsInHandPanel;
+    private JLabel[] diceLabels;
+    private JLabel remainingStepLabel;
+
+    private JButton EnterExitRoom;
+    private JButton upButton;
+    private JButton SecretPass;
+    private JButton leftButton;
+    private JButton downButton;
+    private JButton rightButton;
+
+    private JButton rollDiceButton;
+    private JButton endTurnButton;
+    private JButton suggestionButton;
+    private JButton accusationButton;
+
+    private Character currentPlayer;
+    private int[] diceRolled = null;
+    private int remainingSteps;
 
     public PlayerPanelCanvas(GUIClient guiClient) {
 
@@ -141,37 +162,36 @@ public class PlayerPanelCanvas extends JPanel {
 
         // =================== North, remaining cards =====================
 
-        remainingCardsPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                // TODO paint the remaining cards one by one
-                // see how many he has, and draw image accordingly
-                // gaps can vary.
-
-                // and remove the below cardImage lables
-
-                // solution 2:
-                // keep JLabels, make 21 cards as static JLabels
-                // keep a list to iterate them.
-                // set tooltip text on labels to show "???(blue)(fontsize bigger)" or
-                // "cross(find a good cross character)(red)(fontsize bigger)"
-
-            }
-        };
+        remainingCardsPanel = new JPanel();
         remainingCardsPanel.setBackground(null);
         remainingCardsPanel.setOpaque(false);
-        remainingCardsPanel.setPreferredSize(new Dimension(WIDTH, SOUTH_PANEL_HEIGHT));
+        remainingCardsPanel.setPreferredSize(new Dimension(WIDTH, NORTH_PANEL_HEIGHT));
+        remainingCardsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         // createEmptyBorder
         remainingCardsPanel
                 .setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.black));
 
-        // these will be removed
-        ImageIcon cardImage_2 = CHARACTER_IMG[2];
-        remainingCardsPanel.add(new JLabel(cardImage_2));
-        remainingCardsPanel.add(new JLabel(cardImage_2));
-        remainingCardsPanel.add(new JLabel(cardImage_2));
-        remainingCardsPanel.add(new JLabel(cardImage_2));
+        JLabel text = new JLabel(new ImageIcon(loadImage("Remaining_Cards.png")),
+                SwingConstants.CENTER);
+
+        remainingCardsPanel.add(text);
+
+        // display remaining cards.
+        remainingCards = gui.getRemainingCards();
+
+        for (Card c : remainingCards) {
+            if (c instanceof Character) {
+                Character ch = (Character) c;
+                remainingCardsPanel.add(CHRACTER_LABELS[ch.ordinal()]);
+            } else if (c instanceof Weapon) {
+                Weapon we = (Weapon) c;
+                remainingCardsPanel.add(WEAPON_LABELS[we.ordinal()]);
+            } else {
+                Location lo = (Location) c;
+                remainingCardsPanel.add(LOCATION_LABELS[lo.ordinal()]);
+            }
+        }
 
         // ============== west, a player's character pic ===============
         profileLabel = new JLabel();
@@ -180,7 +200,7 @@ public class PlayerPanelCanvas extends JPanel {
                 .setPreferredSize(new Dimension(WEST_PANEL_WIDTH, CENTRE_PANEL_HEIGHT));
 
         // createEmptyBorder
-        profileLabel.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT, PADDING_LEFT,
+        profileLabel.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT, PADDING_TOP,
                 PADDING_LEFT, PADDING_LEFT, Color.black));
 
         // ============== centre, dice or dices ====================
@@ -198,19 +218,18 @@ public class PlayerPanelCanvas extends JPanel {
         diceGroup.setLayout(new BoxLayout(diceGroup, BoxLayout.Y_AXIS));
 
         // use JLabel as buttons
-        diceButtons = new JLabel[gui.getNumDices()];
-        for (int i = 0; i < diceButtons.length; i++) {
-            diceButtons[i] = new JLabel();
-            diceButtons[i].setBorder(null);
-            diceAddListener(diceButtons[i]);
-            diceGroup.add(diceButtons[i], Component.CENTER_ALIGNMENT);
+        diceLabels = new JLabel[gui.getNumDices()];
+        for (int i = 0; i < diceLabels.length; i++) {
+            diceLabels[i] = new JLabel();
+            diceLabels[i].setBorder(null);
+            diceGroup.add(diceLabels[i], Component.CENTER_ALIGNMENT);
 
             // add gaps between dices. and do not add a gap after the last dice
-            if (i != diceButtons.length - 1) {
+            if (i != diceLabels.length - 1) {
                 int gap = 0;
-                if (diceButtons.length == 2) {
+                if (diceLabels.length == 2) {
                     gap = 25;
-                } else if (diceButtons.length == 3) {
+                } else if (diceLabels.length == 3) {
                     gap = 5;
                 }
                 diceGroup.add(Box.createRigidArea(new Dimension(gap, gap)),
@@ -239,33 +258,144 @@ public class PlayerPanelCanvas extends JPanel {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 
         // first row
-        remainingSteps = new JLabel();
-        remainingSteps.setBackground(null);
-        remainingSteps.setOpaque(false);
-        remainingSteps.setAlignmentX(Component.CENTER_ALIGNMENT);
-        remainingSteps.setAlignmentY(Component.CENTER_ALIGNMENT);
+        remainingStepLabel = new JLabel();
+        remainingStepLabel.setBackground(null);
+        remainingStepLabel.setOpaque(false);
+        remainingStepLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         // createEmptyBorder
-        remainingSteps.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT,
+        remainingStepLabel.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT,
                 PADDING_LEFT, PADDING_LEFT, PADDING_LEFT, Color.RED));
 
-        // second row, another grid layout to show four direction buttons.
+        // second row, a grid layout to show four direction buttons.
         JPanel movePanel = new JPanel();
         movePanel.setBackground(null);
         movePanel.setOpaque(false);
         movePanel.setLayout(new GridLayout(2, 3));
         movePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        movePanel.setAlignmentY(Component.CENTER_ALIGNMENT);
+
         // createEmptyBorder
         movePanel.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT, PADDING_LEFT,
                 PADDING_LEFT, PADDING_LEFT, Color.RED));
 
-        // add empty JLabels to hole the place
-        movePanel.add(new JLabel());
-        movePanel.add(makeButton("↑", BUTTON_COLOUR, ARROW_BUTTON_SIZE));
-        movePanel.add(new JLabel());
-        movePanel.add(makeButton("←", BUTTON_COLOUR, ARROW_BUTTON_SIZE));
-        movePanel.add(makeButton("↓", BUTTON_COLOUR, ARROW_BUTTON_SIZE));
-        movePanel.add(makeButton("→", BUTTON_COLOUR, ARROW_BUTTON_SIZE));
+        // four direction buttons
+        EnterExitRoom = createButton("Enter Room", ARROW_BUTTON_SIZE);
+        EnterExitRoom.setEnabled(false);
+        upButton = createButton("↑", ARROW_BUTTON_SIZE);
+        SecretPass = createButton("Secret Pass", ARROW_BUTTON_SIZE);
+        SecretPass.setEnabled(false);
+        leftButton = createButton("←", ARROW_BUTTON_SIZE);
+        downButton = createButton("↓", ARROW_BUTTON_SIZE);
+        rightButton = createButton("→", ARROW_BUTTON_SIZE);
+
+        // add listener on them
+        EnterExitRoom.addActionListener(e -> {
+
+            // TODO only interact with room
+            // whenever this button is enabled, the player is standing at entrance (button
+            // text as enter room)
+            // or in a room, (button text as exit room, and pop a selection panel to
+            // choose which exit to take)
+            if (EnterExitRoom.getText().equals("Enter Room")) {
+
+                // TODO add some stuff
+
+                remainingSteps = 0;
+                gui.setRemainingSteps(currentPlayer, remainingSteps);
+
+                // TODO this make suggestion can extract as a method
+                // can make suggestion now
+                // and then pop up do you want to make accusation
+                // if yes, pop up make accusation
+                // if no end turn
+                // gui.currentPlayerEndTurn();
+
+                gui.currentPlayerEndTurn();
+            } else {
+
+                List<Entrance> entrances = gui.getBoard()
+                        .lookForExit(gui.getPlayerByCharacter(currentPlayer));
+
+                // TODO pop up a dialog to choose which room to exit
+
+                remainingSteps--;
+                gui.setRemainingSteps(currentPlayer, remainingSteps);
+                if (remainingSteps == 0) {
+                    gui.currentPlayerEndTurn();
+                }
+            }
+
+            gui.update();
+        });
+
+        upButton.addActionListener(e -> {
+
+            // TODO move up
+
+            remainingSteps--;
+            gui.setRemainingSteps(currentPlayer, remainingSteps);
+            if (remainingSteps == 0) {
+                gui.currentPlayerEndTurn();
+            }
+            gui.update();
+        });
+
+        SecretPass.addActionListener(e -> {
+
+            // TODO take the secret passage
+            // move player to there
+            // brings a suggestion
+
+            remainingSteps = 0;
+            gui.setRemainingSteps(currentPlayer, remainingSteps);
+
+            gui.currentPlayerEndTurn();
+
+            gui.update();
+        });
+
+        leftButton.addActionListener(e -> {
+
+            // TODO move left
+
+            remainingSteps--;
+            gui.setRemainingSteps(currentPlayer, remainingSteps);
+            if (remainingSteps == 0) {
+                gui.currentPlayerEndTurn();
+            }
+            gui.update();
+        });
+
+        downButton.addActionListener(e -> {
+
+            // TODO move down
+
+            remainingSteps--;
+            gui.setRemainingSteps(currentPlayer, remainingSteps);
+            if (remainingSteps == 0) {
+                gui.currentPlayerEndTurn();
+            }
+            gui.update();
+        });
+
+        rightButton.addActionListener(e -> {
+
+            // TODO move right
+
+            remainingSteps--;
+            gui.setRemainingSteps(currentPlayer, remainingSteps);
+            if (remainingSteps == 0) {
+                gui.currentPlayerEndTurn();
+            }
+            gui.update();
+        });
+
+        movePanel.add(EnterExitRoom);
+        movePanel.add(upButton);
+        movePanel.add(SecretPass);
+        movePanel.add(leftButton);
+        movePanel.add(downButton);
+        movePanel.add(rightButton);
 
         // third row, another gridLayout
         JPanel actionPanel = new JPanel();
@@ -273,144 +403,299 @@ public class PlayerPanelCanvas extends JPanel {
         actionPanel.setOpaque(false);
         actionPanel.setLayout(new GridLayout(2, 2));
         actionPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        actionPanel.setAlignmentY(Component.CENTER_ALIGNMENT);
+
         // createEmptyBorder
         actionPanel.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT, PADDING_LEFT,
                 PADDING_LEFT, PADDING_LEFT, Color.RED));
 
-        actionPanel.add(makeButton("Roll Dice", BUTTON_COLOUR, ACTION_BUTTON_SIZE));
-        actionPanel.add(makeButton("End Turn", BUTTON_COLOUR, ACTION_BUTTON_SIZE));
-        actionPanel.add(makeButton("Suggestion", BUTTON_COLOUR, ACTION_BUTTON_SIZE));
-        actionPanel.add(makeButton("Accusation", BUTTON_COLOUR, ACTION_BUTTON_SIZE));
+        rollDiceButton = createButton("Roll Dice", ACTION_BUTTON_SIZE);
+        rollDiceButton.setEnabled(false);
+        endTurnButton = createButton("End Turn", ACTION_BUTTON_SIZE);
+        suggestionButton = createButton("Suggestion", ACTION_BUTTON_SIZE);
+        suggestionButton.setEnabled(false);
+        accusationButton = createButton("Accusation", ACTION_BUTTON_SIZE);
+
+        // add listeners
+        rollDiceButton.addActionListener(e -> {
+            diceRolled = gui.rollDice(currentPlayer);
+            for (int i = 0; i < diceLabels.length; i++) {
+                if (diceRolled != null) {
+                    diceLabels[i].setIcon(DICE_IMG[diceRolled[i]]);
+                }
+            }
+            remainingSteps = 0;
+            for (int i : diceRolled) {
+                remainingSteps += (i + 1);
+            }
+            gui.setRemainingSteps(currentPlayer, remainingSteps);
+            rollDiceButton.setEnabled(false);
+            gui.update();
+        });
+
+        endTurnButton.addActionListener(e -> {
+
+            remainingSteps = 0;
+            gui.setRemainingSteps(currentPlayer, 0);
+            gui.currentPlayerEndTurn();
+            gui.update();
+        });
+
+        suggestionButton.addActionListener(e -> {
+
+            remainingSteps = 0;
+            gui.setRemainingSteps(currentPlayer, remainingSteps);
+            gui.popUpSuggestion();
+            // TODO popup do you want to make accusation
+            // if yes, pop up make accusation
+            // if no end turn
+            // gui.currentPlayerEndTurn();
+
+            gui.update();
+        });
+
+        accusationButton.addActionListener(e -> {
+            remainingSteps = 0;
+            gui.setRemainingSteps(currentPlayer, remainingSteps);
+            gui.popUpAccusation();
+            gui.currentPlayerEndTurn();
+            gui.update();
+        });
+
+        actionPanel.add(rollDiceButton);
+        actionPanel.add(endTurnButton);
+        actionPanel.add(suggestionButton);
+        actionPanel.add(accusationButton);
 
         // put them together
-        buttonPanel.add(remainingSteps);
+        buttonPanel.add(remainingStepLabel);
         buttonPanel.add(Box.createRigidArea(new Dimension(5, 5)));
         buttonPanel.add(movePanel);
         buttonPanel.add(Box.createRigidArea(new Dimension(5, 5)));
         buttonPanel.add(actionPanel);
 
-        // ================= south, cards =================
-        cardsInHandPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                // TODO paint the player's cards one by one
-                // see how many he has, and draw image accordingly
-                // gaps can vary.
-
-                // and remove the below cardImage lables
-
-            }
-        };
+        // ================= south, cards in hand =================
+        cardsInHandPanel = new JPanel();
         cardsInHandPanel.setBackground(null);
         cardsInHandPanel.setOpaque(false);
         cardsInHandPanel.setPreferredSize(new Dimension(WIDTH, SOUTH_PANEL_HEIGHT));
-
+        cardsInHandPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         // createEmptyBorder
         cardsInHandPanel
                 .setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.black));
 
-        // these will be removed
-        ImageIcon cardImage = CHARACTER_IMG[3];
-        cardsInHandPanel.add(new JLabel(cardImage));
-        cardsInHandPanel.add(new JLabel(cardImage));
-        cardsInHandPanel.add(new JLabel(cardImage));
-        cardsInHandPanel.add(new JLabel(cardImage));
+        currentPlayer = gui.getCurrentPlayer();
+        cardsInHand = gui.getPlayerByCharacter(currentPlayer).getCards();
 
-        // ================ Adding stuff ===================
+        for (Card c : cardsInHand) {
+            if (c instanceof Character) {
+                Character ch = (Character) c;
+                cardsInHandPanel.add(CHRACTER_LABELS[ch.ordinal()]);
+            } else if (c instanceof Weapon) {
+                Weapon we = (Weapon) c;
+                cardsInHandPanel.add(WEAPON_LABELS[we.ordinal()]);
+            } else {
+                Location lo = (Location) c;
+                cardsInHandPanel.add(LOCATION_LABELS[lo.ordinal()]);
+            }
+        }
+
+        // ================ Adding stuff together ===================
         this.add(remainingCardsPanel, BorderLayout.NORTH);
-        this.add(dicePanel, BorderLayout.CENTER);
         this.add(profileLabel, BorderLayout.WEST);
+        this.add(dicePanel, BorderLayout.CENTER);
         this.add(buttonPanel, BorderLayout.EAST);
         this.add(cardsInHandPanel, BorderLayout.SOUTH);
 
         this.setVisible(true);
+
+        update();
     }
+
+    // check the player's movable positions, if it contains north, enable it
+    // otherwise disable it
+
+    // if (button.getText().equals("Suggestion")) {
+    // this should not be necessary
+    // if currentPlayer is not in room, disable this button
+    // Character currentPlayer = gui.getCurrentPlayer();
+    // Position pos = gui.getPlayerPosition(currentPlayer);
+    // if (pos instanceof Room)
 
     public void update() {
 
-        // TODO is it necessary to update five panels individually?
+        // ===== North, remaining cards, No need to update during the game =======
 
-        // north: remainint cards
-
-        // west: currentPlayer
+        // ============== west, a player's character pic ===============
         currentPlayer = gui.getCurrentPlayer();
-        ImageIcon playerImage = PROFILE_IMG[currentPlayer.ordinal()];
-        profileLabel.setIcon(playerImage);
+        profileLabel.setIcon(PROFILE_IMG[currentPlayer.ordinal()]);
 
-        // centre: dices
-        int[] diceRoll = gui.rollDice(currentPlayer);
-        for (int i = 0; i < diceButtons.length; i++) {
-            diceButtons[i].setIcon(createDiceImg(diceRoll[i]));
+        // ============== centre, dice or dices ====================
+        if (remainingSteps == 0) {
+            for (int i = 0; i < diceLabels.length; i++) {
+                diceLabels[i].setIcon(null);
+            }
         }
 
-        remainingSteps
-                .setText("Remaining Steps: " + gui.getRemainingSteps(currentPlayer));
+        // ============ east, buttons panel ===================
+        valuateButtons();
 
-        // east: button panel, need to update remaining steps
+        // ================= south, cards in hand =================
+        cardsInHandPanel = new JPanel();
+        cardsInHandPanel.setBackground(null);
+        cardsInHandPanel.setOpaque(false);
+        cardsInHandPanel.setPreferredSize(new Dimension(WIDTH, SOUTH_PANEL_HEIGHT));
+        cardsInHandPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        // createEmptyBorder
+        cardsInHandPanel
+                .setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.black));
+        // cardsInHandPanel.setBorder(null);
 
-        // south: cards in hands
+        cardsInHand = gui.getPlayerByCharacter(currentPlayer).getCards();
+
+        for (Card c : cardsInHand) {
+            if (c instanceof Character) {
+                Character ch = (Character) c;
+                cardsInHandPanel.add(CHRACTER_LABELS[ch.ordinal()]);
+
+            } else if (c instanceof Weapon) {
+                Weapon we = (Weapon) c;
+                cardsInHandPanel.add(WEAPON_LABELS[we.ordinal()]);
+            } else {
+                Location lo = (Location) c;
+                cardsInHandPanel.add(LOCATION_LABELS[lo.ordinal()]);
+            }
+        }
+
+        cardsInHandPanel.setVisible(true);
+        
+        this.add(cardsInHandPanel, BorderLayout.SOUTH);
+
+        // ================ Adding stuff ===================
 
         repaint();
     }
 
-    private void diceAddListener(JLabel diceLabel) {
-        diceLabel.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-            }
+    private void valuateButtons() {
+        // the text label for displaying remaining steps
+        remainingStepLabel
+                .setText("Remaining Steps: " + gui.getRemainingSteps(currentPlayer));
 
-            @Override
-            public void mousePressed(MouseEvent e) {
-            }
+        // first if the player hasn't rolled dices, disable all buttons and return
+        if (remainingSteps == 0) {
+            EnterExitRoom.setEnabled(false);
+            upButton.setEnabled(false);
+            SecretPass.setEnabled(false);
+            leftButton.setEnabled(false);
+            downButton.setEnabled(false);
+            rightButton.setEnabled(false);
+            suggestionButton.setEnabled(false);
+            accusationButton.setEnabled(false);
+            endTurnButton.setEnabled(false);
+            rollDiceButton.setEnabled(true);
+            return;
+        }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-            }
+        // first let's disable all
+        EnterExitRoom.setEnabled(false);
+        upButton.setEnabled(false);
+        SecretPass.setEnabled(false);
+        leftButton.setEnabled(false);
+        downButton.setEnabled(false);
+        rightButton.setEnabled(false);
+        suggestionButton.setEnabled(false);
+        accusationButton.setEnabled(true);
+        endTurnButton.setEnabled(true);
 
-            @Override
-            public void mouseEntered(MouseEvent e) {
+        Player player = gui.getPlayerByCharacter(currentPlayer);
 
+        // if there are tiles in four directions
+        if (gui.getBoard().lookNorth(player) != null) {
+            // check if any other player standing there, then it's not an option
+            boolean isBlocking = false;
+            Tile tile = gui.getBoard().lookNorth(player);
+            for (Player existingPlayer : gui.getPlayers()) {
+                if (tile.equals(existingPlayer.getPosition())) {
+                    isBlocking = true;
+                }
             }
+            upButton.setEnabled(!isBlocking);
+        }
 
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                System.out.println("button pressed");
+        if (gui.getBoard().lookEast(player) != null) {
+            // check if any other player standing there, then it's not an option
+            boolean isBlocking = false;
+            Tile tile = gui.getBoard().lookEast(player);
+            for (Player existingPlayer : gui.getPlayers()) {
+                if (tile.equals(existingPlayer.getPosition())) {
+                    isBlocking = true;
+                }
             }
-        });
+            rightButton.setEnabled(!isBlocking);
+        }
+
+        if (gui.getBoard().lookSouth(player) != null) {
+            // check if any other player standing there, then it's not an option
+            boolean isBlocking = false;
+            Tile tile = gui.getBoard().lookSouth(player);
+            for (Player existingPlayer : gui.getPlayers()) {
+                if (tile.equals(existingPlayer.getPosition())) {
+                    isBlocking = true;
+                }
+            }
+            downButton.setEnabled(!isBlocking);
+        }
+
+        if (gui.getBoard().lookWest(player) != null) {
+            // check if any other player standing there, then it's not an option
+            boolean isBlocking = false;
+            Tile tile = gui.getBoard().lookWest(player);
+            for (Player existingPlayer : gui.getPlayers()) {
+                if (tile.equals(existingPlayer.getPosition())) {
+                    isBlocking = true;
+                }
+            }
+            leftButton.setEnabled(!isBlocking);
+        }
+
+        // if the player is standing at an entrance to a room
+        if (gui.getBoard().atEntranceTo(player) != null) {
+            EnterExitRoom.setText("Enter Room");
+            EnterExitRoom.setEnabled(true);
+        }
+
+        // if the player is in a room, get the exits
+        List<Entrance> entrances = gui.getBoard().lookForExit(player);
+        if (entrances != null && !entrances.isEmpty()) {
+            EnterExitRoom.setText("Exit Room");
+            EnterExitRoom.setEnabled(true);
+        }
+
+        // if the player is in a room, and there is a secret passage
+        if (gui.getBoard().lookForSecPas(player) != null) {
+            // in a room, have a secret passage
+            SecretPass.setEnabled(true);
+        }
+
+        if (gui.getRemainingSteps(currentPlayer) == 0) {
+            rollDiceButton.setEnabled(true);
+        } else {
+            rollDiceButton.setEnabled(false);
+        }
+
+        if (gui.getPlayerPosition(currentPlayer) instanceof Room) {
+            suggestionButton.setEnabled(true);
+        } else {
+            suggestionButton.setEnabled(false);
+        }
     }
 
-    private JButton makeButton(String label, Color color, Dimension dimension) {
+    private JButton createButton(String label, Dimension dimension) {
         JButton button = new JButton(label);
-        button.setBackground(color);
+        button.setBackground(BUTTON_COLOUR);
         button.setPreferredSize(dimension);
         // createEmptyBorder
         button.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT, PADDING_LEFT,
                 PADDING_LEFT, PADDING_LEFT, Color.YELLOW));
-        button.addActionListener(e -> {
-
-            // TODO add button listeners
-
-            if (button.getText().equals("↑")) {
-
-            } else if (button.getText().equals("←")) {
-
-            } else if (button.getText().equals("↓")) {
-
-            } else if (button.getText().equals("→")) {
-
-            } else if (button.getText().equals("Roll Dice")) {
-
-            } else if (button.getText().equals("End Turn")) {
-                update();
-
-            } else if (button.getText().equals("Suggestion")) {
-
-            } else if (button.getText().equals("Accusation")) {
-
-            }
-        });
-
         return button;
     }
 
@@ -470,14 +755,12 @@ public class PlayerPanelCanvas extends JPanel {
 
     }
 
-    private ImageIcon createDiceImg(int i) {
-        return DICE_IMG[i];
-    }
-
     @Override
     public void paintComponent(Graphics g) {
+        super.paintComponent(g);
         g.drawImage(PLAYER_PANEL, PADDING_LEFT, PADDING_TOP, WIDTH, HEIGHT, this);
     }
+
 }
 
 class CardLabel extends JLabel {
