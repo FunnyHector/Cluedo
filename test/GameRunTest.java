@@ -482,7 +482,7 @@ public class GameRunTest {
             Character c = Character.values()[ran.nextInt(Character.values().length)];
             Weapon w = Weapon.values()[ran.nextInt(Weapon.values().length)];
             Location l = Location.values()[ran.nextInt(Location.values().length)];
-            Suggestion randomAccusation = new Suggestion(c, l, w);
+            Suggestion randomAccusation = new Suggestion(c, w, l);
 
             game.makeSuggestion(randomAccusation);
 
@@ -520,14 +520,14 @@ public class GameRunTest {
         Character c = Character.values()[ran.nextInt(Character.values().length)];
         Weapon w = Weapon.values()[ran.nextInt(Weapon.values().length)];
         Location l = Location.values()[ran.nextInt(Location.values().length)];
-        Suggestion wrongAccusation = new Suggestion(c, l, w);
+        Suggestion wrongAccusation = new Suggestion(c, w, l);
 
         // make sure this is a wrong accusation
         while (wrongAccusation.equals(solution)) {
             c = Character.values()[ran.nextInt(Character.values().length)];
             w = Weapon.values()[ran.nextInt(Weapon.values().length)];
             l = Location.values()[ran.nextInt(Location.values().length)];
-            wrongAccusation = new Suggestion(c, l, w);
+            wrongAccusation = new Suggestion(c, w, l);
         }
 
         return wrongAccusation;

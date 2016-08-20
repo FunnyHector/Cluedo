@@ -169,7 +169,7 @@ public class Configs {
 
     
     /**
-     * a string used to construct the board.<br>
+     * a string used to construct the board in text-ui game.<br>
      * <br>
      * '0' : walkable tiles, tiles that are out of all rooms.<br>
      * ' ' : (space) represents walls and unenterable tiles.<br>
@@ -186,7 +186,7 @@ public class Configs {
      * on board, only indicates where to draw player token and weapon token. 'A' 
      * marks where to draw in room '1', 'b' to room '2', and so on.<br>
      */
-    public static final String BOARD_STRING = 
+    public static final String BOARD_STRING_TXT = 
             "         #    $         \n" +
             "       000    000       \n" + 
             " AAAA 00        00 CCCC \n" +
@@ -212,6 +212,49 @@ public class Configs {
             "  HHHH 00 GGG  00 FFFFF \n" +
             "       00 GGG  00  FFFF \n" + 
             "       !        0       \n";
+    
+    /**
+     * a string used to construct the board.<br>
+     * <br>
+     * '0' : walkable tiles, tiles that are out of all rooms.<br>
+     * 'x' : (space) represents walls and unenterable tiles.<br>
+     * 1-9 : represents nine rooms on board.<br>
+     * '!' : (shift + 1) represents Scarlet's start position.<br>
+     * '@' : (shift + 2) represents Mustard's start position.<br>
+     * '#' : (shift + 3) represents White's start position.<br>
+     * '$' : (shift + 4) represents Green's start position.<br>
+     * '%' : (shift + 5) represents Peacock's start position.<br>
+     * '^' : (shift + 6) represents Plum's start position.<br>
+     * a-i : represents entrance to each room, 'a' is entrance to room '1',
+     * 'b' to room '2', and so on.<br>
+     */
+    public static final String BOARD_STRING_GUI = 
+            "xxxxxxxxx#xxxx$xxxxxxxxx\n" +
+            "111111x0002222000x333333\n" + 
+            "111111002222222200333333\n" +
+            "111111002222222200333333\n" + 
+            "111111002222222200333333\n" +
+            "1111110b22222222b0c3333x\n" + 
+            "x1111100222222220000000%\n" +
+            "0000a000222222220000000x\n" + 
+            "x00000000b0000b000444444\n" +
+            "99999000000000000d444444\n" + 
+            "9999999900xxxxx000444444\n" +
+            "9999999900xxxxx000444444\n" + 
+            "99999999i0xxxxx000444444\n" +
+            "9999999900xxxxx00000e0dx\n" + 
+            "9999999900xxxxx00055555x\n" +
+            "9999999900xxxxx005555555\n" + 
+            "x00000i000xxxxx0e5555555\n" +
+            "@0000000000gg00005555555\n" + 
+            "x00000h0077777700055555x\n" +
+            "88888880077777700000000^\n" + 
+            "888888800777777g0f00000x\n" +
+            "888888800777777006666666\n" + 
+            "888888800777777006666666\n" +
+            "888888800777777006666666\n" + 
+            "888888x!x777777x0x666666\n";
+
     // @formatter:on
 
 }

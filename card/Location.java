@@ -31,7 +31,7 @@ public enum Location implements Card {
      * 
      * @return --- the size of this Enumeration class, i.e. how many locations inside.
      */
-    public int size() {
+    public static int size() {
         return 9;
     }
 
@@ -42,7 +42,7 @@ public enum Location implements Card {
      *            --- the index (ordinal)
      * @return --- the location at the given index (ordinal)
      */
-    public Location get(int index) {
+    public static Location get(int index) {
         switch (index) {
         case 0:
             return Kitchen;

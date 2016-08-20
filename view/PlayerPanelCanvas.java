@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.BorderLayout;
+
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Component;
@@ -15,6 +16,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -28,6 +31,12 @@ import javax.swing.JPanel;
 
 import configs.Configs;
 import ui.GUIClient;
+import card.Card;
+import card.Character;
+import card.Location;
+import card.Weapon;
+
+import static ui.GUIClient.loadImage;
 
 public class PlayerPanelCanvas extends JPanel {
 
@@ -35,90 +44,146 @@ public class PlayerPanelCanvas extends JPanel {
             .loadImage("Player_Panel_Background.png");
 
     public static final ImageIcon[] PROFILE_IMG = {
-            new ImageIcon(GUIClient.loadImage("Profile_Miss_Scarlet.png")),
-            new ImageIcon(GUIClient.loadImage("Profile_Colonel_Mustard.png")),
-            new ImageIcon(GUIClient.loadImage("Profile_Mrs_White.png")),
-            new ImageIcon(GUIClient.loadImage("Profile_The_Reverend_Green.png")),
-            new ImageIcon(GUIClient.loadImage("Profile_Mrs_Peacock.png")),
-            new ImageIcon(GUIClient.loadImage("Profile_Professor_Plum.png")) };
+            new ImageIcon(loadImage("Profile_Miss_Scarlet.png")),
+            new ImageIcon(loadImage("Profile_Colonel_Mustard.png")),
+            new ImageIcon(loadImage("Profile_Mrs_White.png")),
+            new ImageIcon(loadImage("Profile_The_Reverend_Green.png")),
+            new ImageIcon(loadImage("Profile_Mrs_Peacock.png")),
+            new ImageIcon(loadImage("Profile_Professor_Plum.png")) };
 
-    public static final ImageIcon[] DICE_IMG = {
-            new ImageIcon(GUIClient.loadImage("Dice_1.png")),
-            new ImageIcon(GUIClient.loadImage("Dice_2.png")),
-            new ImageIcon(GUIClient.loadImage("Dice_3.png")),
-            new ImageIcon(GUIClient.loadImage("Dice_4.png")),
-            new ImageIcon(GUIClient.loadImage("Dice_5.png")),
-            new ImageIcon(GUIClient.loadImage("Dice_6.png")) };
+    public static final ImageIcon[] DICE_IMG = { new ImageIcon(loadImage("Dice_1.png")),
+            new ImageIcon(loadImage("Dice_2.png")),
+            new ImageIcon(loadImage("Dice_3.png")),
+            new ImageIcon(loadImage("Dice_4.png")),
+            new ImageIcon(loadImage("Dice_5.png")),
+            new ImageIcon(loadImage("Dice_6.png")) };
 
-    public static final Image[] CHARACTER_IMG = {
-            GUIClient.loadImage("Character_Miss_Scarlet.png"),
-            GUIClient.loadImage("Character_Colonel_Mustard.png"),
-            GUIClient.loadImage("Character_Mrs_White.png"),
-            GUIClient.loadImage("Character_The_Reverend_Green.png"),
-            GUIClient.loadImage("Character_Mrs_Peacock.png"),
-            GUIClient.loadImage("Character_Professor_Plum.png") };
+    public static final ImageIcon[] CHARACTER_IMG = {
+            new ImageIcon(loadImage("Character_Miss_Scarlet.png")),
+            new ImageIcon(loadImage("Character_Colonel_Mustard.png")),
+            new ImageIcon(loadImage("Character_Mrs_White.png")),
+            new ImageIcon(loadImage("Character_The_Reverend_Green.png")),
+            new ImageIcon(loadImage("Character_Mrs_Peacock.png")),
+            new ImageIcon(loadImage("Character_Professor_Plum.png")) };
 
-    public static final Image[] Weapon_IMAGES = {
-            GUIClient.loadImage("Weapon_Candlestick.png"),
-            GUIClient.loadImage("Weapon_Dagger.png"),
-            GUIClient.loadImage("Weapon_Lead_Pipe.png"),
-            GUIClient.loadImage("Weapon_Revolver.png"),
-            GUIClient.loadImage("Weapon_Rope.png"),
-            GUIClient.loadImage("Weapon_Spanner.png") };
+    public static final CardLabel[] CHRACTER_LABELS = createCardLabel(CHARACTER_IMG,
+            Character.get(0));
 
-    public static final Image[] Location_IMAGES = {
-            GUIClient.loadImage("Location_Kitchen.png"),
-            GUIClient.loadImage("Location_Ball_room.png"),
-            GUIClient.loadImage("Location_Conservatory.png"),
-            GUIClient.loadImage("Location_Billard_Room.png"),
-            GUIClient.loadImage("Location_Library.png"),
-            GUIClient.loadImage("Location_Study.png"),
-            GUIClient.loadImage("Location_Hall.png"),
-            GUIClient.loadImage("Location_Lounge.png"),
-            GUIClient.loadImage("Location_Dining_Room.png") };
+    public static final ImageIcon[] WEAPON_IMG = {
+            new ImageIcon(loadImage("Weapon_Candlestick.png")),
+            new ImageIcon(loadImage("Weapon_Dagger.png")),
+            new ImageIcon(loadImage("Weapon_Lead_Pipe.png")),
+            new ImageIcon(loadImage("Weapon_Revolver.png")),
+            new ImageIcon(loadImage("Weapon_Rope.png")),
+            new ImageIcon(loadImage("Weapon_Spanner.png")) };
+
+    public static final CardLabel[] WEAPON_LABELS = createCardLabel(WEAPON_IMG,
+            Weapon.get(0));
+
+    public static final ImageIcon[] LOCATION_IMG = {
+            new ImageIcon(loadImage("Location_Kitchen.png")),
+            new ImageIcon(loadImage("Location_Ball_room.png")),
+            new ImageIcon(loadImage("Location_Conservatory.png")),
+            new ImageIcon(loadImage("Location_Billard_Room.png")),
+            new ImageIcon(loadImage("Location_Library.png")),
+            new ImageIcon(loadImage("Location_Study.png")),
+            new ImageIcon(loadImage("Location_Hall.png")),
+            new ImageIcon(loadImage("Location_Lounge.png")),
+            new ImageIcon(loadImage("Location_Dining_Room.png")) };
+
+    public static final CardLabel[] LOCATION_LABELS = createCardLabel(LOCATION_IMG,
+            Location.get(0));
 
     public static final int WIDTH = 700;
-    public static final int HEIGHT = 600;
-    public static final int CARD_PANEL_HEIGHT = 280;
-    public static final int UPPER_PANEL_HEIGHT = 280;
-    public static final int PROFILE_PANEL_WIDTH = 230;
-    public static final int DICE_PANEL_WIDTH = 150;
-    public static final int BUTTON_PANEL_WIDTH = 320;
+    public static final int HEIGHT = BoardCanvas.BOARD_IMG_HEIGHT;
 
-    public static final int PADDING_LEFT = 10;
-    public static final int PADDING_RIGHT = PADDING_LEFT;
-    public static final int PADDING_TOP = 20;
-    public static final int PADDING_DOWN = PADDING_LEFT;
+    public static final int SOUTH_PANEL_HEIGHT = 220;
+    public static final int NORTH_PANEL_HEIGHT = SOUTH_PANEL_HEIGHT;
+    public static final int CENTRE_PANEL_HEIGHT = HEIGHT - SOUTH_PANEL_HEIGHT
+            - NORTH_PANEL_HEIGHT;
+
+    public static final int WEST_PANEL_WIDTH = 230;
+    public static final int EAST_PANEL_WIDTH = 320;
+    public static final int CENTRE_PANEL_WIDTH = WIDTH - WEST_PANEL_WIDTH
+            - EAST_PANEL_WIDTH;
+
+    public static final int PADDING_LEFT = BoardCanvas.PADDING_LEFT;
+    public static final int PADDING_RIGHT = BoardCanvas.PADDING_RIGHT;
+    public static final int PADDING_TOP = BoardCanvas.PADDING_TOP;
+    public static final int PADDING_DOWN = BoardCanvas.PADDING_DOWN;
 
     public static final Dimension ARROW_BUTTON_SIZE = new Dimension(80, 50);
     public static final Dimension ACTION_BUTTON_SIZE = new Dimension(120, 50);
 
     public static final Color BUTTON_COLOUR = new Color(68, 170, 58);
 
-    private String textPrompt = "Test";
-
     private GUIClient gui;
+
+    private Character currentPlayer;
+
+    private List<Card> remainingCards;
+    private List<Card> cardsInHand;
+
+    JPanel remainingCardsPanel;
+    private JLabel profileLabel;
+    private JLabel[] diceButtons;
+    private JLabel remainingSteps;
+    JPanel cardsInHandPanel;
 
     public PlayerPanelCanvas(GUIClient guiClient) {
 
         this.gui = guiClient;
+        remainingCards = gui.getRemainingCards();
+        // cardsInHand = new ArrayList<>();
 
         // ================== BorderLayout =====================
         this.setLayout(new BorderLayout(5, 5));
 
-        // ============== west, a player's character pic ===============
-        ImageIcon playerImage = PROFILE_IMG[1];
-        JLabel playerLabel = new JLabel(playerImage);
-        playerLabel.setOpaque(false);
-        playerLabel
-                .setPreferredSize(new Dimension(PROFILE_PANEL_WIDTH, UPPER_PANEL_HEIGHT));
+        // =================== North, remaining cards =====================
+
+        remainingCardsPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                // TODO paint the remaining cards one by one
+                // see how many he has, and draw image accordingly
+                // gaps can vary.
+
+                // and remove the below cardImage lables
+
+                // solution 2:
+                // keep JLabels, make 21 cards as static JLabels
+                // keep a list to iterate them.
+                // set tooltip text on labels to show "???(blue)(fontsize bigger)" or
+                // "cross(find a good cross character)(red)(fontsize bigger)"
+
+            }
+        };
+        remainingCardsPanel.setBackground(null);
+        remainingCardsPanel.setOpaque(false);
+        remainingCardsPanel.setPreferredSize(new Dimension(WIDTH, SOUTH_PANEL_HEIGHT));
 
         // createEmptyBorder
-        playerLabel.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT, PADDING_LEFT,
+        remainingCardsPanel
+                .setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.black));
+
+        // these will be removed
+        ImageIcon cardImage_2 = CHARACTER_IMG[2];
+        remainingCardsPanel.add(new JLabel(cardImage_2));
+        remainingCardsPanel.add(new JLabel(cardImage_2));
+        remainingCardsPanel.add(new JLabel(cardImage_2));
+        remainingCardsPanel.add(new JLabel(cardImage_2));
+
+        // ============== west, a player's character pic ===============
+        profileLabel = new JLabel();
+        profileLabel.setOpaque(false);
+        profileLabel
+                .setPreferredSize(new Dimension(WEST_PANEL_WIDTH, CENTRE_PANEL_HEIGHT));
+
+        // createEmptyBorder
+        profileLabel.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT, PADDING_LEFT,
                 PADDING_LEFT, PADDING_LEFT, Color.black));
 
         // ============== centre, dice or dices ====================
-        MouseListener diceListener = createDiceListener();
 
         // panel for dices
         JPanel dicePanel = new JPanel();
@@ -133,11 +198,11 @@ public class PlayerPanelCanvas extends JPanel {
         diceGroup.setLayout(new BoxLayout(diceGroup, BoxLayout.Y_AXIS));
 
         // use JLabel as buttons
-        JLabel[] diceButtons = new JLabel[gui.getNumDices()];
+        diceButtons = new JLabel[gui.getNumDices()];
         for (int i = 0; i < diceButtons.length; i++) {
-            diceButtons[i] = new JLabel(randomDiceNum(6));
+            diceButtons[i] = new JLabel();
             diceButtons[i].setBorder(null);
-            diceButtons[i].addMouseListener(diceListener);
+            diceAddListener(diceButtons[i]);
             diceGroup.add(diceButtons[i], Component.CENTER_ALIGNMENT);
 
             // add gaps between dices. and do not add a gap after the last dice
@@ -166,7 +231,7 @@ public class PlayerPanelCanvas extends JPanel {
         buttonPanel.setBackground(null);
         buttonPanel.setOpaque(false);
         buttonPanel
-                .setPreferredSize(new Dimension(BUTTON_PANEL_WIDTH, UPPER_PANEL_HEIGHT));
+                .setPreferredSize(new Dimension(EAST_PANEL_WIDTH, CENTRE_PANEL_HEIGHT));
 
         // createEmptyBorder
         buttonPanel.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT, PADDING_LEFT,
@@ -174,7 +239,7 @@ public class PlayerPanelCanvas extends JPanel {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 
         // first row
-        JLabel remainingSteps = new JLabel("Remaining Steps: ");
+        remainingSteps = new JLabel();
         remainingSteps.setBackground(null);
         remainingSteps.setOpaque(false);
         remainingSteps.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -200,7 +265,7 @@ public class PlayerPanelCanvas extends JPanel {
         movePanel.add(new JLabel());
         movePanel.add(makeButton("←", BUTTON_COLOUR, ARROW_BUTTON_SIZE));
         movePanel.add(makeButton("↓", BUTTON_COLOUR, ARROW_BUTTON_SIZE));
-        movePanel.add(makeButton("←", BUTTON_COLOUR, ARROW_BUTTON_SIZE));
+        movePanel.add(makeButton("→", BUTTON_COLOUR, ARROW_BUTTON_SIZE));
 
         // third row, another gridLayout
         JPanel actionPanel = new JPanel();
@@ -226,7 +291,7 @@ public class PlayerPanelCanvas extends JPanel {
         buttonPanel.add(actionPanel);
 
         // ================= south, cards =================
-        JPanel cardPanel = new JPanel() {
+        cardsInHandPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 // TODO paint the player's cards one by one
@@ -237,33 +302,60 @@ public class PlayerPanelCanvas extends JPanel {
 
             }
         };
-        cardPanel.setBackground(null);
-        cardPanel.setOpaque(false);
-        cardPanel.setPreferredSize(new Dimension(WIDTH, CARD_PANEL_HEIGHT));
+        cardsInHandPanel.setBackground(null);
+        cardsInHandPanel.setOpaque(false);
+        cardsInHandPanel.setPreferredSize(new Dimension(WIDTH, SOUTH_PANEL_HEIGHT));
 
         // createEmptyBorder
-        cardPanel.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT, PADDING_LEFT,
-                PADDING_LEFT, PADDING_LEFT, Color.black));
+        cardsInHandPanel
+                .setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.black));
 
         // these will be removed
-        ImageIcon cardImage = new ImageIcon(CHARACTER_IMG[3]);
-        cardPanel.add(new JLabel(cardImage));
-        cardPanel.add(new JLabel(cardImage));
-        cardPanel.add(new JLabel(cardImage));
-        cardPanel.add(new JLabel(cardImage));
+        ImageIcon cardImage = CHARACTER_IMG[3];
+        cardsInHandPanel.add(new JLabel(cardImage));
+        cardsInHandPanel.add(new JLabel(cardImage));
+        cardsInHandPanel.add(new JLabel(cardImage));
+        cardsInHandPanel.add(new JLabel(cardImage));
 
         // ================ Adding stuff ===================
-
+        this.add(remainingCardsPanel, BorderLayout.NORTH);
         this.add(dicePanel, BorderLayout.CENTER);
-        this.add(playerLabel, BorderLayout.WEST);
+        this.add(profileLabel, BorderLayout.WEST);
         this.add(buttonPanel, BorderLayout.EAST);
-        this.add(cardPanel, BorderLayout.SOUTH);
+        this.add(cardsInHandPanel, BorderLayout.SOUTH);
 
         this.setVisible(true);
     }
 
-    private MouseListener createDiceListener() {
-        return new MouseListener() {
+    public void update() {
+
+        // TODO is it necessary to update five panels individually?
+
+        // north: remainint cards
+
+        // west: currentPlayer
+        currentPlayer = gui.getCurrentPlayer();
+        ImageIcon playerImage = PROFILE_IMG[currentPlayer.ordinal()];
+        profileLabel.setIcon(playerImage);
+
+        // centre: dices
+        int[] diceRoll = gui.rollDice(currentPlayer);
+        for (int i = 0; i < diceButtons.length; i++) {
+            diceButtons[i].setIcon(createDiceImg(diceRoll[i]));
+        }
+
+        remainingSteps
+                .setText("Remaining Steps: " + gui.getRemainingSteps(currentPlayer));
+
+        // east: button panel, need to update remaining steps
+
+        // south: cards in hands
+
+        repaint();
+    }
+
+    private void diceAddListener(JLabel diceLabel) {
+        diceLabel.addMouseListener(new MouseListener() {
             @Override
             public void mouseReleased(MouseEvent e) {
             }
@@ -285,7 +377,7 @@ public class PlayerPanelCanvas extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 System.out.println("button pressed");
             }
-        };
+        });
     }
 
     private JButton makeButton(String label, Color color, Dimension dimension) {
@@ -295,15 +387,109 @@ public class PlayerPanelCanvas extends JPanel {
         // createEmptyBorder
         button.setBorder(BorderFactory.createMatteBorder(PADDING_LEFT, PADDING_LEFT,
                 PADDING_LEFT, PADDING_LEFT, Color.YELLOW));
+        button.addActionListener(e -> {
+
+            // TODO add button listeners
+
+            if (button.getText().equals("↑")) {
+
+            } else if (button.getText().equals("←")) {
+
+            } else if (button.getText().equals("↓")) {
+
+            } else if (button.getText().equals("→")) {
+
+            } else if (button.getText().equals("Roll Dice")) {
+
+            } else if (button.getText().equals("End Turn")) {
+                update();
+
+            } else if (button.getText().equals("Suggestion")) {
+
+            } else if (button.getText().equals("Accusation")) {
+
+            }
+        });
+
         return button;
     }
 
-    public ImageIcon randomDiceNum(int diceRoll) {
-        return DICE_IMG[diceRoll - 1];
+    private static CardLabel[] createCardLabel(ImageIcon[] cardImg, Card example) {
+        CardLabel[] cards = new CardLabel[cardImg.length];
+        for (int i = 0; i < cardImg.length; i++) {
+            Card c;
+            if (example instanceof Character) {
+                c = Character.get(i);
+            } else if (example instanceof Weapon) {
+                c = Weapon.get(i);
+            } else {
+                c = Location.get(i);
+            }
+
+            cards[i] = new CardLabel(cardImg[i], c);
+            cards[i].setBorder(null);
+            cards[i].setToolTipText(c.toString());
+            addMouseListenerOnCardLabel(cards[i]);
+        }
+        return cards;
+    }
+
+    private static void addMouseListenerOnCardLabel(CardLabel cardLabel) {
+        cardLabel.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+
+    }
+
+    private ImageIcon createDiceImg(int i) {
+        return DICE_IMG[i];
     }
 
     @Override
     public void paintComponent(Graphics g) {
         g.drawImage(PLAYER_PANEL, PADDING_LEFT, PADDING_TOP, WIDTH, HEIGHT, this);
+    }
+}
+
+class CardLabel extends JLabel {
+
+    private Card card;
+
+    public CardLabel(ImageIcon img, Card card) {
+        super(img);
+        this.card = card;
+    }
+
+    public Card getCard() {
+        return card;
     }
 }

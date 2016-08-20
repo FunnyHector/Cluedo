@@ -140,7 +140,7 @@ public class Game {
         remainingCards.addAll(weaponCards);
 
         // now we have a solution
-        solution = new Suggestion(solCharacter, solLocation, solWeapon);
+        solution = new Suggestion(solCharacter, solWeapon, solLocation);
     }
 
     /**
@@ -270,6 +270,19 @@ public class Game {
      */
     public Position getPlayerPosition(Character character) {
         return getPlayerByCharacter(character).getPosition();
+    }
+
+    /**
+     * Get the Position at given coordinate
+     * 
+     * @param x
+     *            --- the horizontal coordinate
+     * @param y
+     *            --- the vertical coordinate
+     * @return --- the Position at given coordinate
+     */
+    public Position getPosition(int x, int y) {
+        return board.getPosition(x, y);
     }
 
     /**
@@ -425,8 +438,6 @@ public class Game {
             roll[i] = RAN.nextInt(6) + 1;
         }
 
-        // XXX should not need this
-        // getPlayerByCharacter(character).setRemainingSteps(roll);
         return roll;
     }
 

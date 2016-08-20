@@ -25,7 +25,7 @@ import ui.GUIClient;
 
 public class PlayerSetupDialog extends JDialog {
 
-    public static final Dimension PIC_DIMENSION = new Dimension(
+    public static final Dimension PROFILE_DIMENSION = new Dimension(
             PlayerPanelCanvas.PROFILE_IMG[0].getIconWidth(),
             PlayerPanelCanvas.PROFILE_IMG[0].getIconHeight());
 
@@ -36,7 +36,7 @@ public class PlayerSetupDialog extends JDialog {
         List<JRadioButton> rButtonList = new ArrayList<>();
 
         @SuppressWarnings("serial")
-        JComponent cardDisplay = new JComponent() {
+        JPanel cardDisplay = new JPanel() {
             protected void paintComponent(Graphics g) {
                 for (JRadioButton b : rButtonList) {
                     if (b.isSelected()) {
@@ -49,18 +49,20 @@ public class PlayerSetupDialog extends JDialog {
                 }
             }
         };
-        cardDisplay.setPreferredSize(PIC_DIMENSION);
+        cardDisplay.setPreferredSize(PROFILE_DIMENSION);
         // this prevents a bug where the component won't be drawn until it is resized.
         cardDisplay.setVisible(true);
 
+        // two buttons at bottom
         JButton confirm = new JButton("Next");
         JButton cancel = new JButton("Previous");
         confirm.setEnabled(false);
         cancel.setEnabled(false);
 
+        // radio buttons
+        ButtonGroup radioButtonGroup = new ButtonGroup();
         JPanel radioButtonsPanel = new JPanel();
         radioButtonsPanel.setLayout(new BoxLayout(radioButtonsPanel, BoxLayout.Y_AXIS));
-        ButtonGroup radioButtonGroup = new ButtonGroup();
 
         ActionListener al = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -80,20 +82,19 @@ public class PlayerSetupDialog extends JDialog {
             radioButtonGroup.add(rButton);
             rButtonList.add(rButton);
             radioButtonsPanel.add(rButton);
-            radioButtonsPanel.add(Box.createRigidArea(new Dimension(15, 20)));
+            radioButtonsPanel.add(Box.createRigidArea(new Dimension(15, 15)));
 
-            if (selectedCharacters.contains(c)) {
+            if (selectedCharacters.contains(i)) {
                 rButton.setEnabled(false);
             }
         }
 
+        // the middle panel to hold radio buttons and card display
         JPanel midPanel = new JPanel();
         midPanel.setLayout(new BoxLayout(midPanel, BoxLayout.X_AXIS));
         midPanel.add(radioButtonsPanel);
         midPanel.add(Box.createRigidArea(new Dimension(15, 20)));
         midPanel.add(cardDisplay);
-
-        this.setModal(true);
 
         JPanel playerSetupPane = new JPanel();
         playerSetupPane.setLayout(new BoxLayout(playerSetupPane, BoxLayout.Y_AXIS));
@@ -105,54 +106,57 @@ public class PlayerSetupDialog extends JDialog {
         textPane.setAlignmentX(Component.CENTER_ALIGNMENT);
         textPane.add(text);
 
-        confirm.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (selectedCharacters.size() == 0) {
-                    cancel.setEnabled(true);
-                }
+        confirm.addActionListener(e -> {
 
-                for (JRadioButton b : rButtonList) {
-                    if (b.isSelected()) {
+            if (selectedCharacters.size() == 0) {
+                cancel.setEnabled(true);
+            }
 
-                        if (confirm.getText().equals("Start")) {
-                            PlayerSetupDialog.this.dispose();
-                            parent.startGame();
+            for (JRadioButton b : rButtonList) {
+                if (b.isSelected()) {
+
+                    if (confirm.getText().equals("Start")) {
+                        PlayerSetupDialog.this.dispose();
+
+                        // join players
+                        for (Integer i : selectedCharacters) {
+                            parent.joinPlayer(Character.get(i));
                         }
 
-                        selectedCharacters.add(Integer.parseInt(b.getActionCommand()));
-                        b.setSelected(false);
-                        b.setEnabled(false);
-                        confirm.setEnabled(false);
-
-                        if (selectedCharacters.size() == parent.getNumPlayers() - 1) {
-                            confirm.setText("Start");
-                        }
-                        break;
+                        // start the game
+                        parent.setPlayerMoveFirst();
+                        parent.creatSolutionAndDealCards();
+                        parent.startGame();
                     }
+
+                    selectedCharacters.add(Integer.parseInt(b.getActionCommand()));
+                    b.setSelected(false);
+                    b.setEnabled(false);
+                    confirm.setEnabled(false);
+
+                    if (selectedCharacters.size() == parent.getNumPlayers() - 1) {
+                        confirm.setText("Start");
+                    }
+                    break;
                 }
             }
         });
 
-        cancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        cancel.addActionListener(e -> {
+            int i = selectedCharacters.remove(selectedCharacters.size() - 1);
+            if (selectedCharacters.size() == 0) {
+                cancel.setEnabled(false);
+            } else if (selectedCharacters.size() < parent.getNumPlayers() - 1) {
+                confirm.setText("Next");
+            }
 
-                int i = selectedCharacters.remove(selectedCharacters.size() - 1);
-                if (selectedCharacters.size() == 0) {
-                    cancel.setEnabled(false);
-                } else if (selectedCharacters.size() < parent.getNumPlayers() - 1) {
-                    confirm.setText("Next");
-                }
-
-                for (JRadioButton b : rButtonList) {
-                    if (Integer.parseInt(b.getActionCommand()) == i) {
-                        b.setEnabled(true);
-                        if (!confirm.isEnabled()) {
-                            confirm.setEnabled(true);
-                        }
-                        break;
+            for (JRadioButton b : rButtonList) {
+                if (Integer.parseInt(b.getActionCommand()) == i) {
+                    b.setEnabled(true);
+                    if (!confirm.isEnabled()) {
+                        confirm.setEnabled(true);
                     }
+                    break;
                 }
             }
         });
@@ -165,14 +169,14 @@ public class PlayerSetupDialog extends JDialog {
         buttonPane.add(Box.createRigidArea(new Dimension(30, 20)));
         buttonPane.add(confirm);
 
-        playerSetupPane.add(Box.createRigidArea(new Dimension(15, 20)));
         playerSetupPane.add(textPane);
-        playerSetupPane.add(Box.createRigidArea(new Dimension(15, 20)));
+        playerSetupPane.add(Box.createRigidArea(new Dimension(15, 15)));
         playerSetupPane.add(midPanel);
-        playerSetupPane.add(Box.createRigidArea(new Dimension(15, 20)));
+        playerSetupPane.add(Box.createRigidArea(new Dimension(15, 15)));
         playerSetupPane.add(buttonPane);
 
         this.add(playerSetupPane);
+        this.setModal(true);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setResizable(false);
         this.pack();

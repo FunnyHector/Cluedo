@@ -6,6 +6,7 @@ import tile.Entrance;
 import tile.Position;
 import tile.Room;
 import tile.Tile;
+import tile.VoidPosition;
 import card.Character;
 import configs.Configs;
 
@@ -28,12 +29,14 @@ public class Board {
     private static Tile peacockStart;
     private static Tile plumStart;
 
+    private static final VoidPosition NULL_POSITION = new VoidPosition();
+
     /**
      * Construct a board.
      */
     public Board() {
 
-        String boardString = Configs.BOARD_STRING;
+        String boardString = Configs.BOARD_STRING_TXT;
         int height = Configs.BOARD_HEIGHT;
         int width = Configs.BOARD_WIDTH;
 
@@ -225,7 +228,14 @@ public class Board {
                 Configs.DINING_ROOM.addDecoTiles(decoTile_I);
                 break;
 
+            // this is another way of representing null. It's more convenient in GUI.
+            case 'x':
+                board[y][x] = NULL_POSITION;
+                break;
+
             default:
+                throw new GameError("Invalid board string, unknow character:"
+                        + boardString.charAt(index));
             }
             index++;
         }

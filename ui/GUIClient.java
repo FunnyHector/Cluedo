@@ -61,49 +61,48 @@ import javax.swing.event.ChangeListener;
 
 import game.Game;
 import game.GameError;
+import game.Suggestion;
+import tile.Position;
 import view.BoardCanvas;
 import view.CustomMenu;
 import view.NumberSetupDialog;
 import view.PlayerPanelCanvas;
 import view.PlayerSetupDialog;
+import view.SuggestionDialog;
+import card.Card;
 import card.Character;
+import card.Location;
+import card.Weapon;
 
-public class GUIClient extends JFrame implements ActionListener, KeyListener {
+public class GUIClient extends JFrame implements KeyListener {
 
     private static final String IMAGE_PATH = "resources/";
-
-
-
     public static final Image INIT_SCREEN = loadImage("Initial_Screen.png");
-
-    // TODO Have to find a good board which have same width and height
     public static final Image GAME_BOARD = loadImage("Game_Board.png");
 
-
-
+    public static final int HEIGHT = BoardCanvas.BOARD_IMG_HEIGHT
+            + BoardCanvas.PADDING_TOP + BoardCanvas.PADDING_DOWN;
     public static final int LEFT_PANEL_WIDTH = BoardCanvas.BOARD_IMG_WIDTH
             + BoardCanvas.PADDING_LEFT + BoardCanvas.PADDING_RIGHT;
     public static final int RIGHT_PANEL_WIDTH = PlayerPanelCanvas.WIDTH
             + PlayerPanelCanvas.PADDING_LEFT + PlayerPanelCanvas.PADDING_RIGHT;
-    public static final int PLAYER_PANEL_HEIGHT = PlayerPanelCanvas.HEIGHT
-            + PlayerPanelCanvas.PADDING_TOP + PlayerPanelCanvas.PADDING_DOWN;
-    public static final int TEXT_CONSOLE_HEIGHT = BoardCanvas.BOARD_IMG_HEIGHT
-            + BoardCanvas.PADDING_TOP + BoardCanvas.PADDING_DOWN - PLAYER_PANEL_HEIGHT;
 
-    public static final int TEXT_ROW = 30;
-    public static final int TEXT_COL = 60;
+    public static final int TEXT_ROW = 20;
+    public static final int TEXT_COL = 50;
 
     // =========== Views ================
 
     // the main window
     private JPanel window;
-
-    private JTextArea textConsole;
+    // game board on left
     private BoardCanvas gameBoardPanel;
+    // player panel on right bottom
     private PlayerPanelCanvas playerPanel;
 
     // ============= models ===================
-    private Game cluedoGame;
+    private Game game;
+
+    // some fields to remember game status
     private int numPlayers;
     private int numDices;
 
@@ -152,6 +151,38 @@ public class GUIClient extends JFrame implements ActionListener, KeyListener {
                 SwingUtilities.windowForComponent(this), "Setup Wizard");
     }
 
+    public void createNewGame(int numPlayers, int numDices) {
+        this.numPlayers = numPlayers;
+        this.numDices = numDices;
+        game = new Game(numPlayers, numDices);
+    }
+
+    /**
+     * Set the given player as human controlled
+     * 
+     * @param playerChoice
+     *            --- the character chosen by a player
+     */
+    public void joinPlayer(Character playerChoice) {
+        game.joinPlayer(playerChoice);
+    }
+
+    /**
+     * This method sets who the first character is to move.
+     */
+    public void setPlayerMoveFirst() {
+        game.setPlayerMoveFirst();
+    }
+
+    /**
+     * This method randomly choose one character, one room, and one weapon to create a
+     * solution, then shuffles all remaining cards, and deal them evenly to all players.
+     */
+    public void creatSolutionAndDealCards() {
+        game.creatSolution();
+        game.dealCard();
+    }
+
     public void startGame() {
 
         // remove the welcome screen, and load into the game interface
@@ -165,12 +196,7 @@ public class GUIClient extends JFrame implements ActionListener, KeyListener {
 
         // gameBoardPanel.setBorder(BorderFactory.createEmptyBorder());
 
-        TitledBorder gameBoardPanel_border = BorderFactory
-                .createTitledBorder(
-                        BorderFactory.createCompoundBorder(
-                                BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
-                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
-                        "Board", TitledBorder.CENTER, TitledBorder.TOP);
+        TitledBorder gameBoardPanel_border = creatTitledBorder("Board");
 
         gameBoardPanel.setBorder(gameBoardPanel_border);
 
@@ -179,37 +205,14 @@ public class GUIClient extends JFrame implements ActionListener, KeyListener {
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         // rightPanel.setBorder(BorderFactory.createEmptyBorder());
 
-        // now make the right-top split panel, which is a text console
-        // TODO change it
-        textConsole = new JTextArea(TEXT_ROW, TEXT_COL);
-        textConsole.setLineWrap(true);
-        textConsole.setWrapStyleWord(true);
-        textConsole.setEditable(false);
-        JScrollPane textPanel = new JScrollPane(textConsole);
-
-        TitledBorder textPanel_border = BorderFactory
-                .createTitledBorder(
-                        BorderFactory.createCompoundBorder(
-                                BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
-                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
-                        "Text Console", TitledBorder.CENTER, TitledBorder.TOP);
-
-        textPanel.setBorder(textPanel_border);
-
         // now make the right-bottom split panel, which is player panel (cards and dices)
         playerPanel = new PlayerPanelCanvas(this);
 
-        TitledBorder playerPanel_border = BorderFactory
-                .createTitledBorder(
-                        BorderFactory.createCompoundBorder(
-                                BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
-                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
-                        "Player Panel", TitledBorder.CENTER, TitledBorder.TOP);
+        TitledBorder playerPanel_border = creatTitledBorder("Player Panel");
 
         playerPanel.setBorder(playerPanel_border);
 
         // now put up the right split panel
-        rightPanel.add(textPanel);
         rightPanel.add(playerPanel);
 
         // now put them together
@@ -217,16 +220,8 @@ public class GUIClient extends JFrame implements ActionListener, KeyListener {
         window.add(rightPanel);
 
         // set preferred size
-        textPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, TEXT_CONSOLE_HEIGHT));
-        playerPanel
-                .setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, PLAYER_PANEL_HEIGHT));
-        // rightPanel
-        // .setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, PLAYER_PANEL_HEIGHT));
-
-        gameBoardPanel.setPreferredSize(new Dimension(LEFT_PANEL_WIDTH,
-                PLAYER_PANEL_HEIGHT + TEXT_CONSOLE_HEIGHT));
-        // windowPanel.setPreferredSize(new Dimension(FULL_WIDTH, FULL_HEIGHT));
-        // window.setPreferredSize(new Dimension(FULL_WIDTH, FULL_HEIGHT));
+        playerPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, HEIGHT));
+        gameBoardPanel.setPreferredSize(new Dimension(LEFT_PANEL_WIDTH, HEIGHT));
 
         // last
         this.add(window);
@@ -240,65 +235,100 @@ public class GUIClient extends JFrame implements ActionListener, KeyListener {
 
         // ============= initialise fields ================
         noBrainer = false;
-        cluedoGame = new Game(numPlayers, numDices);
 
-        System.out.println("start");
-
-        System.out.println("===========================");
-
-        System.out.println("gameBoardPanel width:" + gameBoardPanel.getWidth());
-        System.out.println("gameBoardPanel height:" + gameBoardPanel.getHeight());
-        System.out.println("gameBoardPanel + border width:"
-                + gameBoardPanel_border.getMinimumSize(gameBoardPanel).getWidth());
-        System.out.println("gameBoardPanel + border height:"
-                + gameBoardPanel_border.getMinimumSize(gameBoardPanel).getHeight());
-        System.out.println("===========================");
-
-        System.out.println("textPanel width:" + textPanel.getWidth());
-        System.out.println("textPanel height:" + textPanel.getHeight());
-        System.out.println("textPanel + border width:"
-                + textPanel_border.getMinimumSize(textPanel).getWidth());
-        System.out.println("textPanel + border height:"
-                + textPanel_border.getMinimumSize(textPanel).getHeight());
-        System.out.println("===========================");
-
-        System.out.println("playerPanel width:" + playerPanel.getWidth());
-        System.out.println("playerPanel height:" + playerPanel.getHeight());
-        System.out.println("playerPanel + border width:"
-                + playerPanel_border.getMinimumSize(playerPanel).getWidth());
-        System.out.println("playerPanel + border height:"
-                + playerPanel_border.getMinimumSize(playerPanel).getHeight());
-        System.out.println("===========================");
-
-        System.out.println("rightPanel width:" + rightPanel.getWidth());
-        System.out.println("rightPanel height:" + rightPanel.getHeight());
-        System.out.println("window width:" + window.getWidth());
-        System.out.println("window height:" + window.getHeight());
-        System.out.println("Frame width:" + this.getWidth());
-        System.out.println("Frame height:" + this.getHeight());
-
-        System.out.println("===========================");
+        // game.joinPlayer(playerChoice);
 
     }
 
-    public void setNumPlayers(int numPlayers) {
-        this.numPlayers = numPlayers;
+    private TitledBorder creatTitledBorder(String string) {
+        return BorderFactory
+                .createTitledBorder(
+                        BorderFactory.createCompoundBorder(
+                                BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
+                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
+                        string, TitledBorder.CENTER, TitledBorder.TOP);
+    }
+
+    public void popUpSuggestion() {
+        new SuggestionDialog(this, SwingUtilities.windowForComponent(this),
+                "Make a Suggestion", false);
+    }
+
+    public void makeSuggestion(Character c, Weapon w, Location l) {
+        game.makeSuggestion(new Suggestion(c, w, l));
+    }
+
+    public void popUpAccusation() {
+        new SuggestionDialog(this, SwingUtilities.windowForComponent(this),
+                "Make an Accusation", true);
+    }
+
+    public void makeAccusation(Character c, Weapon w, Location l) {
+        game.checkAccusation(new Suggestion(c, w, l));
+
+    }
+
+    /**
+     * Let the player roll dices.
+     *
+     * @return --- the number rolled
+     */
+    public int[] rollDice(Character character) {
+        return game.rollDice(character);
     }
 
     public int getNumPlayers() {
         return numPlayers;
     }
 
-    public void setNumDices(int numDices) {
-        this.numDices = numDices;
-    }
-    
     public int getNumDices() {
         return numDices;
     }
 
+    /**
+     * Get the remaining cards as a list. Note that the returned list could be empty if
+     * all cards are dealt.
+     * 
+     * @return --- the remaining cards as a list
+     */
+    public List<Card> getRemainingCards() {
+        return game.getRemainingCards();
+    }
+
     public void setNobrainerMode(boolean nobrainer) {
         this.noBrainer = nobrainer;
+    }
+
+    public boolean isGameRunning() {
+        if (game == null) {
+            return false;
+        } else {
+            return game.isGameRunning();
+        }
+    }
+
+    public Position getPosition(int x, int y) {
+        return game.getPosition(x, y);
+    }
+
+    /**
+     * Get the player who need to move.
+     * 
+     * @return --- the current player
+     */
+    public Character getCurrentPlayer() {
+        return game.getCurrentPlayer();
+    }
+
+    /**
+     * Get how many steps left for the player to move.
+     * 
+     * @param character
+     *            --- the player
+     * @return --- how many steps left for the player to move.
+     */
+    public int getRemainingSteps(Character character) {
+        return game.getRemainingSteps(character);
     }
 
     @Override
@@ -319,17 +349,11 @@ public class GUIClient extends JFrame implements ActionListener, KeyListener {
 
     }
 
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    GUIClient window = new GUIClient();
+                    new GUIClient();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -338,16 +362,11 @@ public class GUIClient extends JFrame implements ActionListener, KeyListener {
     }
 
     public static Image loadImage(String filename) {
-        // using the URL means the image loads when stored
-        // in a jar or expanded into individual files.
         URL imageURL = BoardCanvas.class.getResource(IMAGE_PATH + filename);
-
         try {
             Image img = ImageIO.read(imageURL);
             return img;
         } catch (IOException e) {
-            // we've encountered an error loading the image. There's not much we
-            // can actually do at this point, except to abort the game.
             throw new GameError("Unable to load image: " + filename);
         }
     }

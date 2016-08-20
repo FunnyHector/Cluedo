@@ -32,7 +32,7 @@ public class Suggestion {
      * @param weapon
      *            --- the involved weapon
      */
-    public Suggestion(Character character, Location location, Weapon weapon) {
+    public Suggestion(Character character, Weapon weapon, Location location) {
         super();
         this.character = character;
         this.location = location;

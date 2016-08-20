@@ -342,7 +342,7 @@ public class TextClient {
         default: // dead code
         }
 
-        Suggestion suggestion = new Suggestion(suspect, location, weapon);
+        Suggestion suggestion = new Suggestion(suspect, weapon, location);
         game.makeSuggestion(suggestion);
 
         // now the player has made a suggestion
@@ -475,7 +475,7 @@ public class TextClient {
                 "Your accusation is:\nSuspect: " + suspect.toString() + "\nWeapon: "
                         + weapon.toString() + "\nLocation: " + location.toString());
 
-        Suggestion accusation = new Suggestion(suspect, location, weapon);
+        Suggestion accusation = new Suggestion(suspect, weapon, location);
 
         // now we should check whether the accusation is correct
         if (game.checkAccusation(accusation)) {

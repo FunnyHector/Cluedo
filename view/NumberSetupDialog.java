@@ -25,7 +25,6 @@ public class NumberSetupDialog extends JDialog {
 
     public NumberSetupDialog(GUIClient parent, Window windowForComponent, String string) {
         super(windowForComponent, string);
-        this.setModal(true);
 
         JPanel numSetup = new JPanel();
         numSetup.setLayout(new BoxLayout(numSetup, BoxLayout.Y_AXIS));
@@ -68,33 +67,25 @@ public class NumberSetupDialog extends JDialog {
         JPanel thirdRow = new JPanel();
         thirdRow.setLayout(new BoxLayout(thirdRow, BoxLayout.X_AXIS));
         JButton confirm = new JButton("OK");
-        confirm.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int numPlayers = comboBox_1.getItemAt(comboBox_1.getSelectedIndex());
-                int numDices = comboBox_2.getItemAt(comboBox_2.getSelectedIndex());
-                NumberSetupDialog.this.dispose();
-                parent.setNumPlayers(numPlayers);
-                parent.setNumDices(numDices);
-                parent.setupPlayers();
-            }
+        confirm.addActionListener(e -> {
+            int numPlayers = comboBox_1.getItemAt(comboBox_1.getSelectedIndex());
+            int numDices = comboBox_2.getItemAt(comboBox_2.getSelectedIndex());
+            NumberSetupDialog.this.dispose();
+            parent.createNewGame(numPlayers, numDices);
+            parent.setupPlayers();
         });
         thirdRow.add(confirm);
         thirdRow.add(Box.createRigidArea(new Dimension(20, 15)));
         JButton cancel = new JButton("Cancel");
         thirdRow.add(cancel);
-        cancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                NumberSetupDialog.this.dispose();
-            }
-        });
+        cancel.addActionListener(e -> NumberSetupDialog.this.dispose());
         thirdRow.setAlignmentX(Component.CENTER_ALIGNMENT);
         numSetup.add(thirdRow);
 
         // show it
         this.add(numSetup);
 
+        this.setModal(true);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setResizable(false);
         this.pack();

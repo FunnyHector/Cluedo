@@ -52,7 +52,7 @@ public enum Weapon implements Card {
      * 
      * @return --- the size of this Enumeration class, i.e. how many weapons inside.
      */
-    public int size() {
+    public static int size() {
         return 6;
     }
 
@@ -63,7 +63,7 @@ public enum Weapon implements Card {
      *            --- the index (ordinal)
      * @return --- the weapon at the given index (ordinal)
      */
-    public Weapon get(int index) {
+    public static Weapon get(int index) {
         switch (index) {
         case 0:
             return Candlestick;
