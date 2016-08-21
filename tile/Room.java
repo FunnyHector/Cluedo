@@ -22,7 +22,7 @@ public class Room extends Position {
     // The end of the secret passage if this room has one. null if it doesn't have one.
     private final Location secPasTo;
     // a collection of entrance tiles only on which a player can enter this room.
-    private final Set<Entrance> entrances;
+    private final List<Entrance> entrances;
     // a collection of decorative tiles for drawing tokens
     private final List<Tile> decoTiles;
     // used to prevent from two tokens occupying the same position
@@ -41,7 +41,7 @@ public class Room extends Position {
     public Room(Location room, Location secPasTo) {
         this.room = room;
         this.secPasTo = secPasTo;
-        entrances = new HashSet<>();
+        entrances = new ArrayList<>();
         decoTiles = new ArrayList<>();
     }
 

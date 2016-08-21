@@ -30,6 +30,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import configs.Configs;
 import game.Player;
@@ -291,14 +292,16 @@ public class PlayerPanelCanvas extends JPanel {
         // add listener on them
         EnterExitRoom.addActionListener(e -> {
 
-            // TODO only interact with room
-            // whenever this button is enabled, the player is standing at entrance (button
-            // text as enter room)
-            // or in a room, (button text as exit room, and pop a selection panel to
-            // choose which exit to take)
+            /*
+             * This button only interact with room. Whenever this button is enabled, the
+             * player is standing at entrance to (button text as "enter room") or in a
+             * room (button text as "exit room").
+             */
             if (EnterExitRoom.getText().equals("Enter Room")) {
 
-                // TODO add some stuff
+                Room room = gui.getBoard()
+                        .atEntranceTo(gui.getPlayerByCharacter(currentPlayer));
+                gui.movePlayer(currentPlayer, room);
 
                 remainingSteps = 0;
                 gui.setRemainingSteps(currentPlayer, remainingSteps);
@@ -307,16 +310,23 @@ public class PlayerPanelCanvas extends JPanel {
                 // can make suggestion now
                 // and then pop up do you want to make accusation
                 // if yes, pop up make accusation
-                // if no end turn
-                // gui.currentPlayerEndTurn();
 
                 gui.currentPlayerEndTurn();
             } else {
 
                 List<Entrance> entrances = gui.getBoard()
                         .lookForExit(gui.getPlayerByCharacter(currentPlayer));
+                Location room = entrances.get(0).toRoom().getRoom();
 
-                // TODO pop up a dialog to choose which room to exit
+                if (room == Location.Kitchen || room == Location.Conservatory
+                        || room == Location.Study || room == Location.Lounge) {
+
+                    gui.movePlayer(currentPlayer, entrances.get(0));
+                } else {
+                    // pop up a dialog to choose which room to exit
+                    new ExitRoomDialog(gui, SwingUtilities.windowForComponent(this),
+                            "Exit Room", room);
+                }
 
                 remainingSteps--;
                 gui.setRemainingSteps(currentPlayer, remainingSteps);
@@ -330,24 +340,32 @@ public class PlayerPanelCanvas extends JPanel {
 
         upButton.addActionListener(e -> {
 
-            // TODO move up
+            Tile northTile = gui.getBoard()
+                    .lookNorth(gui.getPlayerByCharacter(currentPlayer));
+            gui.movePlayer(currentPlayer, northTile);
 
             remainingSteps--;
             gui.setRemainingSteps(currentPlayer, remainingSteps);
             if (remainingSteps == 0) {
                 gui.currentPlayerEndTurn();
             }
+
             gui.update();
         });
 
         SecretPass.addActionListener(e -> {
 
-            // TODO take the secret passage
-            // move player to there
-            // brings a suggestion
+            Room secPasTo = gui.getBoard()
+                    .lookForSecPas(gui.getPlayerByCharacter(currentPlayer));
+            gui.movePlayer(currentPlayer, secPasTo);
 
             remainingSteps = 0;
             gui.setRemainingSteps(currentPlayer, remainingSteps);
+
+            // TODO this make suggestion can extract as a method
+            // can make suggestion now
+            // and then pop up do you want to make accusation
+            // if yes, pop up make accusation
 
             gui.currentPlayerEndTurn();
 
@@ -356,37 +374,46 @@ public class PlayerPanelCanvas extends JPanel {
 
         leftButton.addActionListener(e -> {
 
-            // TODO move left
+            Tile westTile = gui.getBoard()
+                    .lookWest(gui.getPlayerByCharacter(currentPlayer));
+            gui.movePlayer(currentPlayer, westTile);
 
             remainingSteps--;
             gui.setRemainingSteps(currentPlayer, remainingSteps);
             if (remainingSteps == 0) {
                 gui.currentPlayerEndTurn();
             }
+
             gui.update();
         });
 
         downButton.addActionListener(e -> {
 
-            // TODO move down
+            Tile southTile = gui.getBoard()
+                    .lookSouth(gui.getPlayerByCharacter(currentPlayer));
+            gui.movePlayer(currentPlayer, southTile);
 
             remainingSteps--;
             gui.setRemainingSteps(currentPlayer, remainingSteps);
             if (remainingSteps == 0) {
                 gui.currentPlayerEndTurn();
             }
+
             gui.update();
         });
 
         rightButton.addActionListener(e -> {
 
-            // TODO move right
+            Tile eastTile = gui.getBoard()
+                    .lookEast(gui.getPlayerByCharacter(currentPlayer));
+            gui.movePlayer(currentPlayer, eastTile);
 
             remainingSteps--;
             gui.setRemainingSteps(currentPlayer, remainingSteps);
             if (remainingSteps == 0) {
                 gui.currentPlayerEndTurn();
             }
+
             gui.update();
         });
 
@@ -447,9 +474,8 @@ public class PlayerPanelCanvas extends JPanel {
             gui.popUpSuggestion();
             // TODO popup do you want to make accusation
             // if yes, pop up make accusation
-            // if no end turn
-            // gui.currentPlayerEndTurn();
 
+            gui.currentPlayerEndTurn();
             gui.update();
         });
 
@@ -567,7 +593,7 @@ public class PlayerPanelCanvas extends JPanel {
         }
 
         cardsInHandPanel.setVisible(true);
-        
+
         this.add(cardsInHandPanel, BorderLayout.SOUTH);
 
         // ================ Adding stuff ===================
@@ -595,7 +621,7 @@ public class PlayerPanelCanvas extends JPanel {
             return;
         }
 
-        // first let's disable all
+        // first let's disable most actions
         EnterExitRoom.setEnabled(false);
         upButton.setEnabled(false);
         SecretPass.setEnabled(false);
@@ -606,6 +632,7 @@ public class PlayerPanelCanvas extends JPanel {
         accusationButton.setEnabled(true);
         endTurnButton.setEnabled(true);
 
+        // now let's see what the player can do.
         Player player = gui.getPlayerByCharacter(currentPlayer);
 
         // if there are tiles in four directions
@@ -616,6 +643,7 @@ public class PlayerPanelCanvas extends JPanel {
             for (Player existingPlayer : gui.getPlayers()) {
                 if (tile.equals(existingPlayer.getPosition())) {
                     isBlocking = true;
+                    break;
                 }
             }
             upButton.setEnabled(!isBlocking);
@@ -628,6 +656,7 @@ public class PlayerPanelCanvas extends JPanel {
             for (Player existingPlayer : gui.getPlayers()) {
                 if (tile.equals(existingPlayer.getPosition())) {
                     isBlocking = true;
+                    break;
                 }
             }
             rightButton.setEnabled(!isBlocking);
@@ -640,6 +669,7 @@ public class PlayerPanelCanvas extends JPanel {
             for (Player existingPlayer : gui.getPlayers()) {
                 if (tile.equals(existingPlayer.getPosition())) {
                     isBlocking = true;
+                    break;
                 }
             }
             downButton.setEnabled(!isBlocking);
@@ -652,6 +682,7 @@ public class PlayerPanelCanvas extends JPanel {
             for (Player existingPlayer : gui.getPlayers()) {
                 if (tile.equals(existingPlayer.getPosition())) {
                     isBlocking = true;
+                    break;
                 }
             }
             leftButton.setEnabled(!isBlocking);
@@ -667,7 +698,25 @@ public class PlayerPanelCanvas extends JPanel {
         List<Entrance> entrances = gui.getBoard().lookForExit(player);
         if (entrances != null && !entrances.isEmpty()) {
             EnterExitRoom.setText("Exit Room");
-            EnterExitRoom.setEnabled(true);
+
+            Location room = entrances.get(0).toRoom().getRoom();
+
+            if (room == Location.Kitchen || room == Location.Conservatory
+                    || room == Location.Study || room == Location.Lounge) {
+
+                boolean isBlocking = false;
+                for (Player existingPlayer : gui.getPlayers()) {
+                    if (entrances.get(0).equals(existingPlayer.getPosition())) {
+                        isBlocking = true;
+                        break;
+                    }
+                }
+                EnterExitRoom.setEnabled(!isBlocking);
+
+            } else {
+                EnterExitRoom.setEnabled(true);
+            }
+
         }
 
         // if the player is in a room, and there is a secret passage

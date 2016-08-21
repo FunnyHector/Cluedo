@@ -409,6 +409,11 @@ public class SuggestionDialog extends JDialog {
             }
         });
 
+        // TODO if this is a suggestion, when the player press make suggestion
+        // give the result of suggestion
+        // and ask if the player want to make accusation right away.
+        // if yes, then pop up a accusation dialog
+
         // confirm button at bottom
         cancel.addActionListener(e -> cardLayout.previous(mainPanel));
 

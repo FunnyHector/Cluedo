@@ -64,6 +64,7 @@ public class PlayerSetupDialog extends JDialog {
         JPanel radioButtonsPanel = new JPanel();
         radioButtonsPanel.setLayout(new BoxLayout(radioButtonsPanel, BoxLayout.Y_AXIS));
 
+        // a listener for radiobuttons
         ActionListener al = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 cardDisplay.repaint();
@@ -73,6 +74,7 @@ public class PlayerSetupDialog extends JDialog {
             }
         };
 
+        // add radio buttons
         for (int i = 0; i < Character.size(); i++) {
             Character c = Character.get(i);
 
@@ -177,7 +179,7 @@ public class PlayerSetupDialog extends JDialog {
 
         this.add(playerSetupPane);
         this.setModal(true);
-        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.setResizable(false);
         this.pack();
         this.setLocationRelativeTo(parent);
