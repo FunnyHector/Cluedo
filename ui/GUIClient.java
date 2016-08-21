@@ -5,8 +5,11 @@ import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -52,7 +55,7 @@ import card.Location;
 import card.Weapon;
 import configs.Configs;
 
-public class GUIClient extends JFrame implements KeyListener {
+public class GUIClient extends JFrame {
 
     private static final String IMAGE_PATH = "resources/";
     public static final Image INIT_SCREEN = loadImage("Initial_Screen.png");
@@ -206,6 +209,48 @@ public class GUIClient extends JFrame implements KeyListener {
         playerPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, HEIGHT));
         gameBoardPanel.setPreferredSize(new Dimension(LEFT_PANEL_WIDTH, HEIGHT));
 
+        // This is to prevent the window from losing focus after JPanel repaint()
+        window.addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                window.requestFocusInWindow();
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+            }
+        });
+
+        // Add a keyAdaptor
+        window.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                int k = e.getKeyCode();
+                switch (k) {
+                case KeyEvent.VK_UP:
+                case KeyEvent.VK_W:
+                    playerPanel.tryClickOnUp();
+                    break;
+                case KeyEvent.VK_DOWN:
+                case KeyEvent.VK_S:
+                    playerPanel.tryClickOnDown();
+                    break;
+                case KeyEvent.VK_RIGHT:
+                case KeyEvent.VK_D:
+                    playerPanel.tryClickOnRight();
+                    break;
+                case KeyEvent.VK_LEFT:
+                case KeyEvent.VK_A:
+                    playerPanel.tryClickOnLeft();
+                    break;
+                case KeyEvent.VK_SPACE:
+                    playerPanel.tryClickOnLeft();
+                    break;
+                default:  
+                }
+            }
+        });
+
         // last
         this.add(window);
 
@@ -227,6 +272,7 @@ public class GUIClient extends JFrame implements KeyListener {
         if (game.isGameRunning()) {
             gameBoardPanel.update();
             playerPanel.update();
+            window.requestFocusInWindow();
         } else {
             int choice = JOptionPane.showConfirmDialog(window,
                     getCurrentPlayer().toString()
@@ -238,6 +284,7 @@ public class GUIClient extends JFrame implements KeyListener {
             if (choice == JOptionPane.OK_OPTION) {
                 setupNumPlayers();
             }
+            window.requestFocusInWindow();
         }
     }
 
@@ -498,24 +545,6 @@ public class GUIClient extends JFrame implements KeyListener {
      */
     public List<Position> getMovablePositions(Character character) {
         return game.getMovablePositions(character);
-    }
-
-    @Override
-    public void keyPressed(KeyEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void keyReleased(KeyEvent arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void keyTyped(KeyEvent arg0) {
-        // TODO Auto-generated method stub
-
     }
 
     public static void main(String[] args) {
