@@ -113,6 +113,7 @@ public class Game {
         for (Weapon w : Weapon.values()) {
             int roomNo = RAN.nextInt(roomList.size());
             RoomTile roomTile = board.getAvailableRoomTile(roomList.remove(roomNo));
+            roomTile.setHoldingToken(true);
             WeaponToken weaponToken = new WeaponToken(
                     BoardCanvas.WEAPON_TOKEN_IMG[w.ordinal()], w, roomTile);
             weaponTokens[w.ordinal()] = weaponToken;

@@ -60,6 +60,9 @@ public class ExitRoomDialog extends JDialog {
 
         super(windowForComponent, string);
 
+        images = null;
+        selectedExit = null;
+
         List<Entrance> exits = parent.getBoard()
                 .lookForExit(parent.getPlayerByCharacter(parent.getCurrentPlayer()));
 
@@ -82,6 +85,7 @@ public class ExitRoomDialog extends JDialog {
         @SuppressWarnings("serial")
         JPanel exitDisplay = new JPanel() {
             protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
                 for (JRadioButton b : rButtonList) {
                     if (b.isSelected()) {
                         g.drawImage(
@@ -98,7 +102,7 @@ public class ExitRoomDialog extends JDialog {
         exitDisplay.setVisible(true);
 
         // button at bottom
-        JButton confirm = new JButton("Exit");
+        JButton confirm = new JButton("Exit Room");
         confirm.setEnabled(false);
 
         // radio buttons
@@ -118,7 +122,7 @@ public class ExitRoomDialog extends JDialog {
 
         // add radio buttons
         for (int i = 0; i < exits.size(); i++) {
-            JRadioButton rButton = new JRadioButton(room.toString() + "Exit " + (i + 1),
+            JRadioButton rButton = new JRadioButton(room.toString() + " Exit " + (i + 1),
                     false);
             rButton.setActionCommand(String.valueOf(i));
             rButton.addActionListener(al);
@@ -128,7 +132,7 @@ public class ExitRoomDialog extends JDialog {
             radioButtonsPanel.add(Box.createRigidArea(new Dimension(15, 15)));
 
             boolean isBlocking = false;
-            for (Player existingPlayer : parent.getPlayers()) {
+            for (Player existingPlayer : parent.getAllPlayers()) {
                 if (exits.get(i).equals(existingPlayer.getPosition())) {
                     isBlocking = true;
                     break;

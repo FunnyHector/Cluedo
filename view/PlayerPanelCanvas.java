@@ -306,10 +306,9 @@ public class PlayerPanelCanvas extends JPanel {
                 remainingSteps = 0;
                 gui.setRemainingSteps(currentPlayer, remainingSteps);
 
-                // TODO this make suggestion can extract as a method
-                // can make suggestion now
-                // and then pop up do you want to make accusation
-                // if yes, pop up make accusation
+                gui.update();
+
+                gui.popUpSuggestion();
 
                 gui.currentPlayerEndTurn();
             } else {
@@ -362,10 +361,9 @@ public class PlayerPanelCanvas extends JPanel {
             remainingSteps = 0;
             gui.setRemainingSteps(currentPlayer, remainingSteps);
 
-            // TODO this make suggestion can extract as a method
-            // can make suggestion now
-            // and then pop up do you want to make accusation
-            // if yes, pop up make accusation
+            gui.update();
+
+            gui.popUpSuggestion();
 
             gui.currentPlayerEndTurn();
 
@@ -471,9 +469,8 @@ public class PlayerPanelCanvas extends JPanel {
 
             remainingSteps = 0;
             gui.setRemainingSteps(currentPlayer, remainingSteps);
+
             gui.popUpSuggestion();
-            // TODO popup do you want to make accusation
-            // if yes, pop up make accusation
 
             gui.currentPlayerEndTurn();
             gui.update();
@@ -536,16 +533,6 @@ public class PlayerPanelCanvas extends JPanel {
 
         update();
     }
-
-    // check the player's movable positions, if it contains north, enable it
-    // otherwise disable it
-
-    // if (button.getText().equals("Suggestion")) {
-    // this should not be necessary
-    // if currentPlayer is not in room, disable this button
-    // Character currentPlayer = gui.getCurrentPlayer();
-    // Position pos = gui.getPlayerPosition(currentPlayer);
-    // if (pos instanceof Room)
 
     public void update() {
 
@@ -640,7 +627,7 @@ public class PlayerPanelCanvas extends JPanel {
             // check if any other player standing there, then it's not an option
             boolean isBlocking = false;
             Tile tile = gui.getBoard().lookNorth(player);
-            for (Player existingPlayer : gui.getPlayers()) {
+            for (Player existingPlayer : gui.getAllPlayers()) {
                 if (tile.equals(existingPlayer.getPosition())) {
                     isBlocking = true;
                     break;
@@ -653,7 +640,7 @@ public class PlayerPanelCanvas extends JPanel {
             // check if any other player standing there, then it's not an option
             boolean isBlocking = false;
             Tile tile = gui.getBoard().lookEast(player);
-            for (Player existingPlayer : gui.getPlayers()) {
+            for (Player existingPlayer : gui.getAllPlayers()) {
                 if (tile.equals(existingPlayer.getPosition())) {
                     isBlocking = true;
                     break;
@@ -666,7 +653,7 @@ public class PlayerPanelCanvas extends JPanel {
             // check if any other player standing there, then it's not an option
             boolean isBlocking = false;
             Tile tile = gui.getBoard().lookSouth(player);
-            for (Player existingPlayer : gui.getPlayers()) {
+            for (Player existingPlayer : gui.getAllPlayers()) {
                 if (tile.equals(existingPlayer.getPosition())) {
                     isBlocking = true;
                     break;
@@ -679,7 +666,7 @@ public class PlayerPanelCanvas extends JPanel {
             // check if any other player standing there, then it's not an option
             boolean isBlocking = false;
             Tile tile = gui.getBoard().lookWest(player);
-            for (Player existingPlayer : gui.getPlayers()) {
+            for (Player existingPlayer : gui.getAllPlayers()) {
                 if (tile.equals(existingPlayer.getPosition())) {
                     isBlocking = true;
                     break;
@@ -703,9 +690,9 @@ public class PlayerPanelCanvas extends JPanel {
 
             if (room == Location.Kitchen || room == Location.Conservatory
                     || room == Location.Study || room == Location.Lounge) {
-
+                // these rooms has only one exit, if it's blocked, disable the exit button
                 boolean isBlocking = false;
-                for (Player existingPlayer : gui.getPlayers()) {
+                for (Player existingPlayer : gui.getAllPlayers()) {
                     if (entrances.get(0).equals(existingPlayer.getPosition())) {
                         isBlocking = true;
                         break;
@@ -714,7 +701,32 @@ public class PlayerPanelCanvas extends JPanel {
                 EnterExitRoom.setEnabled(!isBlocking);
 
             } else {
-                EnterExitRoom.setEnabled(true);
+                /*
+                 * other rooms have more than one exit. Check if they are all blocked.
+                 */
+                boolean allBlocked = true;
+                for (Entrance exit : entrances) {
+                    boolean isBlocked = false;
+                    for (Player existingPlayer : gui.getAllPlayers()) {
+                        if (exit.equals(existingPlayer.getPosition())) {
+                            isBlocked = true;
+                            break;
+                        }
+                        isBlocked = false;
+                    }
+
+                    if (!isBlocked) {
+                        allBlocked = false;
+                        break;
+                    }
+                }
+
+                if (allBlocked) {
+                    EnterExitRoom.setEnabled(false);
+                } else {
+                    EnterExitRoom.setEnabled(true);
+                }
+
             }
 
         }

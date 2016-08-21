@@ -105,9 +105,7 @@ public class BoardCanvas extends JPanel {
                 Tile tile = (Tile) pos;
                 setCharacterTokenOnTile(characterTokens[i], tile.x, tile.y);
             } else if (pos instanceof Room) {
-                Room room = (Room) pos;
-                RoomTile roomTile = gui.getAvailableRoomTile(room.getRoom());
-                setTokenInRoom(characterTokens[i], roomTile);
+                setTokenInRoom(characterTokens[i], characterTokens[i].getRoomTile());
             }
         }
 
@@ -233,8 +231,8 @@ public class BoardCanvas extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 // TODO Auto-generated method stub
 
-                int x = (e.getX() - PADDING_LEFT) / 32;
-                int y = (e.getY() - PADDING_TOP) / 32;
+                int x = (e.getX() - PADDING_LEFT) / TILE_WIDTH;
+                int y = (e.getY() - PADDING_TOP) / TILE_WIDTH;
 
                 System.out.println("clicked on Tile(" + x + ", " + y + ")");
 
@@ -244,8 +242,8 @@ public class BoardCanvas extends JPanel {
             public void mousePressed(MouseEvent e) {
                 // TODO Auto-generated method stub
 
-                int x = (e.getX() - PADDING_LEFT) / 32;
-                int y = (e.getY() - PADDING_TOP) / 32;
+                int x = (e.getX() - PADDING_LEFT) / TILE_WIDTH;
+                int y = (e.getY() - PADDING_TOP) / TILE_WIDTH;
 
                 System.out.println("pressed on Tile(" + x + ", " + y + ")");
 
@@ -255,8 +253,8 @@ public class BoardCanvas extends JPanel {
             public void mouseReleased(MouseEvent e) {
                 // TODO Auto-generated method stub
 
-                int x = (e.getX() - PADDING_LEFT) / 32;
-                int y = (e.getY() - PADDING_TOP) / 32;
+                int x = (e.getX() - PADDING_LEFT) / TILE_WIDTH;
+                int y = (e.getY() - PADDING_TOP) / TILE_WIDTH;
 
                 System.out.println("released on Tile(" + x + ", " + y + ")");
 

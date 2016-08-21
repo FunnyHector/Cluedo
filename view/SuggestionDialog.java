@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -79,14 +80,28 @@ public class SuggestionDialog extends JDialog {
                         BorderFactory.createCompoundBorder(
                                 BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
                                 BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
-                        "Who?", TitledBorder.LEFT, TitledBorder.TOP));
+                        "Select Character:", TitledBorder.LEFT, TitledBorder.TOP));
 
         List<JRadioButton> rButtonList = new ArrayList<>();
 
-        JLabel cardDisplay = new JLabel(PlayerPanelCanvas.CHARACTER_IMG[0]);
+        JPanel cardDisplay = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                for (JRadioButton b : rButtonList) {
+                    if (b.isSelected()) {
+                        g.drawImage(
+                                PlayerPanelCanvas.CHARACTER_IMG[Integer
+                                        .parseInt(b.getActionCommand())].getImage(),
+                                0, 0, this);
+                        break;
+                    }
+                }
+            }
+        };
 
         cardDisplay.setPreferredSize(CARD_DIMENSION);
-        cardDisplay.setAlignmentY(CENTER_ALIGNMENT);
+        cardDisplay.setAlignmentY(TOP_ALIGNMENT);
         // this prevents a bug where the component won't be drawn until it is resized.
         cardDisplay.setVisible(true);
 
@@ -94,29 +109,30 @@ public class SuggestionDialog extends JDialog {
         ButtonGroup radioButtonGroup = new ButtonGroup();
         JPanel radioButtonsPanel = new JPanel();
         radioButtonsPanel.setLayout(new BoxLayout(radioButtonsPanel, BoxLayout.Y_AXIS));
-        radioButtonsPanel.setAlignmentY(CENTER_ALIGNMENT);
+        radioButtonsPanel.setAlignmentY(TOP_ALIGNMENT);
+
+        // two buttons at bottom
+        JButton confirm = new JButton("Next");
+        confirm.setEnabled(false);
+        JButton cancel = new JButton("Cancel");
 
         ActionListener al = new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                JRadioButton button = (JRadioButton) e.getSource();
-                cardDisplay.setIcon(PlayerPanelCanvas.CHARACTER_IMG[Integer
-                        .parseInt(button.getActionCommand())]);
                 cardDisplay.repaint();
+                if (!confirm.isEnabled()) {
+                    confirm.setEnabled(true);
+                }
             }
         };
 
         // add radio buttons
         for (int i = 0; i < Character.size(); i++) {
             Character c = Character.get(i);
-
             JRadioButton rButton = new JRadioButton(c.toString(), false);
             rButton.setActionCommand(String.valueOf(i));
             rButton.addActionListener(al);
             rButton.setAlignmentX(LEFT_ALIGNMENT);
-            if (i == 0) {
-                rButton.setSelected(true);
-            }
-
             radioButtonGroup.add(rButton);
             rButtonList.add(rButton);
             radioButtonsPanel.add(rButton);
@@ -132,15 +148,11 @@ public class SuggestionDialog extends JDialog {
         midPanel.add(Box.createRigidArea(new Dimension(5, 5)));
 
         // a text prompt
-        JLabel text = new JLabel("Select Character:");
+        JLabel text = new JLabel("Who?");
         JPanel textPane = new JPanel();
         textPane.setLayout(new BoxLayout(textPane, BoxLayout.X_AXIS));
         textPane.setAlignmentX(Component.CENTER_ALIGNMENT);
         textPane.add(text);
-
-        // two buttons at bottom
-        JButton confirm = new JButton("Next");
-        JButton cancel = new JButton("Cancel");
 
         // confirm button's listener
         confirm.addActionListener(e -> {
@@ -186,15 +198,28 @@ public class SuggestionDialog extends JDialog {
                         BorderFactory.createCompoundBorder(
                                 BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
                                 BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
-                        "...commited crime with weapon?", TitledBorder.CENTER,
-                        TitledBorder.TOP));
+                        "Select Weapon:", TitledBorder.CENTER, TitledBorder.TOP));
 
         List<JRadioButton> rButtonList = new ArrayList<>();
 
-        JLabel cardDisplay = new JLabel(PlayerPanelCanvas.WEAPON_IMG[0]);
+        JPanel cardDisplay = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                for (JRadioButton b : rButtonList) {
+                    if (b.isSelected()) {
+                        g.drawImage(
+                                PlayerPanelCanvas.WEAPON_IMG[Integer
+                                        .parseInt(b.getActionCommand())].getImage(),
+                                0, 0, this);
+                        break;
+                    }
+                }
+            }
+        };
 
         cardDisplay.setPreferredSize(CARD_DIMENSION);
-        cardDisplay.setAlignmentY(CENTER_ALIGNMENT);
+        cardDisplay.setAlignmentY(TOP_ALIGNMENT);
         // this prevents a bug where the component won't be drawn until it is resized.
         cardDisplay.setVisible(true);
 
@@ -202,30 +227,31 @@ public class SuggestionDialog extends JDialog {
         ButtonGroup radioButtonGroup = new ButtonGroup();
         JPanel radioButtonsPanel = new JPanel();
         radioButtonsPanel.setLayout(new BoxLayout(radioButtonsPanel, BoxLayout.Y_AXIS));
-        radioButtonsPanel.setAlignmentY(CENTER_ALIGNMENT);
+        radioButtonsPanel.setAlignmentY(TOP_ALIGNMENT);
+
+        // two buttons at bottom
+        JButton confirm = new JButton("Next");
+        confirm.setEnabled(false);
+        JButton cancel = new JButton("Previous");
+        cancel.setEnabled(true);
 
         ActionListener al = new ActionListener() {
-
+            @Override
             public void actionPerformed(ActionEvent e) {
-                JRadioButton button = (JRadioButton) e.getSource();
-                cardDisplay.setIcon(PlayerPanelCanvas.WEAPON_IMG[Integer
-                        .parseInt(button.getActionCommand())]);
                 cardDisplay.repaint();
+                if (!confirm.isEnabled()) {
+                    confirm.setEnabled(true);
+                }
             }
         };
 
         // add radio buttons
         for (int i = 0; i < Weapon.size(); i++) {
             Weapon w = Weapon.get(i);
-
             JRadioButton rButton = new JRadioButton(w.toString(), false);
             rButton.setActionCommand(String.valueOf(i));
             rButton.addActionListener(al);
             rButton.setAlignmentX(LEFT_ALIGNMENT);
-            if (i == 0) {
-                rButton.setSelected(true);
-            }
-
             radioButtonGroup.add(rButton);
             rButtonList.add(rButton);
             radioButtonsPanel.add(rButton);
@@ -236,20 +262,16 @@ public class SuggestionDialog extends JDialog {
         JPanel midPanel = new JPanel();
         midPanel.setLayout(new BoxLayout(midPanel, BoxLayout.X_AXIS));
         midPanel.add(radioButtonsPanel);
-        midPanel.add(Box.createRigidArea(new Dimension(15, 15)));
+        midPanel.add(Box.createRigidArea(new Dimension(40, 15)));
         midPanel.add(cardDisplay);
         midPanel.add(Box.createRigidArea(new Dimension(5, 5)));
 
         // a text prompt
-        JLabel text = new JLabel("Select Weapon:");
+        JLabel text = new JLabel("...commited crime with weapon?");
         JPanel textPane = new JPanel();
         textPane.setLayout(new BoxLayout(textPane, BoxLayout.X_AXIS));
         textPane.setAlignmentX(Component.CENTER_ALIGNMENT);
         textPane.add(text);
-
-        // two buttons at bottom
-        JButton confirm = new JButton("Next");
-        JButton cancel = new JButton("Previous");
 
         // confirm button's listener
         confirm.addActionListener(e -> {
@@ -295,11 +317,25 @@ public class SuggestionDialog extends JDialog {
                         BorderFactory.createCompoundBorder(
                                 BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
                                 BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
-                        "...in which room?", TitledBorder.RIGHT, TitledBorder.TOP));
+                        "Select Location:", TitledBorder.RIGHT, TitledBorder.TOP));
 
         List<JRadioButton> rButtonList = new ArrayList<>();
 
-        JLabel cardDisplay = new JLabel(PlayerPanelCanvas.LOCATION_IMG[0]);
+        JPanel cardDisplay = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                for (JRadioButton b : rButtonList) {
+                    super.paintComponent(g);
+                    if (b.isSelected()) {
+                        g.drawImage(
+                                PlayerPanelCanvas.LOCATION_IMG[Integer
+                                        .parseInt(b.getActionCommand())].getImage(),
+                                0, 0, this);
+                        break;
+                    }
+                }
+            }
+        };
 
         cardDisplay.setPreferredSize(CARD_DIMENSION);
         cardDisplay.setAlignmentY(CENTER_ALIGNMENT);
@@ -312,13 +348,23 @@ public class SuggestionDialog extends JDialog {
         radioButtonsPanel.setLayout(new BoxLayout(radioButtonsPanel, BoxLayout.Y_AXIS));
         radioButtonsPanel.setAlignmentY(CENTER_ALIGNMENT);
 
-        ActionListener al = new ActionListener() {
+        // two buttons at bottom
+        JButton confirm;
+        if (isAccusation) {
+            confirm = new JButton("Make Accusation!");
+        } else {
+            confirm = new JButton("Make Suggestion!");
+        }
 
+        JButton cancel = new JButton("Previous");
+
+        ActionListener al = new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                JRadioButton button = (JRadioButton) e.getSource();
-                cardDisplay.setIcon(PlayerPanelCanvas.LOCATION_IMG[Integer
-                        .parseInt(button.getActionCommand())]);
                 cardDisplay.repaint();
+                if (!confirm.isEnabled()) {
+                    confirm.setEnabled(true);
+                }
             }
         };
 
@@ -330,19 +376,14 @@ public class SuggestionDialog extends JDialog {
             rButton.setActionCommand(String.valueOf(i));
             rButton.addActionListener(al);
             rButton.setAlignmentX(LEFT_ALIGNMENT);
-
-            if (i == 0) {
-                rButton.setSelected(true);
-            }
-
             radioButtonGroup.add(rButton);
             rButtonList.add(rButton);
             radioButtonsPanel.add(rButton);
             radioButtonsPanel.add(Box.createRigidArea(new Dimension(5, 5)));
         }
 
+        // disable other rooms, only enable the current room
         if (!isAccusation) {
-
             Character currentPlayer = gui.getCurrentPlayer();
             Position pos = gui.getPlayerPosition(currentPlayer);
             if (pos instanceof Room) {
@@ -361,7 +402,6 @@ public class SuggestionDialog extends JDialog {
                     }
                 }
             }
-
         }
 
         // the middle panel to hold radio buttons and card display
@@ -373,21 +413,11 @@ public class SuggestionDialog extends JDialog {
         midPanel.add(Box.createRigidArea(new Dimension(5, 5)));
 
         // a text prompt
-        JLabel text = new JLabel("Select Location:");
+        JLabel text = new JLabel("...in which room?");
         JPanel textPane = new JPanel();
         textPane.setLayout(new BoxLayout(textPane, BoxLayout.X_AXIS));
         textPane.setAlignmentX(Component.CENTER_ALIGNMENT);
         textPane.add(text);
-
-        // two buttons at bottom
-        JButton confirm;
-        if (isAccusation) {
-            confirm = new JButton("Make Accusation!");
-        } else {
-            confirm = new JButton("Make Suggestion!");
-        }
-
-        JButton cancel = new JButton("Previous");
 
         // confirm button's listener
         confirm.addActionListener(e -> {

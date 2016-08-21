@@ -50,6 +50,7 @@ import card.Card;
 import card.Character;
 import card.Location;
 import card.Weapon;
+import configs.Configs;
 
 public class GUIClient extends JFrame implements KeyListener {
 
@@ -58,6 +59,8 @@ public class GUIClient extends JFrame implements KeyListener {
     public static final Image GAME_BOARD = loadImage("Game_Board.png");
     public static final ImageIcon CORRECT = new ImageIcon(loadImage("Icon_Correct.png"));
     public static final ImageIcon INCORRECT = new ImageIcon(
+            loadImage("Icon_Incorrect.png"));
+    public static final ImageIcon ACCUSE_ICON = new ImageIcon(
             loadImage("Icon_Incorrect.png"));
 
     public static final int HEIGHT = BoardCanvas.BOARD_IMG_HEIGHT
@@ -221,8 +224,21 @@ public class GUIClient extends JFrame implements KeyListener {
     }
 
     public void update() {
-        gameBoardPanel.update();
-        playerPanel.update();
+        if (game.isGameRunning()) {
+            gameBoardPanel.update();
+            playerPanel.update();
+        } else {
+            int choice = JOptionPane.showConfirmDialog(window,
+                    getCurrentPlayer().toString()
+                            + " are the only player left. Congratulations, you are the winner!\n"
+                            + "Do you want to play again?",
+                    getCurrentPlayer().toString() + " won!", JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE, CORRECT);
+
+            if (choice == JOptionPane.OK_OPTION) {
+                setupNumPlayers();
+            }
+        }
     }
 
     private TitledBorder creatTitledBorder(String string) {
@@ -241,11 +257,21 @@ public class GUIClient extends JFrame implements KeyListener {
 
     public void makeSuggestion(Character c, Weapon w, Location l) {
         Suggestion suggestion = new Suggestion(c, w, l);
-        game.moveTokensInvolvedInSuggestion(suggestion);
+        movePlayer(suggestion.character, Configs.getRoom(suggestion.location));
+        moveWeapon(suggestion.weapon, getAvailableRoomTile(suggestion.location));
         String s = game.rejectSuggestion(suggestion);
 
-        JOptionPane.showMessageDialog(window, s, "Message from other players",
+        JOptionPane.showMessageDialog(window, s, "Refution from other players",
                 JOptionPane.INFORMATION_MESSAGE);
+
+        int choice = JOptionPane.showConfirmDialog(window,
+                "Do you want to make an accusation right away?", "Make Accusation?",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                ACCUSE_ICON);
+
+        if (choice == JOptionPane.OK_OPTION) {
+            popUpAccusation();
+        }
 
     }
 
@@ -255,11 +281,18 @@ public class GUIClient extends JFrame implements KeyListener {
     }
 
     public void makeAccusation(Character c, Weapon w, Location l) {
+
+        Suggestion suggestion = new Suggestion(c, w, l);
+        movePlayer(suggestion.character, Configs.getRoom(suggestion.location));
+        moveWeapon(suggestion.weapon, getAvailableRoomTile(suggestion.location));
+
         boolean isCorrect = game.checkAccusation(new Suggestion(c, w, l));
         if (isCorrect) {
             int choice = JOptionPane.showConfirmDialog(window,
-                    "Your accusation is correct.\nCongratulations, you are the winner!\nDo you want to play again?",
-                    "Correct", JOptionPane.OK_CANCEL_OPTION,
+                    "Your accusation is correct.\nCongratulations, "
+                            + getCurrentPlayer().toString()
+                            + " are the winner!\nDo you want to play again?",
+                    getCurrentPlayer().toString() + " won!", JOptionPane.OK_CANCEL_OPTION,
                     JOptionPane.INFORMATION_MESSAGE, CORRECT);
 
             if (choice == JOptionPane.OK_OPTION) {
@@ -340,7 +373,7 @@ public class GUIClient extends JFrame implements KeyListener {
         return game.getBoard();
     }
 
-    public List<Player> getPlayers() {
+    public List<Player> getAllPlayers() {
         return game.getPlayers();
     }
 
