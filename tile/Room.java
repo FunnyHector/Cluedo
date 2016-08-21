@@ -23,10 +23,6 @@ public class Room extends Position {
     private final Location secPasTo;
     // a collection of entrance tiles only on which a player can enter this room.
     private final List<Entrance> entrances;
-    // a collection of decorative tiles for drawing tokens
-    private final List<Tile> decoTiles;
-    // used to prevent from two tokens occupying the same position
-    private int decoIndex = 0;
 
     /**
      * Construct a Room with current location and the location where the secret passage
@@ -42,7 +38,6 @@ public class Room extends Position {
         this.room = room;
         this.secPasTo = secPasTo;
         entrances = new ArrayList<>();
-        decoTiles = new ArrayList<>();
     }
 
     /**
@@ -89,33 +84,9 @@ public class Room extends Position {
      *            --- An entrance tile of this room
      */
     public void addEntrances(Entrance entrance) {
-        entrances.add(entrance);
-    }
-
-    /**
-     * Add a decorative tile to this room.
-     * 
-     * @param decoTile
-     *            --- a tile that is used to display a character token or weapon token.
-     *            It's used only for a nicer text gui.
-     */
-    public void addDecoTiles(Tile decoTile) {
-        decoTiles.add(decoTile);
-    }
-
-    /**
-     * return a decorative tile
-     * 
-     * @return --- a decorative tile
-     */
-    public Tile getNextDecoTile() {
-        // TODO this method is buggy
-        int index = decoIndex;
-        decoIndex++;
-        if (decoIndex >= decoTiles.size()) {
-            decoIndex = 0;
+        if (!entrances.contains(entrance)) {
+            entrances.add(entrance);
         }
-        return decoTiles.get(index);
     }
 
     @Override

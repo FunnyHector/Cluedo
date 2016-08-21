@@ -127,7 +127,7 @@ public class SuggestionDialog extends JDialog {
         };
 
         // add radio buttons
-        for (int i = 0; i < Character.size(); i++) {
+        for (int i = 0; i < Character.values().length; i++) {
             Character c = Character.get(i);
             JRadioButton rButton = new JRadioButton(c.toString(), false);
             rButton.setActionCommand(String.valueOf(i));
@@ -246,7 +246,7 @@ public class SuggestionDialog extends JDialog {
         };
 
         // add radio buttons
-        for (int i = 0; i < Weapon.size(); i++) {
+        for (int i = 0; i < Weapon.values().length; i++) {
             Weapon w = Weapon.get(i);
             JRadioButton rButton = new JRadioButton(w.toString(), false);
             rButton.setActionCommand(String.valueOf(i));
@@ -369,7 +369,7 @@ public class SuggestionDialog extends JDialog {
         };
 
         // add radio buttons
-        for (int i = 0; i < Location.size(); i++) {
+        for (int i = 0; i < Location.values().length; i++) {
             Location l = Location.get(i);
 
             JRadioButton rButton = new JRadioButton(l.toString(), false);

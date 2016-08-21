@@ -62,7 +62,7 @@ public class TextClient {
         // set how many players
         System.out.println("How many players?");
         int numPlayers = parseInt(Configs.MIN_PLAYER, Configs.MAX_PLAYER);
-        Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+        Game game = new Game(numPlayers, Configs.NUM_DICE);
 
         // let players choose which character to play with
         int playerIndex = 0;
@@ -90,7 +90,7 @@ public class TextClient {
             int choice = parseInt(1, size);
 
             // join this player in
-            game.joinPlayer(playableCharacters.get(choice - 1));
+            game.joinPlayer(playableCharacters.get(choice - 1), "");
             choice = 0; // reset
         }
 
@@ -197,7 +197,7 @@ public class TextClient {
                 // move into a room, now the player can make suggestion
                 Suggestion suggestion = makeSuggestion(game, destination);
                 // now compare the suggestion, and other players try to reject it
-                System.out.println(game.rejectSuggestion(suggestion));
+                System.out.println(game.refuteSuggestion(suggestion));
 
                 // prompt if the player want to make accusation now
                 System.out.println("Do you want to make an accusation now?");
@@ -228,7 +228,7 @@ public class TextClient {
                 // player chose to make a suggestion
                 Suggestion suggestion = makeSuggestion(game, currentPos);
                 // now other players try to reject it
-                System.out.println(game.rejectSuggestion(suggestion));
+                System.out.println(game.refuteSuggestion(suggestion));
 
                 // prompt if the player want to make accusation now
                 System.out.println("Do you want to make an accusation now?");

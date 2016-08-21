@@ -22,7 +22,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import configs.Configs;
+import card.Card;
 import card.Character;
+import card.Location;
 import card.Weapon;
 import game.GameError;
 import game.Player;
@@ -31,6 +33,7 @@ import tile.Room;
 import tile.RoomTile;
 import tile.Tile;
 import ui.GUIClient;
+import view.token.AbstractToken;
 import view.token.CharacterToken;
 import view.token.WeaponToken;
 
@@ -53,6 +56,12 @@ public class BoardCanvas extends JPanel {
             new ImageIcon(loadImage("Token_Revolver.png")),
             new ImageIcon(loadImage("Token_Rope.png")),
             new ImageIcon(loadImage("Token_Spanner.png")) };
+
+    private static final int[][] NO_BRAINER_POS = { { 5, 6 }, { 15, 7 }, { 23, 4 },
+            { 23, 12 }, { 22, 18 }, { 23, 24 }, { 14, 24 }, { 5, 24 }, { 7, 15 } };
+
+    private static final JLabel[] CROSS_ON_ROOM = createCrossOnRoom();
+    private static final JLabel[] QUESTION_ON_ROOM = creatQuestionOnRoom();
 
     // The game board image is made according to this pixel size
     public static final int TILE_WIDTH = 32;
@@ -89,6 +98,15 @@ public class BoardCanvas extends JPanel {
             this.add(weaponTokens[i]);
         }
 
+        // add question marks and cross for no brainer mode
+        for (int i = 0; i < QUESTION_ON_ROOM.length; i++) {
+            this.add(QUESTION_ON_ROOM[i]);
+        }
+
+        for (int i = 0; i < CROSS_ON_ROOM.length; i++) {
+            this.add(CROSS_ON_ROOM[i]);
+        }
+
         // update tokens' positions
         update();
 
@@ -96,8 +114,42 @@ public class BoardCanvas extends JPanel {
 
     public void update() {
 
+        WeaponToken[] weaponTokens = gui.getWeaponTokens();
+        Set<Card> knownCards = gui.getKnownCards();
+        boolean isNoBrainerMode = gui.isNoBrainerMode();
+
+        // if it is no brainer mode, draw some cross or question marks on rooms
+        if (isNoBrainerMode) {
+            for (Location l : Location.values()) {
+                if (knownCards.contains(l)) {
+                    CROSS_ON_ROOM[l.ordinal()].setVisible(true);
+                    QUESTION_ON_ROOM[l.ordinal()].setVisible(false);
+                } else {
+                    QUESTION_ON_ROOM[l.ordinal()].setVisible(true);
+                    CROSS_ON_ROOM[l.ordinal()].setVisible(false);
+                }
+            }
+        } else {
+            for (JLabel jLabel : CROSS_ON_ROOM) {
+                jLabel.setVisible(false);
+            }
+            for (JLabel jLabel : QUESTION_ON_ROOM) {
+                jLabel.setVisible(false);
+            }
+
+        }
+
         // update character tokens
         for (int i = 0; i < characterTokens.length; i++) {
+
+            // if it is no brainer mode, reset the tooltip for tokens.
+            characterTokens[i].setNoBrainer(isNoBrainerMode);
+            if (knownCards.contains(characterTokens[i].getCharacter())) {
+                characterTokens[i].setIsKnown(true);
+            } else {
+                characterTokens[i].setIsKnown(false);
+            }
+
             Player player = gui.getPlayerByCharacter(Character.get(i));
             Position pos = player.getPosition();
 
@@ -110,8 +162,16 @@ public class BoardCanvas extends JPanel {
         }
 
         // update weapon tokens
-        WeaponToken[] weaponTokens = gui.getWeaponTokens();
         for (int i = 0; i < weaponTokens.length; i++) {
+
+            // if it is no brainer mode, reset the tooltip for tokens.
+            weaponTokens[i].setNoBrainer(isNoBrainerMode);
+            if (knownCards.contains(weaponTokens[i].getWeapon())) {
+                weaponTokens[i].setIsKnown(true);
+            } else {
+                weaponTokens[i].setIsKnown(false);
+            }
+
             setTokenInRoom(weaponTokens[i], weaponTokens[i].getRoomTile());
         }
 
@@ -135,6 +195,13 @@ public class BoardCanvas extends JPanel {
 
     }
 
+    private void setNoBrainerCrossForRoom(JLabel cross, int x, int y) {
+        int height = cross.getIcon().getIconHeight();
+        int width = cross.getIcon().getIconWidth();
+        cross.setBounds(PADDING_LEFT + TILE_WIDTH * x,
+                PADDING_TOP + TILE_WIDTH * y - (height - TILE_WIDTH + 2), width, height);
+    }
+
     private CharacterToken[] createCharacterToken(ImageIcon[] charactertokenImg) {
         CharacterToken[] tokens = new CharacterToken[charactertokenImg.length];
         for (int i = 0; i < charactertokenImg.length; i++) {
@@ -142,10 +209,43 @@ public class BoardCanvas extends JPanel {
             Tile tile = gui.getStartPosition(c);
             tokens[i] = new CharacterToken(charactertokenImg[i], tile.x, tile.y, c);
             tokens[i].setBorder(null);
-            tokens[i].setToolTipText(c.toString());
+            tokens[i].setToolTipText(c.toString() + ". \n(Player: "
+                    + gui.getPlayerByCharacter(c).getName() + ")");
             addMouseListenerOnCharacterToken(tokens[i]);
         }
         return tokens;
+    }
+
+    private static JLabel[] creatQuestionOnRoom() {
+        JLabel[] questionIcons = new JLabel[Location.values().length];
+        for (int i = 0; i < Location.values().length; i++) {
+            questionIcons[i] = new JLabel(AbstractToken.QUESTION_ICON);
+            int width = AbstractToken.QUESTION_ICON.getIconWidth();
+            int Height = AbstractToken.QUESTION_ICON.getIconHeight();
+
+            questionIcons[i].setBounds(PADDING_LEFT + TILE_WIDTH * NO_BRAINER_POS[i][0],
+                    PADDING_TOP + TILE_WIDTH * NO_BRAINER_POS[i][1], width, Height);
+
+            questionIcons[i].setVisible(false);
+        }
+
+        return questionIcons;
+    }
+
+    private static JLabel[] createCrossOnRoom() {
+        JLabel[] crossIcons = new JLabel[Location.values().length];
+        for (int i = 0; i < Location.values().length; i++) {
+            crossIcons[i] = new JLabel(AbstractToken.CROSS_ICON);
+            int width = AbstractToken.CROSS_ICON.getIconWidth();
+            int Height = AbstractToken.CROSS_ICON.getIconHeight();
+
+            crossIcons[i].setBounds(PADDING_LEFT + TILE_WIDTH * NO_BRAINER_POS[i][0],
+                    PADDING_TOP + TILE_WIDTH * NO_BRAINER_POS[i][1], width, Height);
+
+            crossIcons[i].setVisible(false);
+        }
+
+        return crossIcons;
     }
 
     private static void addMouseListenerOnCharacterToken(CharacterToken jlabel) {

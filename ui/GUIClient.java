@@ -13,6 +13,8 @@ import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -92,9 +94,6 @@ public class GUIClient extends JFrame {
     private int numPlayers;
     private int numDices;
 
-    // a helper booleans
-    private boolean noBrainer;
-
     public GUIClient() {
         welcomeScreen();
     }
@@ -140,17 +139,19 @@ public class GUIClient extends JFrame {
     public void createNewGame(int numPlayers, int numDices) {
         this.numPlayers = numPlayers;
         this.numDices = numDices;
-        game = new Game(numPlayers, numDices, true);
+        game = new Game(numPlayers, numDices);
     }
 
     /**
-     * Set the given player as human controlled
+     * Set the given player as human controlled, give it a name.
      * 
      * @param playerChoice
      *            --- the character chosen by a player
+     * @param name
+     *            --- the customised name
      */
-    public void joinPlayer(Character playerChoice) {
-        game.joinPlayer(playerChoice);
+    public void joinPlayer(Character playerChoice, String name) {
+        game.joinPlayer(playerChoice, name);
     }
 
     /**
@@ -246,10 +247,12 @@ public class GUIClient extends JFrame {
                 case KeyEvent.VK_SPACE:
                     playerPanel.tryClickOnLeft();
                     break;
-                default:  
+                default:
                 }
             }
         });
+
+        ((CustomMenu) this.getJMenuBar()).enableNoBrainerMenu();
 
         // last
         this.add(window);
@@ -260,12 +263,6 @@ public class GUIClient extends JFrame {
         this.repaint();
         this.setResizable(false);
         this.setVisible(true);
-
-        // ============= initialise fields ================
-        noBrainer = false;
-
-        // game.joinPlayer(playerChoice);
-
     }
 
     public void update() {
@@ -288,25 +285,17 @@ public class GUIClient extends JFrame {
         }
     }
 
-    private TitledBorder creatTitledBorder(String string) {
-        return BorderFactory
-                .createTitledBorder(
-                        BorderFactory.createCompoundBorder(
-                                BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
-                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
-                        string, TitledBorder.CENTER, TitledBorder.TOP);
-    }
-
     public void popUpSuggestion() {
         new SuggestionDialog(this, SwingUtilities.windowForComponent(this),
                 "Make a Suggestion", false);
+
     }
 
     public void makeSuggestion(Character c, Weapon w, Location l) {
         Suggestion suggestion = new Suggestion(c, w, l);
         movePlayer(suggestion.character, Configs.getRoom(suggestion.location));
         moveWeapon(suggestion.weapon, getAvailableRoomTile(suggestion.location));
-        String s = game.rejectSuggestion(suggestion);
+        String s = game.refuteSuggestion(suggestion);
 
         JOptionPane.showMessageDialog(window, s, "Refution from other players",
                 JOptionPane.INFORMATION_MESSAGE);
@@ -337,9 +326,10 @@ public class GUIClient extends JFrame {
         if (isCorrect) {
             int choice = JOptionPane.showConfirmDialog(window,
                     "Your accusation is correct.\nCongratulations, "
-                            + getCurrentPlayer().toString()
-                            + " are the winner!\nDo you want to play again?",
-                    getCurrentPlayer().toString() + " won!", JOptionPane.OK_CANCEL_OPTION,
+                            + getCurrentPlayer().toString() + "("
+                            + game.getPlayerByCharacter(getCurrentPlayer()).getName()
+                            + ") is the winner!\nDo you want to play again?",
+                    "WINNER!", JOptionPane.OK_CANCEL_OPTION,
                     JOptionPane.INFORMATION_MESSAGE, CORRECT);
 
             if (choice == JOptionPane.OK_OPTION) {
@@ -351,6 +341,15 @@ public class GUIClient extends JFrame {
                     "Your accusation is WRONG, you are out!", "Incorrect",
                     JOptionPane.ERROR_MESSAGE, INCORRECT);
         }
+    }
+
+    /**
+     * This method gets all cards that is known as not involved in crime.
+     * 
+     * @return --- all cards that is known as not involved in crime.
+     */
+    public Set<Card> getKnownCards() {
+        return game.getKnownCards();
     }
 
     /**
@@ -454,8 +453,12 @@ public class GUIClient extends JFrame {
         return game.getRemainingCards();
     }
 
-    public void setNobrainerMode(boolean nobrainer) {
-        this.noBrainer = nobrainer;
+    public void setNobrainerMode(boolean isNobrainerMode) {
+        game.setNoBrainerMode(isNobrainerMode);
+    }
+
+    public boolean isNoBrainerMode() {
+        return game.isNoBrainerMode();
     }
 
     public boolean isGameRunning() {
@@ -547,16 +550,13 @@ public class GUIClient extends JFrame {
         return game.getMovablePositions(character);
     }
 
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    new GUIClient();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+    private TitledBorder creatTitledBorder(String string) {
+        return BorderFactory
+                .createTitledBorder(
+                        BorderFactory.createCompoundBorder(
+                                BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
+                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
+                        string, TitledBorder.CENTER, TitledBorder.TOP);
     }
 
     public static Image loadImage(String filename) {
@@ -569,4 +569,15 @@ public class GUIClient extends JFrame {
         }
     }
 
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    new GUIClient();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 }

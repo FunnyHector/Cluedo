@@ -27,11 +27,11 @@ public class InitialisationTest {
     @Test
     public void numPlayers() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
 
             for (int i = 0; i < numPlayers; i++) {
                 Character c = Character.values()[i];
-                game.joinPlayer(c);
+                game.joinPlayer(c, "");
             }
 
             int count = 0;
@@ -69,10 +69,10 @@ public class InitialisationTest {
      */
     @Test
     public void validDiceRoll() {
-        Game game = new Game(3, Configs.NUM_DICE, false);
-        game.joinPlayer(Character.Miss_Scarlet);
-        game.joinPlayer(Character.Mrs_White);
-        game.joinPlayer(Character.Mrs_Peacock);
+        Game game = new Game(3, Configs.NUM_DICE);
+        game.joinPlayer(Character.Miss_Scarlet, "");
+        game.joinPlayer(Character.Mrs_White, "");
+        game.joinPlayer(Character.Mrs_Peacock, "");
         game.creatSolution();
         game.dealCard();
         game.setPlayerMoveFirst();
@@ -83,7 +83,7 @@ public class InitialisationTest {
             diceRoll = game.rollDice(game.getCurrentPlayer());
             int total = 0;
             for (int j = 0; j < diceRoll.length; j++) {
-                total += diceRoll[i];
+                total += (diceRoll[j] + 1);
             }
             if (total < Configs.NUM_DICE || total > Configs.NUM_DICE * 6) {
                 fail("Strange dice!!!");
@@ -98,11 +98,11 @@ public class InitialisationTest {
     @Test
     public void choosingCharacter() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
 
-            game.joinPlayer(Character.Miss_Scarlet);
-            game.joinPlayer(Character.Mrs_White);
-            game.joinPlayer(Character.Mrs_Peacock);
+            game.joinPlayer(Character.Miss_Scarlet, "");
+            game.joinPlayer(Character.Mrs_White, "");
+            game.joinPlayer(Character.Mrs_Peacock, "");
 
             assertTrue("Miss Scarlet should be playing",
                     game.getPlayerByCharacter(Character.Miss_Scarlet).isPlaying());
@@ -126,13 +126,13 @@ public class InitialisationTest {
     @Test
     public void creatSolution() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
 
             List<Player> players = new ArrayList<>();
 
             for (int i = 0; i < numPlayers; i++) {
                 Character c = Character.values()[i];
-                game.joinPlayer(c);
+                game.joinPlayer(c, "");
                 players.add(game.getPlayerByCharacter(c));
             }
 
@@ -171,13 +171,13 @@ public class InitialisationTest {
     @Test
     public void dealingCards() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
 
             List<Player> players = new ArrayList<>();
 
             for (int i = 0; i < numPlayers; i++) {
                 Character c = Character.values()[i];
-                game.joinPlayer(c);
+                game.joinPlayer(c, "");
                 players.add(game.getPlayerByCharacter(c));
             }
 
@@ -234,12 +234,12 @@ public class InitialisationTest {
     @Test
     public void noDuplicateCards() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             List<Player> players = new ArrayList<>();
             Set<Card> cardPile = new HashSet<>();
             for (int i = 0; i < numPlayers; i++) {
                 Character c = Character.values()[i];
-                game.joinPlayer(c);
+                game.joinPlayer(c, "");
                 players.add(game.getPlayerByCharacter(c));
             }
             game.creatSolution();

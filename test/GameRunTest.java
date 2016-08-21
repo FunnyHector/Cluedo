@@ -27,11 +27,11 @@ public class GameRunTest {
     @Test
     public void playerCycling() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
 
-            game.joinPlayer(Character.Colonel_Mustard);
-            game.joinPlayer(Character.The_Reverend_Green);
-            game.joinPlayer(Character.Professor_Plum);
+            game.joinPlayer(Character.Colonel_Mustard, "");
+            game.joinPlayer(Character.The_Reverend_Green, "");
+            game.joinPlayer(Character.Professor_Plum, "");
 
             game.creatSolution();
             game.dealCard();
@@ -59,10 +59,10 @@ public class GameRunTest {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
 
             for (Character c : Character.values()) {
-                Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+                Game game = new Game(numPlayers, Configs.NUM_DICE);
 
                 for (int i = 0; i < numPlayers; i++) {
-                    game.joinPlayer(Character.values()[i]);
+                    game.joinPlayer(Character.values()[i], "");
                 }
 
                 game.creatSolution();
@@ -74,6 +74,8 @@ public class GameRunTest {
                 // put the player in lounge
                 game.movePlayer(c, Configs.LOUNGE);
                 List<Position> positions = game.getMovablePositions(c);
+                int size = positions.size();
+                System.out.println(size);
                 // secret passage
                 if (!positions.contains(Configs.CONSERVATORY)) {
                     fail("Should be able to go to CONSERVATORY");
@@ -164,10 +166,10 @@ public class GameRunTest {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
 
             for (Character c : Character.values()) {
-                Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+                Game game = new Game(numPlayers, Configs.NUM_DICE);
 
                 for (int i = 0; i < numPlayers; i++) {
-                    game.joinPlayer(Character.values()[i]);
+                    game.joinPlayer(Character.values()[i], "");
                 }
 
                 game.creatSolution();
@@ -217,10 +219,10 @@ public class GameRunTest {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
 
             for (Character c : Character.values()) {
-                Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+                Game game = new Game(numPlayers, Configs.NUM_DICE);
 
                 for (int i = 0; i < numPlayers; i++) {
-                    game.joinPlayer(Character.values()[i]);
+                    game.joinPlayer(Character.values()[i], "");
                 }
 
                 game.creatSolution();
@@ -275,9 +277,9 @@ public class GameRunTest {
     @Test
     public void validMove() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
-                game.joinPlayer(Character.values()[i]);
+                game.joinPlayer(Character.values()[i], "");
             }
             game.creatSolution();
             game.dealCard();
@@ -306,9 +308,9 @@ public class GameRunTest {
     @Test
     public void boardBoundary() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
-                game.joinPlayer(Character.values()[i]);
+                game.joinPlayer(Character.values()[i], "");
             }
             game.creatSolution();
             game.dealCard();
@@ -337,9 +339,9 @@ public class GameRunTest {
     @Test
     public void ghostThroughWall() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
-                game.joinPlayer(Character.values()[i]);
+                game.joinPlayer(Character.values()[i], "");
             }
             game.creatSolution();
             game.dealCard();
@@ -365,9 +367,9 @@ public class GameRunTest {
     @Test
     public void correctAccusationWins() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
-                game.joinPlayer(Character.values()[i]);
+                game.joinPlayer(Character.values()[i], "");
             }
             game.creatSolution();
             game.dealCard();
@@ -397,9 +399,9 @@ public class GameRunTest {
     @Test
     public void wrongAccuserOut() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
-                game.joinPlayer(Character.values()[i]);
+                game.joinPlayer(Character.values()[i], "");
             }
             game.creatSolution();
             game.dealCard();
@@ -431,9 +433,9 @@ public class GameRunTest {
     @Test
     public void lastSurvivorWin() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
-                game.joinPlayer(Character.values()[i]);
+                game.joinPlayer(Character.values()[i], "");
             }
             game.creatSolution();
             game.dealCard();
@@ -464,9 +466,9 @@ public class GameRunTest {
     @Test
     public void suggestionMovesCharacterAndWeapon() {
         for (int numPlayers = Configs.MIN_PLAYER; numPlayers <= Configs.MAX_PLAYER; numPlayers++) {
-            Game game = new Game(numPlayers, Configs.NUM_DICE, false);
+            Game game = new Game(numPlayers, Configs.NUM_DICE);
             for (int i = 0; i < numPlayers; i++) {
-                game.joinPlayer(Character.values()[i]);
+                game.joinPlayer(Character.values()[i], "");
             }
             game.creatSolution();
             game.dealCard();
@@ -496,7 +498,7 @@ public class GameRunTest {
             }
 
             for (WeaponToken wt : game.getWeaponTokens()) {
-                if (wt.getToken() == w) {
+                if (wt.getWeapon() == w) {
                     if (!Configs.getRoom(wt.getRoomTile().getRoom())
                             .equals(Configs.getRoom(l))) {
                         fail("weapon mentioned in suggestion should be moved in the mentioned room");

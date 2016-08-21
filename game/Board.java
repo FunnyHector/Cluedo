@@ -1,9 +1,6 @@
 package game;
 
-import java.awt.Point;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import tile.Entrance;
 import tile.Position;
@@ -37,13 +34,9 @@ public class Board {
     /**
      * Construct a board.
      */
-    public Board(boolean isGUI) {
-        String boardString;
-        if (isGUI) {
-            boardString = Configs.BOARD_STRING_GUI;
-        } else {
-            boardString = Configs.BOARD_STRING_TXT;
-        }
+    public Board() {
+        String boardString = Configs.BOARD_STRING;
+
         int height = Configs.BOARD_HEIGHT;
         int width = Configs.BOARD_WIDTH;
 
@@ -183,58 +176,6 @@ public class Board {
                 Configs.DINING_ROOM.addEntrances(entrToDining);
                 break;
 
-            /*
-             * 'A' - 'I' represents decorative tiles in each room, which has no
-             * functionality on board, only indicates where to draw player token and
-             * weapon token. 'A' marks where to draw in room '1', 'b' to room '2', and so
-             * on.
-             */
-            case 'A':
-                Tile decoTile_A = new Tile(x, y);
-                board[y][x] = decoTile_A;
-                Configs.KITCHEN.addDecoTiles(decoTile_A);
-                break;
-            case 'B':
-                Tile decoTile_B = new Tile(x, y);
-                board[y][x] = decoTile_B;
-                Configs.BALL_ROOM.addDecoTiles(decoTile_B);
-                break;
-            case 'C':
-                Tile decoTile_C = new Tile(x, y);
-                board[y][x] = decoTile_C;
-                Configs.CONSERVATORY.addDecoTiles(decoTile_C);
-                break;
-            case 'D':
-                Tile decoTile_D = new Tile(x, y);
-                board[y][x] = decoTile_D;
-                Configs.BILLARD_ROOM.addDecoTiles(decoTile_D);
-                break;
-            case 'E':
-                Tile decoTile_E = new Tile(x, y);
-                board[y][x] = decoTile_E;
-                Configs.LIBRARY.addDecoTiles(decoTile_E);
-                break;
-            case 'F':
-                Tile decoTile_F = new Tile(x, y);
-                board[y][x] = decoTile_F;
-                Configs.STUDY.addDecoTiles(decoTile_F);
-                break;
-            case 'G':
-                Tile decoTile_G = new Tile(x, y);
-                board[y][x] = decoTile_G;
-                Configs.HALL.addDecoTiles(decoTile_G);
-                break;
-            case 'H':
-                Tile decoTile_H = new Tile(x, y);
-                board[y][x] = decoTile_H;
-                Configs.LOUNGE.addDecoTiles(decoTile_H);
-                break;
-            case 'I':
-                Tile decoTile_I = new Tile(x, y);
-                board[y][x] = decoTile_I;
-                Configs.DINING_ROOM.addDecoTiles(decoTile_I);
-                break;
-
             default:
                 throw new GameError("Invalid board string, unknow character:"
                         + boardString.charAt(index));
@@ -282,6 +223,15 @@ public class Board {
         }
     }
 
+    /**
+     * This method finds the next empty spot in a given room to display player or weapon
+     * tokens.
+     * 
+     * @param location
+     *            --- which room we want to display a token
+     * @return --- an empty spot to display a token in the given room, or null if the room
+     *         is full (impossible to happen with the default board)
+     */
     public RoomTile getAvailableRoomTile(Location location) {
         for (int y = 0; y < board.length; y++) {
             for (int x = 0; x < board[0].length; x++) {

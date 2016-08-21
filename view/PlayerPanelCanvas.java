@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GridLayout;
@@ -17,8 +18,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.DoubleToLongFunction;
 
 import javax.swing.BorderFactory;
@@ -98,7 +103,6 @@ public class PlayerPanelCanvas extends JPanel {
 
         this.gui = guiClient;
         remainingCards = gui.getRemainingCards();
-        // cardsInHand = new ArrayList<>();
 
         // ================== BorderLayout =====================
         this.setLayout(new BorderLayout(5, 5));
@@ -203,6 +207,8 @@ public class PlayerPanelCanvas extends JPanel {
         remainingStepLabel = new JLabel();
         remainingStepLabel.setBackground(null);
         remainingStepLabel.setOpaque(false);
+        remainingStepLabel.setFont(new Font("Calibre", 1, 20));
+        remainingStepLabel.setForeground(Color.DARK_GRAY);
         remainingStepLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // create Empty Border

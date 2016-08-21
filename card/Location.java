@@ -27,15 +27,6 @@ public enum Location implements Card {
     }
 
     /**
-     * Return the size of this Enumeration class, i.e. how many locations inside.
-     * 
-     * @return --- the size of this Enumeration class, i.e. how many locations inside.
-     */
-    public static int size() {
-        return 9;
-    }
-
-    /**
      * Get the location whose ordinal is index.
      * 
      * @param index

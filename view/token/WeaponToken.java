@@ -36,6 +36,7 @@ public class WeaponToken extends AbstractToken {
         super(img, roomTile.getX(), roomTile.getY());
         this.weapon = token;
         this.roomTile = roomTile;
+        this.setToolTipText(token.toString());
     }
 
     /**
@@ -43,7 +44,7 @@ public class WeaponToken extends AbstractToken {
      * 
      * @return --- what weapon
      */
-    public Weapon getToken() {
+    public Weapon getWeapon() {
         return weapon;
     }
 

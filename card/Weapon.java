@@ -48,15 +48,6 @@ public enum Weapon implements Card {
     }
 
     /**
-     * Return the size of this Enumeration class, i.e. how many weapons inside.
-     * 
-     * @return --- the size of this Enumeration class, i.e. how many weapons inside.
-     */
-    public static int size() {
-        return 6;
-    }
-
-    /**
      * Get the weapon whose ordinal is index.
      * 
      * @param index

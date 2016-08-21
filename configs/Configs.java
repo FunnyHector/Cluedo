@@ -167,52 +167,6 @@ public class Configs {
             "│          ┌─┘    │          │    └─┐          │\n" + 
             "└──────────┘■■  ■■└──────────┘■■  ■■└──────────┘\n";
 
-    
-    /**
-     * a string used to construct the board in text-ui game.<br>
-     * <br>
-     * '0' : walkable tiles, tiles that are out of all rooms.<br>
-     * ' ' : (space) represents walls and unenterable tiles.<br>
-     * 1-9 : represents nine rooms on board.<br>
-     * '!' : (shift + 1) represents Scarlet's start position.<br>
-     * '@' : (shift + 2) represents Mustard's start position.<br>
-     * '#' : (shift + 3) represents White's start position.<br>
-     * '$' : (shift + 4) represents Green's start position.<br>
-     * '%' : (shift + 5) represents Peacock's start position.<br>
-     * '^' : (shift + 6) represents Plum's start position.<br>
-     * a-i : represents entrance to each room, 'a' is entrance to room '1',
-     * 'b' to room '2', and so on.<br>
-     * A-I : represents decorative tiles in each room, which has no functionality
-     * on board, only indicates where to draw player token and weapon token. 'A' 
-     * marks where to draw in room '1', 'b' to room '2', and so on.<br>
-     */
-    public static final String BOARD_STRING_TXT = 
-            "         #    $         \n" +
-            "       000    000       \n" + 
-            " AAAA 00        00 CCCC \n" +
-            " AAAA 00        00 CCCC \n" + 
-            " AAAA 00  BBBB  003 CC  \n" +
-            "      0b2 BBBB 2b0c     \n" + 
-            "    1 00  BBBB  0000000%\n" +
-            "0000a000 2    2 0000000 \n" + 
-            " 00000000b0000b000      \n" +
-            "     000000000000d4 DDD \n" + 
-            "        00     000 DDDD \n" +
-            "  IIII  00     000 DDD  \n" + 
-            "  IIII 9i0     000    4 \n" +
-            "  IIII  00     00000e0d \n" + 
-            "        00     000  5   \n" +
-            "      9 00     00  E E  \n" + 
-            " 00000i000     0e5 EEEE \n" +
-            "@0000000000gg0000  EEE  \n" + 
-            " 00000h00  77  000      \n" +
-            "      800      00000000^\n" + 
-            "  HHHH 00 GGG 7g0f00000 \n" +
-            "  HHHH 00 GGG  006      \n" + 
-            "  HHHH 00 GGG  00 FFFFF \n" +
-            "       00 GGG  00  FFFF \n" + 
-            "       !        0       \n";
-    
     /**
      * a string used to construct the board.<br>
      * <br>
@@ -228,7 +182,7 @@ public class Configs {
      * a-i : represents entrance to each room, 'a' is entrance to room '1',
      * 'b' to room '2', and so on.<br>
      */
-    public static final String BOARD_STRING_GUI = 
+    public static final String BOARD_STRING = 
             "         #    $         \n" +
             "       000    000       \n" + 
             " 1111 00   22   00 3333 \n" +

@@ -5,6 +5,7 @@ import static ui.GUIClient.loadImage;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,6 +53,8 @@ public class ExitRoomDialog extends JDialog {
             new ImageIcon(loadImage("Exit_Library_1.png")),
             new ImageIcon(loadImage("Exit_Library_2.png")) };
 
+    public static final Dimension EXIT_DISPLAY_DIMENSION = new Dimension(320, 288);
+
     private ImageIcon[] images;
     private Entrance selectedExit;
 
@@ -88,16 +91,23 @@ public class ExitRoomDialog extends JDialog {
                 super.paintComponent(g);
                 for (JRadioButton b : rButtonList) {
                     if (b.isSelected()) {
-                        g.drawImage(
-                                images[Integer.parseInt(b.getActionCommand())].getImage(),
-                                0, 0, this);
+
+                        Image image = images[Integer.parseInt(b.getActionCommand())]
+                                .getImage();
+
+                        int x = ((int) EXIT_DISPLAY_DIMENSION.getWidth()
+                                - image.getWidth(this)) / 2;
+
+                        int y = ((int) EXIT_DISPLAY_DIMENSION.getHeight()
+                                - image.getHeight(this)) / 2;
+
+                        g.drawImage(image, x, y, this);
                         break;
                     }
                 }
             }
         };
-        exitDisplay.setPreferredSize(
-                new Dimension(images[0].getIconHeight(), images[0].getIconHeight()));
+        exitDisplay.setPreferredSize(EXIT_DISPLAY_DIMENSION);
         // this prevents a bug where the component won't be drawn until it is resized.
         exitDisplay.setVisible(true);
 

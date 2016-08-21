@@ -16,6 +16,8 @@ public class CustomMenu extends JMenuBar {
             "Help / Cluedo Rules", "Exit" };
     private static final String HELP_URL = "www.hasbro.com/common/instruct/Clue_(2002).pdf";
 
+    private JCheckBoxMenuItem menuMenu_NoBrainerMode;
+
     public CustomMenu(GUIClient parent) {
 
         int i = 0;
@@ -39,10 +41,12 @@ public class CustomMenu extends JMenuBar {
         });
 
         // a checkbox menu to enable no brainer mode
-        JCheckBoxMenuItem menuMenu_NoBrainerMode = new JCheckBoxMenuItem(
-                MENU_STRINGS[i++]);
-        menuMenu_NoBrainerMode.addChangeListener(e -> parent
-                .setNobrainerMode(((JCheckBoxMenuItem) e.getSource()).isSelected()));
+        menuMenu_NoBrainerMode = new JCheckBoxMenuItem(MENU_STRINGS[i++]);
+        menuMenu_NoBrainerMode.setEnabled(false);
+        menuMenu_NoBrainerMode.addChangeListener(e -> {
+            parent.setNobrainerMode(((JCheckBoxMenuItem) e.getSource()).isSelected());
+            parent.update();
+        });
 
         // a help link to open Cluedo Rule
         JMenuItem menuMenu_Help = new JMenuItem(MENU_STRINGS[i++]);
@@ -67,7 +71,7 @@ public class CustomMenu extends JMenuBar {
             if (parent.isGameRunning()) {
                 int choice = JOptionPane.showConfirmDialog(parent,
                         "Game is still running, are you sure to quit?",
-                        "Confirm quit game?", JOptionPane.YES_NO_OPTION,
+                        "Confirm quiting?", JOptionPane.YES_NO_OPTION,
                         JOptionPane.QUESTION_MESSAGE);
                 if (choice == JOptionPane.YES_OPTION) {
                     System.exit(0);
@@ -81,5 +85,9 @@ public class CustomMenu extends JMenuBar {
         menuMenu.add(menuMenu_NoBrainerMode);
         menuMenu.add(menuMenu_Help);
         menuMenu.add(menuMenu_Exit);
+    }
+
+    public void enableNoBrainerMenu() {
+        menuMenu_NoBrainerMode.setEnabled(true);
     }
 }

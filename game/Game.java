@@ -1,13 +1,13 @@
 package game;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -48,38 +48,41 @@ public class Game {
     private static final Random RAN = new Random();
     // all six weapon tokens as a static final array
     private WeaponToken[] weaponTokens;
-
+    // this map keep a record of who knows what card (that is not involved in crime)
+    private Map<Character, Set<Card>> knownCards;
     // which character is currently acting
     private Character currentPlayer;
     // who is the winner
     private Character winner;
     // a StringBuilder to manipulate strings
     private static StringBuilder BOARD_STRING = new StringBuilder();
-
-    // public static enum Direction {
-    // NORTH, EAST, SOUTH, WEST
-    // };
-    //
-    // public static enum MoveOption {
-    // NORTH, EAST, SOUTH, WEST, KITCHEN, BALL_ROOM, CONSERVATORY, BILLARD_ROOM, LIBRARY,
-    // STUDY, HALL, LOUNGE, DINING_ROOM
-    // };
+    // a helper boolean for the no brainer mode
+    private boolean isNoBrainerMode = false;
 
     /**
      * Construct the game.
      * 
-     * @param numPlayer
+     * @param numPlayers
      *            --- how many (human controlled) players are playing.
+     * @param numDices
+     *            --- how many dices are used in this game
      */
-    public Game(int numPlayers, int numDices, boolean isGUI) {
+    public Game(int numPlayers, int numDices) {
         if (numPlayers < Configs.MIN_PLAYER || numPlayers > Configs.MAX_PLAYER) {
             throw new GameError("Invalid number of players");
         }
 
-        board = new Board(isGUI);
+        board = new Board();
         players = new ArrayList<>(Character.values().length);
         this.numPlayers = numPlayers;
+        this.numDices = numDices;
         winner = null;
+
+        // initialise known cards, now they are all empty
+        knownCards = new HashMap<>();
+        for (int i = 0; i < Character.values().length; i++) {
+            knownCards.put(Character.get(i), new HashSet<>());
+        }
 
         // then add all six dummy tokens on board
         players.add(new Player(Character.Miss_Scarlet,
@@ -95,21 +98,20 @@ public class Game {
         players.add(new Player(Character.Professor_Plum,
                 board.getStartPosition(Character.Professor_Plum), false));
 
-        this.numDices = numDices;
-
         // last, put six weapons in random rooms
         weaponTokens = createWeaponTokens();
     }
 
     /**
-     * This method randomly put six weapons in random rooms.
+     * This method create and randomly put six weapons in random rooms.
      */
     private WeaponToken[] createWeaponTokens() {
 
         // nine rooms
         List<Location> roomList = new ArrayList<>(Arrays.asList(Location.values()));
-
+        // six weapon tokens
         WeaponToken[] weaponTokens = new WeaponToken[Weapon.values().length];
+
         for (Weapon w : Weapon.values()) {
             int roomNo = RAN.nextInt(roomList.size());
             RoomTile roomTile = board.getAvailableRoomTile(roomList.remove(roomNo));
@@ -183,6 +185,11 @@ public class Game {
                 }
             }
         }
+
+        // let each player know what card he has
+        for (Player p : players) {
+            knownCards.get(p.getToken()).addAll(p.getCards());
+        }
     }
 
     /**
@@ -215,13 +222,16 @@ public class Game {
     }
 
     /**
-     * Set the given player as human controlled
+     * Set the given player as human controlled, give it a name.
      * 
      * @param playerChoice
      *            --- the character chosen by a player
+     * @param name
+     *            --- the customised name
      */
-    public void joinPlayer(Character playerChoice) {
+    public void joinPlayer(Character playerChoice, String name) {
         players.get(playerChoice.ordinal()).setPlaying(true);
+        players.get(playerChoice.ordinal()).setName(name);
     }
 
     /**
@@ -297,6 +307,15 @@ public class Game {
         return board.getPosition(x, y);
     }
 
+    /**
+     * This method finds the next empty spot in a given room to display player or weapon
+     * tokens.
+     * 
+     * @param location
+     *            --- which room we want to display a token
+     * @return --- an empty spot to display a token in the given room, or null if the room
+     *         is full (impossible to happen with the default board)
+     */
     public RoomTile getAvailableRoomTile(Location location) {
         return board.getAvailableRoomTile(location);
     }
@@ -325,7 +344,7 @@ public class Game {
     }
 
     /**
-     * Move a weapon to the given room.
+     * Move a weapon onto the given room tile.
      * 
      * @param weapon
      *            --- the character to be moved
@@ -334,7 +353,7 @@ public class Game {
      */
     public void moveWeapon(Weapon weapon, RoomTile roomTile) {
         for (WeaponToken wt : weaponTokens) {
-            if (wt.getToken().equals(weapon)) {
+            if (wt.getWeapon().equals(weapon)) {
                 board.moveWeapon(wt, roomTile);
             }
         }
@@ -399,19 +418,23 @@ public class Game {
     }
 
     /**
-     * This method examines the given suggestion, let other players try to reject it, and
-     * returns a String that represents other player's "voice", which is whether or not
-     * they can reject it.
+     * This method examines the given suggestion, let other players try to refute it, and
+     * returns a String that represents other player's "voice" in turn, which is either
+     * he/she can refute this suggestion with one card, or he/she can't.
      * 
      * @param suggestion
      *            --- the suggestion
      * @return --- a string for text output, represents whether or not another player can
-     *         reject the given suggestion.
+     *         refute the given suggestion.
      */
-    public String rejectSuggestion(Suggestion suggestion) {
+    public String refuteSuggestion(Suggestion suggestion) {
+
+        // what cards are known to current player?
+        Set<Card> knownCardsForCurrentPlayer = knownCards.get(currentPlayer);
+
         String rejectMsg = "";
         List<Card> cardsInSuggetion = suggestion.asList();
-        // shuffle so that it randomly reject the first rejectable card
+        // shuffle so that it randomly reject the first refutable card
         Collections.shuffle(cardsInSuggetion);
 
         outer: for (Player p : players) {
@@ -422,7 +445,9 @@ public class Game {
                         rejectMsg = rejectMsg + p.getToken().toString()
                                 + " rejects your suggestion with card: " + card.toString()
                                 + "\n";
-                        continue outer; // only reject one card
+                        // update current player's known cards
+                        knownCardsForCurrentPlayer.add(card);
+                        continue outer; // only refute one card
                     }
                 }
                 rejectMsg = rejectMsg + p.getToken().toString()
@@ -431,6 +456,15 @@ public class Game {
         }
 
         return rejectMsg;
+    }
+
+    /**
+     * This method gets all cards that is known as not involved in crime.
+     * 
+     * @return --- all cards that is known as not involved in crime.
+     */
+    public Set<Card> getKnownCards() {
+        return knownCards.get(currentPlayer);
     }
 
     /**
@@ -548,6 +582,26 @@ public class Game {
     }
 
     /**
+     * Set the game to no brainer mode (so that the game will remember clues for
+     * player...cheating).
+     * 
+     * @param isNobrainerMode
+     *            --- a flag to turn on or off no brainer mode
+     */
+    public void setNoBrainerMode(boolean isNobrainerMode) {
+        this.isNoBrainerMode = isNobrainerMode;
+    }
+
+    /**
+     * Is the game run on no brainer mode?
+     * 
+     * @return --- true if the game run on no brainer mode, or false if not.
+     */
+    public boolean isNoBrainerMode() {
+        return isNoBrainerMode;
+    }
+
+    /**
      * Get the winner.
      * 
      * @return --- winner
@@ -612,13 +666,8 @@ public class Game {
             } else if (pos instanceof Room) {
                 // inside a room
                 Room room = (Room) pos;
-                Tile decoTile = room.getNextDecoTile();
-                int index = decoTile.x + decoTile.y * width;
-                // find a empty space to draw the player inside the room.
-                while (boardChars[index] != ' ') {
-                    decoTile = room.getNextDecoTile();
-                    index = decoTile.x + decoTile.y * width;
-                }
+                RoomTile roomTile = getAvailableRoomTile(room.getRoom());
+                int index = roomTile.getX() + roomTile.getY() * width;
                 boardChars[index] = p.getToken().toStringOnBoard();
             }
         }
@@ -626,13 +675,8 @@ public class Game {
         // draw the weapon tokens by replacing its character on his position
         for (WeaponToken w : weaponTokens) {
             RoomTile roomTile = w.getRoomTile();
-            Tile decoTile = Configs.getRoom(roomTile.getRoom()).getNextDecoTile();
-            int index = decoTile.x + decoTile.y * width;
-            while (boardChars[index] != ' ') {
-                decoTile = Configs.getRoom(roomTile.getRoom()).getNextDecoTile();
-                index = decoTile.x + decoTile.y * width;
-            }
-            boardChars[index] = w.getToken().toStringOnBoard();
+            int index = roomTile.getX() + roomTile.getY() * width;
+            boardChars[index] = w.getWeapon().toStringOnBoard();
         }
 
         BOARD_STRING.append(boardChars);

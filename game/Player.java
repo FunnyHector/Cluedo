@@ -19,6 +19,8 @@ public class Player {
 
     // the character of this player
     private final Character token;
+    // player's name
+    private String name;
     // it's position on board
     private Position position;
     // cards drawn by this player. dummy token won't have any card in it.
@@ -52,6 +54,25 @@ public class Player {
      */
     public Character getToken() {
         return token;
+    }
+
+    /**
+     * Let the player customise his name (The token's name remains unchanged).
+     * 
+     * @param name
+     *            --- the customised name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * What's this player's name?
+     * 
+     * @return --- the player's name
+     */
+    public String getName() {
+        return name;
     }
 
     /**

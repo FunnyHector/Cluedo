@@ -74,15 +74,6 @@ public enum Character implements Card {
     }
 
     /**
-     * Return the size of this Enumeration class, i.e. how many characters inside.
-     * 
-     * @return --- the size of this Enumeration class, i.e. how many characters inside.
-     */
-    public static int size() {
-        return 6;
-    }
-
-    /**
      * Get the character whose ordinal is index.
      * 
      * @param index
