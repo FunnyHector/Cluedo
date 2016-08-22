@@ -21,7 +21,9 @@ import tile.Room;
  */
 public class TextClient {
 
-    // System.in wrapped in scanner to get user input.
+    /**
+     * System.in wrapped in scanner to get user input.
+     */
     private static final Scanner SCANNER = new Scanner(System.in);
 
     /**
@@ -95,7 +97,7 @@ public class TextClient {
         }
 
         // set which character is first to move
-        game.setPlayerMoveFirst();
+        game.decideWhoMoveFirst();
         // create solution
         game.creatSolution();
         // evenly deal cards

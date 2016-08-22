@@ -31,33 +31,58 @@ import card.Character;
  *
  */
 public class Game {
-
-    // the solution created at beginning
+    /**
+     * the solution created at beginning
+     */
     private Suggestion solution;
-    // the game board
+    /**
+     * the game board
+     */
     private Board board;
-    // number of players
+    /**
+     * number of players
+     */
     private int numPlayers;
-    // number of dices
+    /**
+     * number of dices
+     */
     private int numDices;
-    // all six players (including dummy tokens) as a list
+    /**
+     * all six players (including dummy tokens) as a list
+     */
     private List<Player> players;
-    // after cards are evenly dealt, all remaining cards are in this list.
+    /**
+     * after cards are evenly dealt, all remaining cards are in this list.
+     */
     private List<Card> remainingCards;
-    // a random number generator
+    /**
+     * a random number generator
+     */
     private static final Random RAN = new Random();
-    // all six weapon tokens as a static final array
+    /**
+     * all six weapon tokens as a static final array
+     */
     private WeaponToken[] weaponTokens;
-    // this map keep a record of who knows what card (that is not involved in crime)
+    /**
+     * this map keep a record of who knows what card (that is not involved in crime)
+     */
     private Map<Character, Set<Card>> knownCards;
-    // which character is currently acting
+    /**
+     * which character is currently acting
+     */
     private Character currentPlayer;
-    // who is the winner
+    /**
+     * who is the winner
+     */
     private Character winner;
-    // a StringBuilder to manipulate strings
+    /**
+     * a StringBuilder to manipulate strings
+     */
     private static StringBuilder BOARD_STRING = new StringBuilder();
-    // a helper boolean for the no brainer mode
-    private boolean isNoBrainerMode = false;
+    /**
+     * a helper boolean for the Easy mode
+     */
+    private boolean isEasyMode = false;
 
     /**
      * Construct the game.
@@ -158,70 +183,6 @@ public class Game {
     }
 
     /**
-     * Get the solution
-     * 
-     * @return --- the solution
-     */
-    public Suggestion getSolution() {
-        return solution;
-    }
-
-    /**
-     * This method deals cards evenly to players. Note that this method should be called
-     * after the solution is created.
-     */
-    public void dealCard() {
-        if (remainingCards == null) {
-            throw new GameError("The solution should be created before dealing cards.");
-        }
-
-        // deal cards randomly and evenly to all players
-        while (remainingCards.size() >= numPlayers) {
-            Collections.shuffle(remainingCards); // MAXIMUM RANDOMNESS = ANARCHY !!
-            for (Player p : players) {
-                if (p.isPlaying()) {
-                    p.drawACard(
-                            remainingCards.remove(RAN.nextInt(remainingCards.size())));
-                }
-            }
-        }
-
-        // let each player know what card he has
-        for (Player p : players) {
-            knownCards.get(p.getToken()).addAll(p.getCards());
-        }
-    }
-
-    /**
-     * This method sets who the first character is to move.
-     */
-    public void setPlayerMoveFirst() {
-        currentPlayer = Character.Miss_Scarlet;
-        while (!getPlayerByCharacter(currentPlayer).isPlaying()) {
-            // if this character is kicked out or not controlled by a player, skip him
-            currentPlayer = currentPlayer.nextCharacter();
-        }
-    }
-
-    /**
-     * Get all playable characters, i.e. those who hasn't been chosen by any player yet.
-     * 
-     * @return --- all playable characters as a list
-     */
-    public List<Character> getPlayableCharacters() {
-        List<Character> playableCharacters = new ArrayList<>();
-
-        for (Player p : players) {
-            if (!p.isPlaying()) {
-                // only those who hasn't been chosen
-                playableCharacters.add(p.getToken());
-            }
-        }
-
-        return playableCharacters;
-    }
-
-    /**
      * Set the given player as human controlled, give it a name.
      * 
      * @param playerChoice
@@ -253,23 +214,41 @@ public class Game {
     }
 
     /**
-     * Get the player who need to move.
-     * 
-     * @return --- the current player
+     * This method deals cards evenly to players. Note that this method should be called
+     * after the solution is created.
      */
-    public Character getCurrentPlayer() {
-        return currentPlayer;
+    public void dealCard() {
+        if (remainingCards == null) {
+            throw new GameError("The solution should be created before dealing cards.");
+        }
+
+        // deal cards randomly and evenly to all players
+        while (remainingCards.size() >= numPlayers) {
+            Collections.shuffle(remainingCards); // MAXIMUM RANDOMNESS = ANARCHY !!
+            for (Player p : players) {
+                if (p.isPlaying()) {
+                    p.drawACard(
+                            remainingCards.remove(RAN.nextInt(remainingCards.size())));
+                }
+            }
+        }
+
+        // let each player know what card he has, and what card remains undealt
+        for (Player p : players) {
+            knownCards.get(p.getToken()).addAll(p.getCards());
+            knownCards.get(p.getToken()).addAll(remainingCards);
+        }
     }
 
     /**
-     * A helper method to get the corresponding Player of given Character.
-     * 
-     * @param character
-     *            --- the given character
-     * @return
+     * This method sets who the first character is to move.
      */
-    public Player getPlayerByCharacter(Character character) {
-        return players.get(character.ordinal());
+    public void decideWhoMoveFirst() {
+        currentPlayer = Character.Miss_Scarlet;
+        while (!getPlayerByCharacter(currentPlayer).isPlaying()) {
+            // if this character is kicked out or not controlled by a player, skip him
+            currentPlayer = currentPlayer.nextCharacter();
+        }
     }
 
     /**
@@ -281,54 +260,6 @@ public class Game {
             // if this character is kicked out or not controlled by a player, skip him
             currentPlayer = currentPlayer.nextCharacter();
         }
-    }
-
-    /**
-     * Get the player's position.
-     * 
-     * @param character
-     *            --- the player
-     * @return --- the player's position
-     */
-    public Position getPlayerPosition(Character character) {
-        return getPlayerByCharacter(character).getPosition();
-    }
-
-    /**
-     * Get the Position at given coordinate
-     * 
-     * @param x
-     *            --- the horizontal coordinate
-     * @param y
-     *            --- the vertical coordinate
-     * @return --- the Position at given coordinate
-     */
-    public Position getPosition(int x, int y) {
-        return board.getPosition(x, y);
-    }
-
-    /**
-     * This method finds the next empty spot in a given room to display player or weapon
-     * tokens.
-     * 
-     * @param location
-     *            --- which room we want to display a token
-     * @return --- an empty spot to display a token in the given room, or null if the room
-     *         is full (impossible to happen with the default board)
-     */
-    public RoomTile getAvailableRoomTile(Location location) {
-        return board.getAvailableRoomTile(location);
-    }
-
-    /**
-     * get the start position of given character.
-     * 
-     * @param character
-     *            --- the character
-     * @return --- the start position of this character
-     */
-    public Tile getStartPosition(Character character) {
-        return board.getStartPosition(character);
     }
 
     /**
@@ -355,41 +286,9 @@ public class Game {
         for (WeaponToken wt : weaponTokens) {
             if (wt.getWeapon().equals(weapon)) {
                 board.moveWeapon(wt, roomTile);
+                break;
             }
         }
-    }
-
-    /**
-     * Get the remaining cards as a list. Note that the returned list could be empty if
-     * all cards are dealt.
-     * 
-     * @return --- the remaining cards as a list
-     */
-    public List<Card> getRemainingCards() {
-        return remainingCards;
-    }
-
-    /**
-     * Get how many steps left for the player to move.
-     * 
-     * @param character
-     *            --- the player
-     * @return --- how many steps left for the player to move.
-     */
-    public int getRemainingSteps(Character character) {
-        return getPlayerByCharacter(character).getRemainingSteps();
-    }
-
-    /**
-     * Set how many steps left for the player to move.
-     * 
-     * @param character
-     *            --- the player
-     * @param remainingSteps
-     *            --- how many steps left for the player to move.
-     */
-    public void setRemainingSteps(Character character, int remainingSteps) {
-        getPlayerByCharacter(character).setRemainingSteps(remainingSteps);
     }
 
     /**
@@ -456,15 +355,6 @@ public class Game {
         }
 
         return rejectMsg;
-    }
-
-    /**
-     * This method gets all cards that is known as not involved in crime.
-     * 
-     * @return --- all cards that is known as not involved in crime.
-     */
-    public Set<Card> getKnownCards() {
-        return knownCards.get(currentPlayer);
     }
 
     /**
@@ -582,23 +472,32 @@ public class Game {
     }
 
     /**
-     * Set the game to no brainer mode (so that the game will remember clues for
-     * player...cheating).
+     * Is the game run on Easy mode?
      * 
-     * @param isNobrainerMode
-     *            --- a flag to turn on or off no brainer mode
+     * @return --- true if the game run on Easy mode, or false if not.
      */
-    public void setNoBrainerMode(boolean isNobrainerMode) {
-        this.isNoBrainerMode = isNobrainerMode;
+    public boolean isEasyMode() {
+        return isEasyMode;
     }
 
     /**
-     * Is the game run on no brainer mode?
+     * Set the game to easy mode (so that the game will remember clues for player
+     * ...cheating).
      * 
-     * @return --- true if the game run on no brainer mode, or false if not.
+     * @param isNobrainerMode
+     *            --- a flag to turn on or off easy mode
      */
-    public boolean isNoBrainerMode() {
-        return isNoBrainerMode;
+    public void setEasyMode(boolean isEasyMode) {
+        this.isEasyMode = isEasyMode;
+    }
+
+    /**
+     * Get the solution
+     * 
+     * @return --- the solution
+     */
+    public Suggestion getSolution() {
+        return solution;
     }
 
     /**
@@ -610,14 +509,6 @@ public class Game {
         return winner;
     }
 
-    public Board getBoard() {
-        return board;
-    }
-
-    public List<Player> getPlayers() {
-        return players;
-    }
-
     /**
      * Set a player as winner.
      * 
@@ -626,6 +517,139 @@ public class Game {
      */
     public void setWinner(Character character) {
         winner = character;
+    }
+
+    /**
+     * Get the game board
+     * 
+     * @return --- the game board
+     */
+    public Board getBoard() {
+        return board;
+    }
+
+    /**
+     * Get the player who needs to move.
+     * 
+     * @return --- the current player
+     */
+    public Character getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    /**
+     * A helper method to get the corresponding Player of given Character.
+     * 
+     * @param character
+     *            --- the given character
+     * @return --- the corresponding Player of given Character
+     */
+    public Player getPlayerByCharacter(Character character) {
+        return players.get(character.ordinal());
+    }
+
+    /**
+     * Get all players (including dummy token not controlled by human).
+     * 
+     * @return --- all players (including dummy token not controlled by human) as a list
+     */
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    /**
+     * Get all playable characters, i.e. those who hasn't been chosen by any player yet.
+     * 
+     * @return --- all playable characters as a list
+     */
+    public List<Character> getPlayableCharacters() {
+        List<Character> playableCharacters = new ArrayList<>();
+
+        for (Player p : players) {
+            if (!p.isPlaying()) {
+                // only those who hasn't been chosen
+                playableCharacters.add(p.getToken());
+            }
+        }
+
+        return playableCharacters;
+    }
+
+    /**
+     * Get the player's position.
+     * 
+     * @param character
+     *            --- the player
+     * @return --- the player's position
+     */
+    public Position getPlayerPosition(Character character) {
+        return getPlayerByCharacter(character).getPosition();
+    }
+
+    /**
+     * get the start position of given character.
+     * 
+     * @param character
+     *            --- the character
+     * @return --- the start position of this character
+     */
+    public Tile getStartPosition(Character character) {
+        return board.getStartPosition(character);
+    }
+
+    /**
+     * Get the remaining cards as a list. Note that the returned list could be empty if
+     * all cards are dealt.
+     * 
+     * @return --- the remaining cards as a list
+     */
+    public List<Card> getRemainingCards() {
+        return remainingCards;
+    }
+
+    /**
+     * This method gets all cards that is known as not involved in crime.
+     * 
+     * @return --- all cards that is known as not involved in crime.
+     */
+    public Set<Card> getKnownCards() {
+        return knownCards.get(currentPlayer);
+    }
+
+    /**
+     * Get how many steps left for the player to move.
+     * 
+     * @param character
+     *            --- the player
+     * @return --- how many steps left for the player to move.
+     */
+    public int getRemainingSteps(Character character) {
+        return getPlayerByCharacter(character).getRemainingSteps();
+    }
+
+    /**
+     * Set how many steps left for the player to move.
+     * 
+     * @param character
+     *            --- the player
+     * @param remainingSteps
+     *            --- how many steps left for the player to move.
+     */
+    public void setRemainingSteps(Character character, int remainingSteps) {
+        getPlayerByCharacter(character).setRemainingSteps(remainingSteps);
+    }
+
+    /**
+     * This method finds the next empty spot in a given room to display player or weapon
+     * tokens.
+     * 
+     * @param location
+     *            --- which room we want to display a token
+     * @return --- an empty spot to display a token in the given room, or null if the room
+     *         is full (impossible to happen with the default board)
+     */
+    public RoomTile getAvailableRoomTile(Location location) {
+        return board.getAvailableRoomTile(location);
     }
 
     /**

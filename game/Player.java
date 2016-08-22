@@ -17,17 +17,29 @@ import tile.Position;
  */
 public class Player {
 
-    // the character of this player
+    /**
+     * the character of this player
+     */
     private final Character token;
-    // player's name
+    /**
+     * player's name
+     */
     private String name;
-    // it's position on board
+    /**
+     * it's position on board
+     */
     private Position position;
-    // cards drawn by this player. dummy token won't have any card in it.
+    /**
+     * cards drawn by this player. dummy token won't have any card in it.
+     */
     private List<Card> cards;
-    // remaining steps to move
+    /**
+     * remaining steps to move
+     */
     private int remainingSteps;
-    // a flag to indicate whether this player can continue to play.
+    /**
+     * a flag to indicate whether this player can continue to play.
+     */
     private boolean isPlaying;
 
     /**

@@ -20,21 +20,23 @@ import configs.Configs;
  */
 public class Board {
 
-    // board is created as a 2D array of positions
+    /**
+     * board is created as a 2D array of positions
+     */
     private Position[][] board;
 
-    // six starting tiles for each character
-    private static Tile scarletStart;
-    private static Tile mustardStart;
-    private static Tile whiteStart;
-    private static Tile greenStart;
-    private static Tile peacockStart;
-    private static Tile plumStart;
+    /**
+     * six starting tiles for each character
+     */
+    private Tile[] startPositions;
 
     /**
      * Construct a board.
      */
     public Board() {
+
+        startPositions = new Tile[Character.values().length];
+
         String boardString = Configs.BOARD_STRING;
 
         int height = Configs.BOARD_HEIGHT;
@@ -102,28 +104,34 @@ public class Board {
              * and so on.
              */
             case '!':
-                scarletStart = new Tile(x, y);
+                Tile scarletStart = new Tile(x, y);
                 board[y][x] = scarletStart;
+                startPositions[Character.Miss_Scarlet.ordinal()] = scarletStart;
                 break;
             case '@':
-                mustardStart = new Tile(x, y);
+                Tile mustardStart = new Tile(x, y);
                 board[y][x] = mustardStart;
+                startPositions[Character.Colonel_Mustard.ordinal()] = mustardStart;
                 break;
             case '#':
-                whiteStart = new Tile(x, y);
+                Tile whiteStart = new Tile(x, y);
                 board[y][x] = whiteStart;
+                startPositions[Character.Mrs_White.ordinal()] = whiteStart;
                 break;
             case '$':
-                greenStart = new Tile(x, y);
+                Tile greenStart = new Tile(x, y);
                 board[y][x] = greenStart;
+                startPositions[Character.The_Reverend_Green.ordinal()] = greenStart;
                 break;
             case '%':
-                peacockStart = new Tile(x, y);
+                Tile peacockStart = new Tile(x, y);
                 board[y][x] = peacockStart;
+                startPositions[Character.Mrs_Peacock.ordinal()] = peacockStart;
                 break;
             case '^':
-                plumStart = new Tile(x, y);
+                Tile plumStart = new Tile(x, y);
                 board[y][x] = plumStart;
+                startPositions[Character.Professor_Plum.ordinal()] = plumStart;
                 break;
 
             /*
@@ -205,22 +213,7 @@ public class Board {
      * @return --- the start position of this character
      */
     public Tile getStartPosition(Character character) {
-        switch (character) {
-        case Miss_Scarlet:
-            return scarletStart;
-        case Colonel_Mustard:
-            return mustardStart;
-        case Mrs_White:
-            return whiteStart;
-        case The_Reverend_Green:
-            return greenStart;
-        case Mrs_Peacock:
-            return peacockStart;
-        case Professor_Plum:
-            return plumStart;
-        default:
-            return null; // dead code
-        }
+        return startPositions[character.ordinal()];
     }
 
     /**

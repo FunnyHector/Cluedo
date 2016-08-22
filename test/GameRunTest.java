@@ -35,7 +35,7 @@ public class GameRunTest {
 
             game.creatSolution();
             game.dealCard();
-            game.setPlayerMoveFirst();
+            game.decideWhoMoveFirst();
 
             assertEquals("should be Colonel Mustard's turn", game.getCurrentPlayer(),
                     Character.Colonel_Mustard);
@@ -67,7 +67,7 @@ public class GameRunTest {
 
                 game.creatSolution();
                 game.dealCard();
-                game.setPlayerMoveFirst();
+                game.decideWhoMoveFirst();
 
                 // ============== test lounge ===============
 
@@ -174,7 +174,7 @@ public class GameRunTest {
 
                 game.creatSolution();
                 game.dealCard();
-                game.setPlayerMoveFirst();
+                game.decideWhoMoveFirst();
 
                 // put the player on a tile
                 Tile testTile = new Tile(16, 13);
@@ -227,7 +227,7 @@ public class GameRunTest {
 
                 game.creatSolution();
                 game.dealCard();
-                game.setPlayerMoveFirst();
+                game.decideWhoMoveFirst();
 
                 // ============== test kitchen's entrance ===============
 
@@ -283,7 +283,7 @@ public class GameRunTest {
             }
             game.creatSolution();
             game.dealCard();
-            game.setPlayerMoveFirst();
+            game.decideWhoMoveFirst();
             Character currentPlayer = game.getCurrentPlayer();
 
             // put the player on a boundary tile
@@ -314,7 +314,7 @@ public class GameRunTest {
             }
             game.creatSolution();
             game.dealCard();
-            game.setPlayerMoveFirst();
+            game.decideWhoMoveFirst();
             Character currentPlayer = game.getCurrentPlayer();
 
             // put the player on a boundary tile
@@ -345,7 +345,7 @@ public class GameRunTest {
             }
             game.creatSolution();
             game.dealCard();
-            game.setPlayerMoveFirst();
+            game.decideWhoMoveFirst();
             Character currentPlayer = game.getCurrentPlayer();
 
             // put the player on a boundary tile
@@ -373,7 +373,7 @@ public class GameRunTest {
             }
             game.creatSolution();
             game.dealCard();
-            game.setPlayerMoveFirst();
+            game.decideWhoMoveFirst();
 
             // skips several times, use different character for testing
             Random ran = new Random();
@@ -405,7 +405,7 @@ public class GameRunTest {
             }
             game.creatSolution();
             game.dealCard();
-            game.setPlayerMoveFirst();
+            game.decideWhoMoveFirst();
 
             // skips several times, use different character for testing
             Random ran = new Random();
@@ -439,7 +439,7 @@ public class GameRunTest {
             }
             game.creatSolution();
             game.dealCard();
-            game.setPlayerMoveFirst();
+            game.decideWhoMoveFirst();
 
             // let others make wrong accusation
             for (int i = 0; i < numPlayers - 1; i++) {
@@ -472,7 +472,7 @@ public class GameRunTest {
             }
             game.creatSolution();
             game.dealCard();
-            game.setPlayerMoveFirst();
+            game.decideWhoMoveFirst();
 
             // skips several times, use different character for testing
             Random ran = new Random();

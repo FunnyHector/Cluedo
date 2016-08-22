@@ -1,76 +1,46 @@
 package view.token;
 
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 
 import card.Character;
-import tile.RoomTile;
-import tile.Tile;
 
+/**
+ * This class represents a character token on board. It remembers where to draw tokens
+ * (outside-room positions are remembered by game.Player class). Also, for GUI mode, each
+ * character token has a custom tooltip to show a better-looking tooltip in no-brainer
+ * mode.
+ * 
+ * @author Hector
+ *
+ */
+@SuppressWarnings("serial")
 public class CharacterToken extends AbstractToken {
 
+    /**
+     * the character
+     */
     private Character character;
-    private RoomTile roomTile;
 
-    public CharacterToken(ImageIcon img, int x, int y, Character character) {
-        super(img, x, y);
+    /**
+     * Construct a character token on board.
+     * 
+     * @param img
+     *            --- the image used to draw this weapon token on board
+     * @param token
+     *            --- the character
+     */
+    public CharacterToken(ImageIcon img, Character character) {
+        super(img, null);
         this.character = character;
-        roomTile = null;
     }
 
+    /**
+     * which character is it?
+     * 
+     * @return --- which character
+     */
     public Character getCharacter() {
         return character;
-    }
-
-    /**
-     * This method set the character token in specified room
-     * 
-     * @param roomTile
-     *            --- the room to set in.
-     */
-    public void setRoomTile(RoomTile roomTile) {
-        if (this.roomTile != null) {
-            this.roomTile.setHoldingToken(false);
-        }
-        roomTile.setHoldingToken(true);
-        this.roomTile = roomTile;
-        super.moveTo(roomTile.getX(), roomTile.getY());
-    }
-
-    public void moveToTile(Tile tile) {
-        super.moveTo(tile.x, tile.y);
-    }
-
-    /**
-     * which room is it in? Note that if this character token is not in a room, this
-     * method returns null.
-     * 
-     * @return --- the room it is located, or null if it is outside any room
-     */
-    public RoomTile getRoomTile() {
-        return roomTile;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((character == null) ? 0 : character.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        CharacterToken other = (CharacterToken) obj;
-        if (character != other.character)
-            return false;
-        return true;
     }
 
 }

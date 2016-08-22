@@ -6,10 +6,8 @@ package game;
  * @author Hector
  *
  */
+@SuppressWarnings("serial")
 public class GameError extends RuntimeException {
-
-    // auto-generated serial version UID
-    private static final long serialVersionUID = 3193391567599261380L;
 
     /**
      * Construct an error.

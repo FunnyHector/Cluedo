@@ -75,7 +75,7 @@ public class InitialisationTest {
         game.joinPlayer(Character.Mrs_Peacock, "");
         game.creatSolution();
         game.dealCard();
-        game.setPlayerMoveFirst();
+        game.decideWhoMoveFirst();
 
         int[] diceRoll;
         // let's roll...100 times...

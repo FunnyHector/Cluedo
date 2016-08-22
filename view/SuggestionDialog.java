@@ -1,6 +1,5 @@
 package view;
 
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -10,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -26,25 +24,64 @@ import javax.swing.border.TitledBorder;
 
 import card.Character;
 import card.Weapon;
+import game.Suggestion;
 import tile.Position;
 import tile.Room;
 import card.Location;
 import ui.GUIClient;
 
+/**
+ * This class is a custom dialog for players to make a suggestion or accusation.
+ * 
+ * @author Hector
+ *
+ */
+@SuppressWarnings("serial")
 public class SuggestionDialog extends JDialog {
-
-    public static final Dimension CARD_DIMENSION = new Dimension(
+    /**
+     * The preferred dimension for card displaying
+     */
+    private static final Dimension CARD_DIMENSION = new Dimension(
             PlayerPanelCanvas.CHARACTER_IMG[0].getIconWidth(),
             PlayerPanelCanvas.CHARACTER_IMG[0].getIconHeight());
-
+    /**
+     * A CardLayout to manage the panel switch
+     */
     private CardLayout cardLayout = new CardLayout();
-
+    /**
+     * The GUI of the game
+     */
     private GUIClient gui;
+    /**
+     * This flag indicates whether this is a suggestion or a accusation
+     */
     private boolean isAccusation;
+    /**
+     * Which character is in this suggestion/accusation?
+     */
     private Character character;
+    /**
+     * Which weapon is in this suggestion/accusation?
+     */
     private Weapon weapon;
+    /**
+     * Which location is in this suggestion/accusation?
+     */
     private Location location;
 
+    /**
+     * Construct a dialog, let players choose character, weapon, location respectively,
+     * and make the suggestion/accusation.
+     * 
+     * @param parent
+     *            --- the Main GUI of this game
+     * @param windowForComponent
+     *            --- the owner component
+     * @param title
+     *            --- the tile of this dialog
+     * @param isAccusation
+     *            --- A flag indicates whether this is a suggestion or a accusation
+     */
     public SuggestionDialog(GUIClient parent, Window windowForComponent, String title,
             boolean isAccusation) {
         super(windowForComponent, title);
@@ -55,8 +92,6 @@ public class SuggestionDialog extends JDialog {
 
         // we use card layout
         mainPanel.setLayout(cardLayout);
-
-        // let's make three panels
         addCharacterPanel(mainPanel);
         addWeaponPanel(mainPanel);
         addLocationPanel(mainPanel);
@@ -71,6 +106,12 @@ public class SuggestionDialog extends JDialog {
         this.setVisible(true);
     }
 
+    /**
+     * This method build the first panel of the CardLayout, for choosing a character.
+     * 
+     * @param mainPanel
+     *            --- the parent Panel with CardLayout
+     */
     private void addCharacterPanel(JPanel mainPanel) {
 
         JPanel characterPanel = new JPanel();
@@ -90,6 +131,7 @@ public class SuggestionDialog extends JDialog {
                 super.paintComponent(g);
                 for (JRadioButton b : rButtonList) {
                     if (b.isSelected()) {
+                        // draw the selected card
                         g.drawImage(
                                 PlayerPanelCanvas.CHARACTER_IMG[Integer
                                         .parseInt(b.getActionCommand())].getImage(),
@@ -99,10 +141,8 @@ public class SuggestionDialog extends JDialog {
                 }
             }
         };
-
         cardDisplay.setPreferredSize(CARD_DIMENSION);
         cardDisplay.setAlignmentY(TOP_ALIGNMENT);
-        // this prevents a bug where the component won't be drawn until it is resized.
         cardDisplay.setVisible(true);
 
         // radio buttons
@@ -116,6 +156,7 @@ public class SuggestionDialog extends JDialog {
         confirm.setEnabled(false);
         JButton cancel = new JButton("Cancel");
 
+        // an action listener for radio buttons
         ActionListener al = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -172,7 +213,6 @@ public class SuggestionDialog extends JDialog {
         JPanel buttonPane = new JPanel();
         buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.X_AXIS));
         buttonPane.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         buttonPane.add(cancel);
         buttonPane.add(Box.createRigidArea(new Dimension(30, 20)));
         buttonPane.add(confirm);
@@ -185,13 +225,19 @@ public class SuggestionDialog extends JDialog {
         characterPanel.add(Box.createRigidArea(new Dimension(15, 15)));
         characterPanel.add(buttonPane);
 
+        // finally, add this panel into CardLayout
         mainPanel.add(characterPanel);
     }
 
+    /**
+     * This method build the second panel of the CardLayout, for choosing a weapon.
+     * 
+     * @param mainPanel
+     *            --- the parent Panel with CardLayout
+     */
     private void addWeaponPanel(JPanel mainPanel) {
 
         JPanel weaponPanel = new JPanel();
-
         weaponPanel.setLayout(new BoxLayout(weaponPanel, BoxLayout.Y_AXIS));
         weaponPanel.setBorder(BorderFactory
                 .createTitledBorder(
@@ -217,10 +263,8 @@ public class SuggestionDialog extends JDialog {
                 }
             }
         };
-
         cardDisplay.setPreferredSize(CARD_DIMENSION);
         cardDisplay.setAlignmentY(TOP_ALIGNMENT);
-        // this prevents a bug where the component won't be drawn until it is resized.
         cardDisplay.setVisible(true);
 
         // radio buttons
@@ -235,6 +279,7 @@ public class SuggestionDialog extends JDialog {
         JButton cancel = new JButton("Previous");
         cancel.setEnabled(true);
 
+        // an action listener for radio buttons
         ActionListener al = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -284,14 +329,13 @@ public class SuggestionDialog extends JDialog {
             cardLayout.next(mainPanel);
         });
 
-        // confirm button at bottom
+        // cancel button's listener
         cancel.addActionListener(e -> cardLayout.previous(mainPanel));
 
         // bottom panel, which contains two buttons
         JPanel buttonPane = new JPanel();
         buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.X_AXIS));
         buttonPane.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         buttonPane.add(cancel);
         buttonPane.add(Box.createRigidArea(new Dimension(30, 20)));
         buttonPane.add(confirm);
@@ -304,13 +348,19 @@ public class SuggestionDialog extends JDialog {
         weaponPanel.add(Box.createRigidArea(new Dimension(15, 15)));
         weaponPanel.add(buttonPane);
 
+        // finally, add this panel into CardLayout
         mainPanel.add(weaponPanel);
     }
 
+    /**
+     * This method build the third panel of the CardLayout, for choosing a location.
+     * 
+     * @param mainPanel
+     *            --- the parent Panel with CardLayout
+     */
     private void addLocationPanel(JPanel mainPanel) {
 
         JPanel locationPanel = new JPanel();
-
         locationPanel.setLayout(new BoxLayout(locationPanel, BoxLayout.Y_AXIS));
         locationPanel.setBorder(BorderFactory
                 .createTitledBorder(
@@ -318,7 +368,6 @@ public class SuggestionDialog extends JDialog {
                                 BorderFactory.createSoftBevelBorder(BevelBorder.RAISED),
                                 BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)),
                         "Select Location:", TitledBorder.RIGHT, TitledBorder.TOP));
-
         List<JRadioButton> rButtonList = new ArrayList<>();
 
         JPanel cardDisplay = new JPanel() {
@@ -336,10 +385,8 @@ public class SuggestionDialog extends JDialog {
                 }
             }
         };
-
         cardDisplay.setPreferredSize(CARD_DIMENSION);
         cardDisplay.setAlignmentY(CENTER_ALIGNMENT);
-        // this prevents a bug where the component won't be drawn until it is resized.
         cardDisplay.setVisible(true);
 
         // radio buttons
@@ -355,9 +402,9 @@ public class SuggestionDialog extends JDialog {
         } else {
             confirm = new JButton("Make Suggestion!");
         }
-
         JButton cancel = new JButton("Previous");
 
+        // an action listener for radio buttons
         ActionListener al = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -371,7 +418,6 @@ public class SuggestionDialog extends JDialog {
         // add radio buttons
         for (int i = 0; i < Location.values().length; i++) {
             Location l = Location.get(i);
-
             JRadioButton rButton = new JRadioButton(l.toString(), false);
             rButton.setActionCommand(String.valueOf(i));
             rButton.addActionListener(al);
@@ -382,13 +428,12 @@ public class SuggestionDialog extends JDialog {
             radioButtonsPanel.add(Box.createRigidArea(new Dimension(5, 5)));
         }
 
-        // disable other rooms, only enable the current room
+        // if this is making suggestion, disable other rooms, only enable the current room
         if (!isAccusation) {
             Character currentPlayer = gui.getCurrentPlayer();
             Position pos = gui.getPlayerPosition(currentPlayer);
             if (pos instanceof Room) {
                 Room room = (Room) pos;
-
                 Location loc = room.getRoom();
 
                 for (JRadioButton button : rButtonList) {
@@ -427,22 +472,19 @@ public class SuggestionDialog extends JDialog {
                     break;
                 }
             }
+            Suggestion sug = new Suggestion(character, weapon, location);
+
             // dispose dialog
             SuggestionDialog.this.dispose();
 
             if (isAccusation) {
                 // now make an accusation
-                gui.makeAccusation(character, weapon, location);
+                gui.makeAccusation(sug);
             } else {
                 // now make a suggestion
-                gui.makeSuggestion(character, weapon, location);
+                gui.makeSuggestion(sug);
             }
         });
-
-        // TODO if this is a suggestion, when the player press make suggestion
-        // give the result of suggestion
-        // and ask if the player want to make accusation right away.
-        // if yes, then pop up a accusation dialog
 
         // confirm button at bottom
         cancel.addActionListener(e -> cardLayout.previous(mainPanel));
@@ -451,7 +493,6 @@ public class SuggestionDialog extends JDialog {
         JPanel buttonPane = new JPanel();
         buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.X_AXIS));
         buttonPane.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         buttonPane.add(cancel);
         buttonPane.add(Box.createRigidArea(new Dimension(30, 20)));
         buttonPane.add(confirm);
@@ -464,8 +505,7 @@ public class SuggestionDialog extends JDialog {
         locationPanel.add(Box.createRigidArea(new Dimension(15, 15)));
         locationPanel.add(buttonPane);
 
+        // finally, add this panel into CardLayout
         mainPanel.add(locationPanel);
-
     }
-
 }

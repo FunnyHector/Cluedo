@@ -1,9 +1,7 @@
 package tile;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import card.Location;
 import game.GameError;
@@ -17,11 +15,20 @@ import game.GameError;
  */
 public class Room extends Position {
 
-    // Room name
+    /**
+     * The Location
+     */
     private final Location room;
-    // The end of the secret passage if this room has one. null if it doesn't have one.
+    /**
+     * The end of the secret passage if this room has one. null if it doesn't have one.
+     */
     private final Location secPasTo;
-    // a collection of entrance tiles only on which a player can enter this room.
+    /**
+     * a list of entrance tiles only on which a player can enter this room. The order is
+     * crucial as we identify each entrance by it's index inside this list. Also, we need
+     * to make sure each entrance only appear once here since we are using only one
+     * instance for each room, we need to make sure
+     */
     private final List<Entrance> entrances;
 
     /**
@@ -84,6 +91,7 @@ public class Room extends Position {
      *            --- An entrance tile of this room
      */
     public void addEntrances(Entrance entrance) {
+        // do not add duplicates. (It does happen in JUnit test)
         if (!entrances.contains(entrance)) {
             entrances.add(entrance);
         }

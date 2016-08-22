@@ -12,7 +12,9 @@ import game.GameError;
  */
 public class Entrance extends Tile {
 
-    // The room that the player can enter from this entrance tile.
+    /**
+     * The room that the player can enter from this entrance tile.
+     */
     private Room toRoom;
 
     /**

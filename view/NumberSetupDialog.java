@@ -3,8 +3,6 @@ package view;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -17,20 +15,34 @@ import javax.swing.JPanel;
 
 import ui.GUIClient;
 
+/**
+ * This class is a custom dialog for players to choose how many players and how many dices
+ * are used in game.
+ * 
+ * @author Hector
+ *
+ */
+@SuppressWarnings("serial")
 public class NumberSetupDialog extends JDialog {
 
     /**
-     * TODO Generated serial version UID
+     * Construct a dialog to choose how many players and how many dices are used in game.
+     * 
+     * @param parent
+     *            --- the Main GUI of this game
+     * @param windowForComponent
+     *            --- the owner component
+     * @param string
+     *            --- the tile of this dialog
      */
-
     public NumberSetupDialog(GUIClient parent, Window windowForComponent, String string) {
         super(windowForComponent, string);
-
+        // initialise the main panel, and set a vertical BoxLayout
         JPanel numSetup = new JPanel();
         numSetup.setLayout(new BoxLayout(numSetup, BoxLayout.Y_AXIS));
         numSetup.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // ======== first row ========
+        // ===== first row, choose how many players with a JComboBox =====
 
         JPanel firstRow = new JPanel();
         firstRow.setLayout(new BoxLayout(firstRow, BoxLayout.X_AXIS));
@@ -46,7 +58,7 @@ public class NumberSetupDialog extends JDialog {
 
         numSetup.add(Box.createRigidArea(new Dimension(15, 20)));
 
-        // ======== second row ========
+        // ===== second row, choose how many dicess with a JComboBox =====
 
         JPanel secondRow = new JPanel();
         secondRow.setLayout(new BoxLayout(secondRow, BoxLayout.X_AXIS));
@@ -62,12 +74,13 @@ public class NumberSetupDialog extends JDialog {
 
         numSetup.add(Box.createRigidArea(new Dimension(15, 20)));
 
-        // ======== OK and Cancel buttons ========
+        // ===== last row, OK and Cancel buttons =====
 
         JPanel thirdRow = new JPanel();
         thirdRow.setLayout(new BoxLayout(thirdRow, BoxLayout.X_AXIS));
         JButton confirm = new JButton("OK");
         confirm.addActionListener(e -> {
+            // if the player click OK, then we have a new game!
             int numPlayers = comboBox_1.getItemAt(comboBox_1.getSelectedIndex());
             int numDices = comboBox_2.getItemAt(comboBox_2.getSelectedIndex());
             NumberSetupDialog.this.dispose();
@@ -82,9 +95,8 @@ public class NumberSetupDialog extends JDialog {
         thirdRow.setAlignmentX(Component.CENTER_ALIGNMENT);
         numSetup.add(thirdRow);
 
-        // show it
+        // pack and show it
         this.add(numSetup);
-
         this.setModal(true);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setResizable(false);

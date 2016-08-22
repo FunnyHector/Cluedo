@@ -4,30 +4,25 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Point;
-import java.awt.event.KeyAdapter;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
-import javax.swing.JDialog;
+import javax.swing.InputMap;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
@@ -38,7 +33,6 @@ import game.Game;
 import game.GameError;
 import game.Player;
 import game.Suggestion;
-import tile.Entrance;
 import tile.Position;
 import tile.Room;
 import tile.RoomTile;
@@ -57,48 +51,72 @@ import card.Location;
 import card.Weapon;
 import configs.Configs;
 
+/**
+ * A GUI client for Cluedo game.
+ * 
+ * @author Hector
+ *
+ */
+@SuppressWarnings("serial")
 public class GUIClient extends JFrame {
 
-    private static final String IMAGE_PATH = "resources/";
-    public static final Image INIT_SCREEN = loadImage("Initial_Screen.png");
-    public static final Image GAME_BOARD = loadImage("Game_Board.png");
-    public static final ImageIcon CORRECT = new ImageIcon(loadImage("Icon_Correct.png"));
-    public static final ImageIcon INCORRECT = new ImageIcon(
-            loadImage("Icon_Incorrect.png"));
-    public static final ImageIcon ACCUSE_ICON = new ImageIcon(
-            loadImage("Icon_Incorrect.png"));
-
+    /**
+     * The height of main frame
+     */
     public static final int HEIGHT = BoardCanvas.BOARD_IMG_HEIGHT
             + BoardCanvas.PADDING_TOP + BoardCanvas.PADDING_DOWN;
+    /**
+     * The width of game board (left panel)
+     */
     public static final int LEFT_PANEL_WIDTH = BoardCanvas.BOARD_IMG_WIDTH
             + BoardCanvas.PADDING_LEFT + BoardCanvas.PADDING_RIGHT;
+    /**
+     * the width of game board (right panel)
+     */
     public static final int RIGHT_PANEL_WIDTH = PlayerPanelCanvas.WIDTH
             + PlayerPanelCanvas.PADDING_LEFT + PlayerPanelCanvas.PADDING_RIGHT;
 
-    public static final int TEXT_ROW = 20;
-    public static final int TEXT_COL = 50;
-
     // =========== Views ================
 
-    // the main window
+    /**
+     * the main window
+     */
     private JPanel window;
-    // game board on left
+    /**
+     * game board on left
+     */
     private BoardCanvas gameBoardPanel;
-    // player panel on right bottom
+    /**
+     * player panel on right
+     */
     private PlayerPanelCanvas playerPanel;
 
     // ============= models ===================
+
+    /**
+     * the game
+     */
     private Game game;
 
-    // some fields to remember game status
+    /**
+     * the number of players
+     */
     private int numPlayers;
+    /**
+     * the number of dices
+     */
     private int numDices;
 
+    /**
+     * Construct a GUI to run Cluedo
+     */
     public GUIClient() {
         welcomeScreen();
     }
 
-    @SuppressWarnings("serial")
+    /**
+     * Initialise the main frame, menuBar, and a welcome screen
+     */
     private void welcomeScreen() {
 
         this.setTitle("Cluedo");
@@ -111,12 +129,13 @@ public class GUIClient extends JFrame {
         // ============ then the welcome screen =====================
         window = new JPanel() {
             protected void paintComponent(Graphics g) {
-                g.drawImage(INIT_SCREEN, 0, 0, null);
+                g.drawImage(INIT_SCREEN, 0, 0, this);
             }
         };
         window.setPreferredSize(
                 new Dimension(INIT_SCREEN.getWidth(this), INIT_SCREEN.getHeight(this)));
 
+        // pack and ... display (SHOUT: why not save?)
         this.add(window);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setResizable(false);
@@ -124,18 +143,30 @@ public class GUIClient extends JFrame {
         this.setVisible(true);
     }
 
+    /**
+     * Pop up a dialog to setup how many players and how many dices are used in game
+     */
     public void setupNumPlayers() {
-        @SuppressWarnings("unused")
-        JDialog frame = new NumberSetupDialog(this,
-                SwingUtilities.windowForComponent(this), "Setup Wizard");
+        new NumberSetupDialog(this, SwingUtilities.windowForComponent(this),
+                "Setup Wizard");
     }
 
+    /**
+     * Pop up a dialog to join players
+     */
     public void setupPlayers() {
-        @SuppressWarnings("unused")
-        JDialog frame = new PlayerSetupDialog(this,
-                SwingUtilities.windowForComponent(this), "Setup Wizard");
+        new PlayerSetupDialog(this, SwingUtilities.windowForComponent(this),
+                "Join Players");
     }
 
+    /**
+     * Initialise the game with the given number of players and number of dices
+     * 
+     * @param numPlayers
+     *            --- how many players
+     * @param numDices
+     *            --- how many dices are used in game
+     */
     public void createNewGame(int numPlayers, int numDices) {
         this.numPlayers = numPlayers;
         this.numDices = numDices;
@@ -155,108 +186,46 @@ public class GUIClient extends JFrame {
     }
 
     /**
-     * This method sets who the first character is to move.
+     * This method construct the in-game GUI, and let the game begin.
      */
-    public void setPlayerMoveFirst() {
-        game.setPlayerMoveFirst();
-    }
+    public void startGame() {
 
-    /**
-     * This method randomly choose one character, one room, and one weapon to create a
-     * solution, then shuffles all remaining cards, and deal them evenly to all players.
-     */
-    public void creatSolutionAndDealCards() {
+        // first let's finish initialising the game
+        game.decideWhoMoveFirst();
         game.creatSolution();
         game.dealCard();
-    }
-
-    public void startGame() {
 
         // remove the welcome screen, and load into the game interface
         this.remove(window);
-
         window = new JPanel();
         window.setLayout(new BoxLayout(window, BoxLayout.X_AXIS));
 
         // now make the left panel, which is game board
         gameBoardPanel = new BoardCanvas(this);
-
-        // gameBoardPanel.setBorder(BorderFactory.createEmptyBorder());
-
         TitledBorder gameBoardPanel_border = creatTitledBorder("Board");
-
+        gameBoardPanel.setPreferredSize(new Dimension(LEFT_PANEL_WIDTH, HEIGHT));
         gameBoardPanel.setBorder(gameBoardPanel_border);
 
-        // now the right panel (player panel and a text console)
-        JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        // rightPanel.setBorder(BorderFactory.createEmptyBorder());
-
-        // now make the right-bottom split panel, which is player panel (cards and dices)
+        // now the right panel (player panel)
         playerPanel = new PlayerPanelCanvas(this);
-
         TitledBorder playerPanel_border = creatTitledBorder("Player Panel");
-
+        playerPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, HEIGHT));
         playerPanel.setBorder(playerPanel_border);
-
-        // now put up the right split panel
-        rightPanel.add(playerPanel);
 
         // now put them together
         window.add(gameBoardPanel);
-        window.add(rightPanel);
+        window.add(playerPanel);
 
-        // set preferred size
-        playerPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, HEIGHT));
-        gameBoardPanel.setPreferredSize(new Dimension(LEFT_PANEL_WIDTH, HEIGHT));
+        // add key bindings
+        addKeyBindings(gameBoardPanel);
+        addKeyBindings(playerPanel);
+        addKeyBindings(window);
 
-        // This is to prevent the window from losing focus after JPanel repaint()
-        window.addMouseMotionListener(new MouseMotionListener() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                window.requestFocusInWindow();
-            }
+        // enable the no brainer mode on menu
+        ((CustomMenu) this.getJMenuBar()).enableEasyModeMenu();
 
-            @Override
-            public void mouseDragged(MouseEvent e) {
-            }
-        });
-
-        // Add a keyAdaptor
-        window.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                int k = e.getKeyCode();
-                switch (k) {
-                case KeyEvent.VK_UP:
-                case KeyEvent.VK_W:
-                    playerPanel.tryClickOnUp();
-                    break;
-                case KeyEvent.VK_DOWN:
-                case KeyEvent.VK_S:
-                    playerPanel.tryClickOnDown();
-                    break;
-                case KeyEvent.VK_RIGHT:
-                case KeyEvent.VK_D:
-                    playerPanel.tryClickOnRight();
-                    break;
-                case KeyEvent.VK_LEFT:
-                case KeyEvent.VK_A:
-                    playerPanel.tryClickOnLeft();
-                    break;
-                case KeyEvent.VK_SPACE:
-                    playerPanel.tryClickOnLeft();
-                    break;
-                default:
-                }
-            }
-        });
-
-        ((CustomMenu) this.getJMenuBar()).enableNoBrainerMenu();
-
-        // last
+        // last, pack and display
         this.add(window);
-
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.pack();
         this.validate();
@@ -265,41 +234,66 @@ public class GUIClient extends JFrame {
         this.setVisible(true);
     }
 
+    /**
+     * This method updates game board and player panel display according to the model
+     * (game).
+     */
     public void update() {
         if (game.isGameRunning()) {
             gameBoardPanel.update();
             playerPanel.update();
             window.requestFocusInWindow();
         } else {
+            // game stopped, we must have a winner
+            window.requestFocusInWindow();
             int choice = JOptionPane.showConfirmDialog(window,
-                    getCurrentPlayer().toString()
-                            + " are the only player left. Congratulations, you are the winner!\n"
-                            + "Do you want to play again?",
-                    getCurrentPlayer().toString() + " won!", JOptionPane.OK_CANCEL_OPTION,
+                    game.getWinner().toString()
+                            + " are the only player left. Congratulations, "
+                            + game.getPlayerByCharacter(game.getWinner()).getName()
+                            + " are the winner!\n" + "Do you want to play again?",
+                    game.getWinner().toString() + " won!", JOptionPane.OK_CANCEL_OPTION,
                     JOptionPane.INFORMATION_MESSAGE, CORRECT);
 
             if (choice == JOptionPane.OK_OPTION) {
+                // start a new game
                 setupNumPlayers();
+            } else {
+                // exit
+                System.exit(0);
             }
-            window.requestFocusInWindow();
         }
     }
 
+    /**
+     * Pop up a dialog for player to make suggestion.
+     */
     public void popUpSuggestion() {
         new SuggestionDialog(this, SwingUtilities.windowForComponent(this),
                 "Make a Suggestion", false);
 
     }
 
-    public void makeSuggestion(Character c, Weapon w, Location l) {
-        Suggestion suggestion = new Suggestion(c, w, l);
-        movePlayer(suggestion.character, Configs.getRoom(suggestion.location));
-        moveWeapon(suggestion.weapon, getAvailableRoomTile(suggestion.location));
-        String s = game.refuteSuggestion(suggestion);
+    /**
+     * After the player has made his suggestion, this method evaluate the suggestion, and
+     * pop up a option panel to show how other players refuted this suggestion.
+     * 
+     * @param sug
+     *            --- the suggestion made by player
+     */
+    public void makeSuggestion(Suggestion sug) {
+        // move the involved character and weapon into the involved location
+        movePlayer(sug.character, Configs.getRoom(sug.location));
+        moveWeapon(sug.weapon, getAvailableRoomTile(sug.location));
 
+        // let's see how others refute it
+        String s = game.refuteSuggestion(sug);
         JOptionPane.showMessageDialog(window, s, "Refution from other players",
                 JOptionPane.INFORMATION_MESSAGE);
 
+        /*
+         * After the player has made a suggestion, he can choose to make an accusation
+         * right away
+         */
         int choice = JOptionPane.showConfirmDialog(window,
                 "Do you want to make an accusation right away?", "Make Accusation?",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE,
@@ -308,32 +302,44 @@ public class GUIClient extends JFrame {
         if (choice == JOptionPane.OK_OPTION) {
             popUpAccusation();
         }
-
     }
 
+    /**
+     * Pop up a dialog for player to make accusation.
+     */
     public void popUpAccusation() {
         new SuggestionDialog(this, SwingUtilities.windowForComponent(this),
                 "Make an Accusation", true);
     }
 
-    public void makeAccusation(Character c, Weapon w, Location l) {
+    /**
+     * After the player has made his accusation, this method evaluate the suggestion, and
+     * pop up a option panel to show if he is the winner or he loses the game.
+     * 
+     * @param accusation
+     *            --- the accusation made by player
+     */
+    public void makeAccusation(Suggestion accusation) {
+        // move the involved character and weapon into the involved location
+        movePlayer(accusation.character, Configs.getRoom(accusation.location));
+        moveWeapon(accusation.weapon, getAvailableRoomTile(accusation.location));
 
-        Suggestion suggestion = new Suggestion(c, w, l);
-        movePlayer(suggestion.character, Configs.getRoom(suggestion.location));
-        moveWeapon(suggestion.weapon, getAvailableRoomTile(suggestion.location));
-
-        boolean isCorrect = game.checkAccusation(new Suggestion(c, w, l));
+        // let's see if the accusation is right or wrong
+        boolean isCorrect = game.checkAccusation(accusation);
         if (isCorrect) {
             int choice = JOptionPane.showConfirmDialog(window,
                     "Your accusation is correct.\nCongratulations, "
                             + getCurrentPlayer().toString() + "("
                             + game.getPlayerByCharacter(getCurrentPlayer()).getName()
-                            + ") is the winner!\nDo you want to play again?",
+                            + ") is the winner!\n Do you want to play again?",
                     "WINNER!", JOptionPane.OK_CANCEL_OPTION,
                     JOptionPane.INFORMATION_MESSAGE, CORRECT);
 
+            // start a new game or quit
             if (choice == JOptionPane.OK_OPTION) {
                 setupNumPlayers();
+            } else {
+                System.exit(0);
             }
 
         } else {
@@ -341,15 +347,6 @@ public class GUIClient extends JFrame {
                     "Your accusation is WRONG, you are out!", "Incorrect",
                     JOptionPane.ERROR_MESSAGE, INCORRECT);
         }
-    }
-
-    /**
-     * This method gets all cards that is known as not involved in crime.
-     * 
-     * @return --- all cards that is known as not involved in crime.
-     */
-    public Set<Card> getKnownCards() {
-        return game.getKnownCards();
     }
 
     /**
@@ -379,13 +376,13 @@ public class GUIClient extends JFrame {
      *            --- where to move
      */
     public void movePlayer(Character character, Position position) {
-
+        // move the player
         game.movePlayer(character, position);
+        // we move the corresponding character token as well
         CharacterToken[] characterTokens = gameBoardPanel.getCharacterTokens();
-
         if (position instanceof Tile) {
-            Tile tile = (Tile) position;
-            characterTokens[character.ordinal()].moveToTile(tile);
+            // Tile tile = (Tile) position;
+            // characterTokens[character.ordinal()].moveToTile(tile);
         } else if (position instanceof Room) {
             Room room = (Room) position;
             RoomTile destRoomTile = getAvailableRoomTile(room.getRoom());
@@ -402,25 +399,56 @@ public class GUIClient extends JFrame {
      *            --- which room to move into, and on which tile is this token put
      */
     public void moveWeapon(Weapon weapon, RoomTile roomTile) {
+        // move the weapon
         game.moveWeapon(weapon, roomTile);
+        // move the corresponding weapon token as well
         WeaponToken[] weaponTokens = game.getWeaponTokens();
         weaponTokens[weapon.ordinal()].setRoomTile(roomTile);
     }
 
+    /**
+     * Get the number of players
+     * 
+     * @return --- the number of players (3 to 6 inclusive)
+     */
     public int getNumPlayers() {
         return numPlayers;
     }
 
+    /**
+     * Get the number of dices
+     * 
+     * @return --- the number of dices (1 to 3 inclusive)
+     */
     public int getNumDices() {
         return numDices;
     }
 
+    /**
+     * Get the game board
+     * 
+     * @return --- the game board
+     */
     public Board getBoard() {
         return game.getBoard();
     }
 
+    /**
+     * Get all players (including dummy token not controlled by human).
+     * 
+     * @return --- all players (including dummy token not controlled by human) as a list
+     */
     public List<Player> getAllPlayers() {
         return game.getPlayers();
+    }
+
+    /**
+     * Get the player who needs to move.
+     * 
+     * @return --- the current player
+     */
+    public Character getCurrentPlayer() {
+        return game.getCurrentPlayer();
     }
 
     /**
@@ -428,7 +456,7 @@ public class GUIClient extends JFrame {
      * 
      * @param character
      *            --- the given character
-     * @return
+     * @return --- the corresponding Player of given Character
      */
     public Player getPlayerByCharacter(Character character) {
         return game.getPlayerByCharacter(character);
@@ -453,14 +481,31 @@ public class GUIClient extends JFrame {
         return game.getRemainingCards();
     }
 
-    public void setNobrainerMode(boolean isNobrainerMode) {
-        game.setNoBrainerMode(isNobrainerMode);
+    /**
+     * Is the game run on easy mode?
+     * 
+     * @return --- true if the game run on easy mode, or false if not.
+     */
+    public boolean isEasyMode() {
+        return game.isEasyMode();
     }
 
-    public boolean isNoBrainerMode() {
-        return game.isNoBrainerMode();
+    /**
+     * Set the game to easy mode (so that the game will remember clues for
+     * player...cheating).
+     * 
+     * @param isEasyMode
+     *            --- a flag to turn on or off easy mode
+     */
+    public void setEasyMode(boolean isEasyMode) {
+        game.setEasyMode(isEasyMode);
     }
 
+    /**
+     * Whether game has a winner (i.e. game end)
+     * 
+     * @return --- true if game is still running, there is no winner yet; false if not.
+     */
     public boolean isGameRunning() {
         if (game == null) {
             return false;
@@ -469,10 +514,15 @@ public class GUIClient extends JFrame {
         }
     }
 
-    public Position getPosition(int x, int y) {
-        return game.getPosition(x, y);
-    }
-
+    /**
+     * This method finds the next empty spot in a given room to display player or weapon
+     * tokens.
+     * 
+     * @param location
+     *            --- which room we want to display a token
+     * @return --- an empty spot to display a token in the given room, or null if the room
+     *         is full (impossible to happen with the default board)
+     */
     public RoomTile getAvailableRoomTile(Location location) {
         return game.getAvailableRoomTile(location);
     }
@@ -500,12 +550,12 @@ public class GUIClient extends JFrame {
     }
 
     /**
-     * Get the player who need to move.
+     * This method gets all cards that is known as not involved in crime.
      * 
-     * @return --- the current player
+     * @return --- all cards that is known as not involved in crime.
      */
-    public Character getCurrentPlayer() {
-        return game.getCurrentPlayer();
+    public Set<Card> getKnownCards() {
+        return game.getKnownCards();
     }
 
     /**
@@ -550,6 +600,120 @@ public class GUIClient extends JFrame {
         return game.getMovablePositions(character);
     }
 
+    /**
+     * This method does key bindings:<br>
+     * <br>
+     * W/up arrow for moving up<br>
+     * S/down arrow for moving down<br>
+     * A/left arrow for moving left<br>
+     * D/right arrow for moving right<br>
+     * Q fir entering/exiting room<br>
+     * E for taking secret passage<br>
+     * Space bar for rolling dice<br>
+     * Esc for Ending turn.
+     */
+    private void addKeyBindings(JPanel jpanel) {
+        InputMap inputMap = jpanel.getInputMap();
+        ActionMap actionMap = jpanel.getActionMap();
+
+        // add UP / W as short-cut key
+        Action moveUp = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                playerPanel.tryClickOnUp();
+            }
+        };
+        inputMap.put(KeyStroke.getKeyStroke('w'), "moveUp");
+        inputMap.put(KeyStroke.getKeyStroke('W'), "moveUp");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "moveUp");
+        actionMap.put("moveUp", moveUp);
+
+        // add DOWN / S as short-cut key
+        Action moveDown = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                playerPanel.tryClickOnDown();
+            }
+        };
+        inputMap.put(KeyStroke.getKeyStroke('s'), "moveDown");
+        inputMap.put(KeyStroke.getKeyStroke('S'), "moveDown");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "moveDown");
+        actionMap.put("moveDown", moveDown);
+
+        // add LEFT / A as short-cut key
+        Action moveLeft = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                playerPanel.tryClickOnLeft();
+            }
+        };
+        inputMap.put(KeyStroke.getKeyStroke('a'), "moveLeft");
+        inputMap.put(KeyStroke.getKeyStroke('A'), "moveLeft");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "moveLeft");
+        actionMap.put("moveLeft", moveLeft);
+
+        // add RIGHT / D as short-cut key
+        Action moveRight = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                playerPanel.tryClickOnRight();
+            }
+        };
+        inputMap.put(KeyStroke.getKeyStroke('d'), "moveRight");
+        inputMap.put(KeyStroke.getKeyStroke('D'), "moveRight");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "moveRight");
+        actionMap.put("moveRight", moveRight);
+
+        // add Q as short-cut key for entering/exiting room
+        Action enterExit = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                playerPanel.tryClickOnEnterExitRoom();
+            }
+        };
+        inputMap.put(KeyStroke.getKeyStroke('q'), "enterExit");
+        inputMap.put(KeyStroke.getKeyStroke('Q'), "enterExit");
+        actionMap.put("enterExit", enterExit);
+
+        // add E as short-cut key for taking secret passage
+        Action secPas = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                playerPanel.tryClickOnSecretOass();
+            }
+        };
+        inputMap.put(KeyStroke.getKeyStroke('e'), "secPas");
+        inputMap.put(KeyStroke.getKeyStroke('E'), "secPas");
+        actionMap.put("secPas", secPas);
+
+        // add SPACE as short-cut key for rolling dice
+        Action rollDice = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                playerPanel.tryClickOnRollDice();
+            }
+        };
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "rollDice");
+        actionMap.put("rollDice", rollDice);
+
+        // add ESC as short-cut key for ending turn
+        Action endTurn = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                playerPanel.tryClickOnEndTurn();
+            }
+        };
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "endTurn");
+        actionMap.put("endTurn", endTurn);
+    }
+
+    /**
+     * A helper method to create a titled border
+     * 
+     * @param string
+     *            --- the border tile
+     * @return --- a titled border
+     */
     private TitledBorder creatTitledBorder(String string) {
         return BorderFactory
                 .createTitledBorder(
@@ -559,16 +723,12 @@ public class GUIClient extends JFrame {
                         string, TitledBorder.CENTER, TitledBorder.TOP);
     }
 
-    public static Image loadImage(String filename) {
-        URL imageURL = BoardCanvas.class.getResource(IMAGE_PATH + filename);
-        try {
-            Image img = ImageIO.read(imageURL);
-            return img;
-        } catch (IOException e) {
-            throw new GameError("Unable to load image: " + filename);
-        }
-    }
-
+    /**
+     * Main method to start the game.
+     * 
+     * @param args
+     *            --- who cares it in GUI?
+     */
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -580,4 +740,44 @@ public class GUIClient extends JFrame {
             }
         });
     }
+
+    /**
+     * A helper method to load image
+     * 
+     * @param filename
+     *            --- the file name
+     * @return --- the Image object of the given file
+     */
+    public static Image loadImage(String filename) {
+        URL imageURL = BoardCanvas.class.getResource(IMAGE_PATH + filename);
+        try {
+            Image img = ImageIO.read(imageURL);
+            return img;
+        } catch (IOException e) {
+            throw new GameError("Unable to load image: " + filename);
+        }
+    }
+
+    /**
+     * This String specifies the path for loadImage() to look for images.
+     */
+    private static final String IMAGE_PATH = "resources/";
+    /**
+     * The image displayed on welcome screen
+     */
+    public static final Image INIT_SCREEN = loadImage("Initial_Screen.png");
+    /**
+     * An icon used to pop a dialog to tell players something is *Correct*
+     */
+    public static final ImageIcon CORRECT = new ImageIcon(loadImage("Icon_Correct.png"));
+    /**
+     * An icon used to pop a dialog to tell players something is *Incorrect*
+     */
+    public static final ImageIcon INCORRECT = new ImageIcon(
+            loadImage("Icon_Incorrect.png"));
+    /**
+     * An icon used to pop a dialog to let players to do accusation
+     */
+    public static final ImageIcon ACCUSE_ICON = new ImageIcon(
+            loadImage("Icon_Accusation.png"));
 }

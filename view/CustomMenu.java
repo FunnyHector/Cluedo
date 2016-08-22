@@ -10,14 +10,37 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import ui.GUIClient;
 
+/**
+ * This class is a custom menu for the main Frame in Cluedo GUI.
+ * 
+ * @author Hector
+ *
+ */
+@SuppressWarnings("serial")
 public class CustomMenu extends JMenuBar {
 
-    private static final String[] MENU_STRINGS = { "Menu", "New Game", "No Brainer Mode",
+    /**
+     * An array holding all Strings to make the menu
+     */
+    private static final String[] MENU_STRINGS = { "Menu", "New Game", "Easy Mode",
             "Help / Cluedo Rules", "Exit" };
+
+    /**
+     * A URL address to open a Cluedo manual
+     */
     private static final String HELP_URL = "www.hasbro.com/common/instruct/Clue_(2002).pdf";
 
-    private JCheckBoxMenuItem menuMenu_NoBrainerMode;
+    /**
+     * a check box menu to enable/disable no brainer mode
+     */
+    private JCheckBoxMenuItem menuMenu_EasyMode;
 
+    /**
+     * Construct a Menu for Cluedo game
+     * 
+     * @param parent
+     *            --- the Main GUI of this game
+     */
     public CustomMenu(GUIClient parent) {
 
         int i = 0;
@@ -41,10 +64,10 @@ public class CustomMenu extends JMenuBar {
         });
 
         // a checkbox menu to enable no brainer mode
-        menuMenu_NoBrainerMode = new JCheckBoxMenuItem(MENU_STRINGS[i++]);
-        menuMenu_NoBrainerMode.setEnabled(false);
-        menuMenu_NoBrainerMode.addChangeListener(e -> {
-            parent.setNobrainerMode(((JCheckBoxMenuItem) e.getSource()).isSelected());
+        menuMenu_EasyMode = new JCheckBoxMenuItem(MENU_STRINGS[i++]);
+        menuMenu_EasyMode.setEnabled(false);
+        menuMenu_EasyMode.addChangeListener(e -> {
+            parent.setEasyMode(((JCheckBoxMenuItem) e.getSource()).isSelected());
             parent.update();
         });
 
@@ -82,12 +105,15 @@ public class CustomMenu extends JMenuBar {
         });
 
         menuMenu.add(menuMenu_NewGame);
-        menuMenu.add(menuMenu_NoBrainerMode);
+        menuMenu.add(menuMenu_EasyMode);
         menuMenu.add(menuMenu_Help);
         menuMenu.add(menuMenu_Exit);
     }
 
-    public void enableNoBrainerMenu() {
-        menuMenu_NoBrainerMode.setEnabled(true);
+    /**
+     * This method enables easy mode menuItem in menu.
+     */
+    public void enableEasyModeMenu() {
+        menuMenu_EasyMode.setEnabled(true);
     }
 }

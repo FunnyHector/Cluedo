@@ -18,9 +18,18 @@ import card.Weapon;
  */
 public class Suggestion {
 
+    /**
+     * The character involved in this suggestion / accusation
+     */
     public final Character character;
-    public final Location location;
+    /**
+     * The weapon involved in this suggestion / accusation
+     */
     public final Weapon weapon;
+    /**
+     * The location involved in this suggestion / accusation
+     */
+    public final Location location;
 
     /**
      * Construct a suggestion with one Character, one Location, and one Weapon.

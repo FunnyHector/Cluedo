@@ -18,7 +18,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,24 +27,52 @@ import javax.swing.JTextField;
 import card.Character;
 import ui.GUIClient;
 
+/**
+ * This class is a custom dialog for players to choose which character he / she want to
+ * play as one by one.
+ * 
+ * @author Hector
+ *
+ */
+@SuppressWarnings("serial")
 public class PlayerSetupDialog extends JDialog {
 
-    public static final Dimension PROFILE_DIMENSION = new Dimension(
+    /*
+     * A dimension used to set the size of player profile picture
+     */
+    private static final Dimension PROFILE_DIMENSION = new Dimension(
             PlayerPanelCanvas.PROFILE_IMG[0].getIconWidth(),
             PlayerPanelCanvas.PROFILE_IMG[0].getIconHeight());
 
+    /**
+     * Construct a dialog, let players choose which character he / she want to play as one
+     * by one.
+     * 
+     * @param parent
+     *            --- the Main GUI of this game
+     * @param windowForComponent
+     *            --- the owner component
+     * @param string
+     *            --- the tile of this dialog
+     */
     public PlayerSetupDialog(GUIClient parent, Window windowForComponent, String string) {
         super(windowForComponent, string);
 
+        /*
+         * a list used to remember the order of chosen characters in case someone want to
+         * re-select another character
+         */
         Map<Character, String> selectedCharacters = new HashMap<>();
+        // a map used to maintain a [character = player name] pair
         List<Integer> characterOder = new ArrayList<>();
+        // a bunch of JRadioButtons
         List<JRadioButton> rButtonList = new ArrayList<>();
 
-        @SuppressWarnings("serial")
         JPanel cardDisplay = new JPanel() {
             protected void paintComponent(Graphics g) {
                 for (JRadioButton b : rButtonList) {
                     if (b.isSelected()) {
+                        // paint the profile picture according to radio buttons
                         g.drawImage(
                                 PlayerPanelCanvas.PROFILE_IMG[Integer
                                         .parseInt(b.getActionCommand())].getImage(),
@@ -65,77 +92,25 @@ public class PlayerSetupDialog extends JDialog {
         confirm.setEnabled(false);
         cancel.setEnabled(false);
 
-        // radio buttons
+        // A ButtonGroup used to ensure that only one is selected.
         ButtonGroup radioButtonGroup = new ButtonGroup();
         JPanel radioButtonsPanel = new JPanel();
         radioButtonsPanel.setLayout(new BoxLayout(radioButtonsPanel, BoxLayout.Y_AXIS));
 
-        // a text field to input player's name
+        // a text field to input player's name (TOTALLY UNNECESSARY!! ONLY FOR ASSIGNMENT)
         JTextField nameInput = new JTextField(8);
         nameInput.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent e) {
-                boolean hasName = false;
-                boolean nameUnique = true;
-                boolean radioSelected = false;
-
-                String name = nameInput.getText();
-                if (name != null && !name.equals("")) {
-                    hasName = true;
-                    for (String s : selectedCharacters.values()) {
-                        if (s.equals(name)) {
-                            nameUnique = false;
-                            break;
-                        }
-                    }
-                }
-
-                for (JRadioButton button : rButtonList) {
-                    if (button.isSelected()) {
-                        radioSelected = true;
-                        break;
-                    }
-                }
-
-                if (hasName && radioSelected && nameUnique) {
-                    confirm.setEnabled(true);
-                } else {
-                    confirm.setEnabled(false);
-                }
+                tryUnlockNext(selectedCharacters, rButtonList, confirm, nameInput);
             }
         });
 
-        // a listener for radiobuttons
+        // a listener for radio buttons
         ActionListener al = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                // update the profile picture
                 cardDisplay.repaint();
-
-                boolean hasName = false;
-                boolean nameUnique = true;
-                boolean radioSelected = false;
-
-                String name = nameInput.getText();
-                if (name != null && !name.equals("")) {
-                    hasName = true;
-                    for (String s : selectedCharacters.values()) {
-                        if (s.equals(name)) {
-                            nameUnique = false;
-                            break;
-                        }
-                    }
-                }
-
-                for (JRadioButton button : rButtonList) {
-                    if (button.isSelected()) {
-                        radioSelected = true;
-                        break;
-                    }
-                }
-
-                if (hasName && radioSelected && nameUnique) {
-                    confirm.setEnabled(true);
-                } else {
-                    confirm.setEnabled(false);
-                }
+                tryUnlockNext(selectedCharacters, rButtonList, confirm, nameInput);
             }
         };
 
@@ -144,13 +119,13 @@ public class PlayerSetupDialog extends JDialog {
             Character c = Character.get(i);
 
             JRadioButton rButton = new JRadioButton(c.toString(), false);
+            // use the index as the button's action command
             rButton.setActionCommand(String.valueOf(i));
             rButton.addActionListener(al);
             radioButtonGroup.add(rButton);
             rButtonList.add(rButton);
             radioButtonsPanel.add(rButton);
             radioButtonsPanel.add(Box.createRigidArea(new Dimension(15, 15)));
-
         }
 
         // the middle panel to hold radio buttons and card display
@@ -173,33 +148,32 @@ public class PlayerSetupDialog extends JDialog {
         textPane.add(Box.createRigidArea(new Dimension(15, 20)));
         textPane.add(nameInput);
 
+        // what "Next" button will do
         confirm.addActionListener(e -> {
-
             String name = nameInput.getText();
+            // clear name input field
             nameInput.setText("");
 
             if (selectedCharacters.size() == 0) {
+                // No you can't "previous" any more
                 cancel.setEnabled(true);
             }
 
             for (JRadioButton b : rButtonList) {
                 if (b.isSelected()) {
                     int buttonIndex = Integer.parseInt(b.getActionCommand());
+                    // update these memory collections
                     selectedCharacters.put(Character.get(buttonIndex), name);
                     characterOder.add(buttonIndex);
 
                     if (confirm.getText().equals("Game On!")) {
+                        // dispose this dialog
                         PlayerSetupDialog.this.dispose();
-
                         // join players
                         for (Character c : selectedCharacters.keySet()) {
-
                             parent.joinPlayer(c, selectedCharacters.get(c));
                         }
-
                         // start the game
-                        parent.setPlayerMoveFirst();
-                        parent.creatSolutionAndDealCards();
                         parent.startGame();
                     }
 
@@ -215,9 +189,11 @@ public class PlayerSetupDialog extends JDialog {
             }
         });
 
+        // what "Previous" button will do
         cancel.addActionListener(e -> {
-
+            // clear the name input
             nameInput.setText("");
+            // update memory collections
             int canceledIndex = characterOder.remove(characterOder.size() - 1);
 
             for (JRadioButton button : rButtonList) {
@@ -226,19 +202,14 @@ public class PlayerSetupDialog extends JDialog {
                 }
             }
 
-            String s = selectedCharacters.remove(Character.get(canceledIndex));
-
-            System.out.println(canceledIndex);
-            System.out.println(Character.get(canceledIndex) + ", " + s);
-
             if (characterOder.size() == 0) {
                 cancel.setEnabled(false);
             } else if (selectedCharacters.size() < parent.getNumPlayers() - 1) {
                 confirm.setText("Next");
             }
-
         });
 
+        // put stuff together
         JPanel buttonPane = new JPanel();
         buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.X_AXIS));
         buttonPane.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -253,6 +224,7 @@ public class PlayerSetupDialog extends JDialog {
         playerSetupPane.add(Box.createRigidArea(new Dimension(15, 15)));
         playerSetupPane.add(buttonPane);
 
+        // pack and show
         this.add(playerSetupPane);
         this.setModal(true);
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -260,5 +232,54 @@ public class PlayerSetupDialog extends JDialog {
         this.pack();
         this.setLocationRelativeTo(parent);
         this.setVisible(true);
+    }
+
+    /**
+     * This helper method check whether the "Next" button can be unlocked. It can be
+     * unlocked only when a name has been inputed, and the name inputed is not duplicate
+     * with previous ones, and a different character is selected. Otherwise the "Next"
+     * button would be disabled.
+     * 
+     * @param selectedCharacters
+     *            --- a map used to maintain a [character = player name] pair
+     * @param rButtonList
+     *            --- a list of radio button group
+     * @param confirm
+     *            --- the "Next" button
+     * @param nameInput
+     *            --- the text field for inputting player names
+     */
+    private void tryUnlockNext(Map<Character, String> selectedCharacters,
+            List<JRadioButton> rButtonList, JButton confirm, JTextField nameInput) {
+
+        // three booleans to represent three critical conditions
+        boolean hasName = false;
+        boolean nameUnique = true;
+        boolean radioSelected = false;
+
+        String name = nameInput.getText();
+        if (name != null && !name.equals("")) {
+            hasName = true;
+            for (String s : selectedCharacters.values()) {
+                if (s.equals(name)) {
+                    nameUnique = false;
+                    break;
+                }
+            }
+        }
+
+        for (JRadioButton button : rButtonList) {
+            if (button.isSelected()) {
+                radioSelected = true;
+                break;
+            }
+        }
+
+        // all of them have to be true to unlock the next chapter ** sorry button
+        if (hasName && radioSelected && nameUnique) {
+            confirm.setEnabled(true);
+        } else {
+            confirm.setEnabled(false);
+        }
     }
 }
