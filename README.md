@@ -2,9 +2,9 @@
 SWEN222 Assignment 01 & 02, co-worked with Roy
 
 Text-based UI: DONE!   
-Graphical UI: in progress.  
+Graphical UI: DOOOONE!
 Works to be done:   
+
   
 
-1. Make a suggestion / accusation Panel  
-2. Connect the view (UI) with model (game) 
+This version is ready-to-submit, although there are many possible improvements in my head already.
