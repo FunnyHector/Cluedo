@@ -169,10 +169,10 @@ public abstract class AbstractToken extends JLabel {
      * a cross icon to represents this token is known, i.e. not involved in crime
      */
     public static final ImageIcon CROSS_ICON = new ImageIcon(
-            loadImage("NoBrainer_Cross.png"));
+            loadImage("EasyMode_Cross.png"));
     /**
      * a question mark icon to represents this token is unknown
      */
     public static final ImageIcon QUESTION_ICON = new ImageIcon(
-            loadImage("NoBrainer_Question.png"));
+            loadImage("EasyMode_Question.png"));
 }

@@ -23,7 +23,7 @@ public class CustomMenu extends JMenuBar {
      * An array holding all Strings to make the menu
      */
     private static final String[] MENU_STRINGS = { "Menu", "New Game", "Easy Mode",
-            "Help / Cluedo Rules", "Exit" };
+            "Help", "Cluedo Manual", "Exit" };
 
     /**
      * A URL address to open a Cluedo manual
@@ -31,9 +31,9 @@ public class CustomMenu extends JMenuBar {
     private static final String HELP_URL = "www.hasbro.com/common/instruct/Clue_(2002).pdf";
 
     /**
-     * a check box menu to enable/disable no brainer mode
+     * a check box menu to enable/disable easy mode
      */
-    private JCheckBoxMenuItem menuMenu_EasyMode;
+    private JCheckBoxMenuItem easyMode;
 
     /**
      * Construct a Menu for Cluedo game
@@ -44,12 +44,12 @@ public class CustomMenu extends JMenuBar {
     public CustomMenu(GUIClient parent) {
 
         int i = 0;
-        JMenu menuMenu = new JMenu(MENU_STRINGS[i++]);
-        this.add(menuMenu);
+        JMenu jMenu = new JMenu(MENU_STRINGS[i++]);
+        this.add(jMenu);
 
         // new game
-        JMenuItem menuMenu_NewGame = new JMenuItem(MENU_STRINGS[i++]);
-        menuMenu_NewGame.addActionListener(e -> {
+        JMenuItem newGame = new JMenuItem(MENU_STRINGS[i++]);
+        newGame.addActionListener(e -> {
             if (parent.isGameRunning()) {
                 int choice = JOptionPane.showConfirmDialog(parent,
                         "Game is still running, are you sure to start a new game?",
@@ -63,17 +63,21 @@ public class CustomMenu extends JMenuBar {
             }
         });
 
-        // a checkbox menu to enable no brainer mode
-        menuMenu_EasyMode = new JCheckBoxMenuItem(MENU_STRINGS[i++]);
-        menuMenu_EasyMode.setEnabled(false);
-        menuMenu_EasyMode.addChangeListener(e -> {
+        // a checkbox menu to enable easy mode
+        easyMode = new JCheckBoxMenuItem(MENU_STRINGS[i++]);
+        easyMode.setEnabled(false);
+        easyMode.addChangeListener(e -> {
             parent.setEasyMode(((JCheckBoxMenuItem) e.getSource()).isSelected());
             parent.update();
         });
 
-        // a help link to open Cluedo Rule
-        JMenuItem menuMenu_Help = new JMenuItem(MENU_STRINGS[i++]);
-        menuMenu_Help.addActionListener(e -> {
+        // a Pop up help dialog
+        JMenuItem help = new JMenuItem(MENU_STRINGS[i++]);
+        help.addActionListener(e -> parent.popUpHelp());
+
+        // a link to open a browser for Cluedo Manual
+        JMenuItem manual = new JMenuItem(MENU_STRINGS[i++]);
+        manual.addActionListener(e -> {
             if (Desktop.isDesktopSupported()) {
                 try {
                     URI uri = URI.create(HELP_URL);
@@ -88,8 +92,8 @@ public class CustomMenu extends JMenuBar {
         });
 
         // exit
-        JMenuItem menuMenu_Exit = new JMenuItem(MENU_STRINGS[i++]);
-        menuMenu_Exit.addActionListener(e -> {
+        JMenuItem exit = new JMenuItem(MENU_STRINGS[i++]);
+        exit.addActionListener(e -> {
 
             if (parent.isGameRunning()) {
                 int choice = JOptionPane.showConfirmDialog(parent,
@@ -104,16 +108,17 @@ public class CustomMenu extends JMenuBar {
             }
         });
 
-        menuMenu.add(menuMenu_NewGame);
-        menuMenu.add(menuMenu_EasyMode);
-        menuMenu.add(menuMenu_Help);
-        menuMenu.add(menuMenu_Exit);
+        jMenu.add(newGame);
+        jMenu.add(easyMode);
+        jMenu.add(help);
+        jMenu.add(manual);
+        jMenu.add(exit);
     }
 
     /**
      * This method enables easy mode menuItem in menu.
      */
     public void enableEasyModeMenu() {
-        menuMenu_EasyMode.setEnabled(true);
+        easyMode.setEnabled(true);
     }
 }

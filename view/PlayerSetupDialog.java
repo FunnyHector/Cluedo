@@ -181,7 +181,7 @@ public class PlayerSetupDialog extends JDialog {
                     b.setEnabled(false);
                     confirm.setEnabled(false);
 
-                    if (characterOder.size() == parent.getNumPlayers() - 1) {
+                    if (selectedCharacters.size() == parent.getNumPlayers() - 1) {
                         confirm.setText("Game On!");
                     }
                     break;
@@ -195,6 +195,7 @@ public class PlayerSetupDialog extends JDialog {
             nameInput.setText("");
             // update memory collections
             int canceledIndex = characterOder.remove(characterOder.size() - 1);
+            selectedCharacters.remove(Character.get(canceledIndex));
 
             for (JRadioButton button : rButtonList) {
                 if (Integer.parseInt(button.getActionCommand()) == canceledIndex) {
@@ -202,7 +203,7 @@ public class PlayerSetupDialog extends JDialog {
                 }
             }
 
-            if (characterOder.size() == 0) {
+            if (selectedCharacters.size() == 0) {
                 cancel.setEnabled(false);
             } else if (selectedCharacters.size() < parent.getNumPlayers() - 1) {
                 confirm.setText("Next");
@@ -269,7 +270,7 @@ public class PlayerSetupDialog extends JDialog {
         }
 
         for (JRadioButton button : rButtonList) {
-            if (button.isSelected()) {
+            if (button.isSelected() && button.isEnabled()) {
                 radioSelected = true;
                 break;
             }

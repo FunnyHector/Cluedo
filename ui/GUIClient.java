@@ -39,6 +39,7 @@ import tile.RoomTile;
 import tile.Tile;
 import view.BoardCanvas;
 import view.CustomMenu;
+import view.HelpDialog;
 import view.NumberSetupDialog;
 import view.PlayerPanelCanvas;
 import view.PlayerSetupDialog;
@@ -262,6 +263,13 @@ public class GUIClient extends JFrame {
                 System.exit(0);
             }
         }
+    }
+
+    /**
+     * Pop up a help dialog.
+     */
+    public void popUpHelp() {
+        new HelpDialog(this, SwingUtilities.windowForComponent(this), "Help");
     }
 
     /**

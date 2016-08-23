@@ -202,12 +202,19 @@ public class PlayerPanelCanvas extends JPanel {
         remainingCardsPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         // a Label to show some artsy fonts
-        JLabel text = new JLabel(new ImageIcon(loadImage("Remaining_Cards.png")),
-                SwingConstants.CENTER);
-        remainingCardsPanel.add(text);
+        JLabel remainingCardLabel = new JLabel(
+                new ImageIcon(loadImage("Remaining_Cards.png")), SwingConstants.CENTER);
+        remainingCardsPanel.add(remainingCardLabel);
 
         // display remaining cards.
         remainingCards = gui.getRemainingCards();
+        if (remainingCards.isEmpty()) {
+            remainingCardLabel.setToolTipText("There is no remaining card.");
+        } else {
+            remainingCardLabel.setToolTipText(
+                    "There are " + remainingCards.size() + " remaining cards.");
+        }
+
         for (Card c : remainingCards) {
             if (c instanceof Character) {
                 Character ch = (Character) c;

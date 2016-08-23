@@ -54,9 +54,6 @@ public class NumberSetupDialog extends JDialog {
         comboBox_1.setSelectedIndex(3);
         firstRow.add(comboBox_1);
         firstRow.setAlignmentX(Component.CENTER_ALIGNMENT);
-        numSetup.add(firstRow);
-
-        numSetup.add(Box.createRigidArea(new Dimension(15, 20)));
 
         // ===== second row, choose how many dicess with a JComboBox =====
 
@@ -70,9 +67,7 @@ public class NumberSetupDialog extends JDialog {
         comboBox_2.setSelectedIndex(1);
         secondRow.add(comboBox_2);
         secondRow.setAlignmentX(Component.CENTER_ALIGNMENT);
-        numSetup.add(secondRow);
 
-        numSetup.add(Box.createRigidArea(new Dimension(15, 20)));
 
         // ===== last row, OK and Cancel buttons =====
 
@@ -87,12 +82,18 @@ public class NumberSetupDialog extends JDialog {
             parent.createNewGame(numPlayers, numDices);
             parent.setupPlayers();
         });
-        thirdRow.add(confirm);
-        thirdRow.add(Box.createRigidArea(new Dimension(20, 15)));
         JButton cancel = new JButton("Cancel");
-        thirdRow.add(cancel);
         cancel.addActionListener(e -> NumberSetupDialog.this.dispose());
+        
+        thirdRow.add(cancel);
+        thirdRow.add(Box.createRigidArea(new Dimension(20, 15)));
+        thirdRow.add(confirm);
         thirdRow.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        numSetup.add(firstRow);
+        numSetup.add(Box.createRigidArea(new Dimension(15, 20)));
+        numSetup.add(secondRow);
+        numSetup.add(Box.createRigidArea(new Dimension(15, 20)));
         numSetup.add(thirdRow);
 
         // pack and show it
