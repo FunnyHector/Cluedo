@@ -45,7 +45,6 @@ public class CustomMenu extends JMenuBar {
 
         int i = 0;
         JMenu jMenu = new JMenu(MENU_STRINGS[i++]);
-        this.add(jMenu);
 
         // new game
         JMenuItem newGame = new JMenuItem(MENU_STRINGS[i++]);
@@ -81,7 +80,7 @@ public class CustomMenu extends JMenuBar {
             if (Desktop.isDesktopSupported()) {
                 try {
                     URI uri = URI.create(HELP_URL);
-                    Desktop desktop = java.awt.Desktop.getDesktop();
+                    Desktop desktop = Desktop.getDesktop();
                     if (desktop.isSupported(Desktop.Action.BROWSE)) {
                         desktop.browse(uri);
                     }
@@ -113,6 +112,7 @@ public class CustomMenu extends JMenuBar {
         jMenu.add(help);
         jMenu.add(manual);
         jMenu.add(exit);
+        this.add(jMenu);
     }
 
     /**

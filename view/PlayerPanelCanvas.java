@@ -115,7 +115,7 @@ public class PlayerPanelCanvas extends JPanel {
     /**
      * The button for entering / exiting room
      */
-    private JButton EnterExitRoom;
+    private JButton enterExitRoom;
     /**
      * The button for moving up
      */
@@ -123,7 +123,7 @@ public class PlayerPanelCanvas extends JPanel {
     /**
      * The button for taking the secret passage
      */
-    private JButton SecretPass;
+    private JButton SecPasButton;
     /**
      * The button for moving left
      */
@@ -306,14 +306,14 @@ public class PlayerPanelCanvas extends JPanel {
                 PADDING_LEFT, PADDING_LEFT));
 
         // six buttons for different directions, enter/exit room, and secret passage
-        EnterExitRoom = createButton(ENTER_DEFAULT_IMG, ENTER_PRESSED_IMG,
+        enterExitRoom = createButton(ENTER_DEFAULT_IMG, ENTER_PRESSED_IMG,
                 MOVE_DISABLED_IMG, MOVE_BUTTON_SIZE);
-        EnterExitRoom.setEnabled(false);
+        enterExitRoom.setEnabled(false);
         upButton = createButton(UP_DEFAULT_IMG, UP_PRESSED_IMG, MOVE_DISABLED_IMG,
                 MOVE_BUTTON_SIZE);
-        SecretPass = createButton(SECPAS_DEFAULT_IMG, SECPAS_PRESSED_IMG,
+        SecPasButton = createButton(SECPAS_DEFAULT_IMG, SECPAS_PRESSED_IMG,
                 MOVE_DISABLED_IMG, MOVE_BUTTON_SIZE);
-        SecretPass.setEnabled(false);
+        SecPasButton.setEnabled(false);
         leftButton = createButton(LEFT_DEFAULT_IMG, LEFT_PRESSED_IMG, MOVE_DISABLED_IMG,
                 MOVE_BUTTON_SIZE);
         downButton = createButton(DOWN_DEFAULT_IMG, DOWN_PRESSED_IMG, MOVE_DISABLED_IMG,
@@ -322,17 +322,17 @@ public class PlayerPanelCanvas extends JPanel {
                 MOVE_DISABLED_IMG, MOVE_BUTTON_SIZE);
 
         // add listener on them
-        EnterExitRoom.addActionListener(e -> clickOnEnterExitRoom());
+        enterExitRoom.addActionListener(e -> clickOnEnterExitRoom());
         upButton.addActionListener(e -> clickOnUp());
-        SecretPass.addActionListener(e -> clickOnSecretPass());
+        SecPasButton.addActionListener(e -> clickOnSecretPass());
         leftButton.addActionListener(e -> clickOnLeft());
         downButton.addActionListener(e -> clickOnDown());
         rightButton.addActionListener(e -> clickOnRight());
 
         // add button into the panel
-        movePanel.add(EnterExitRoom);
+        movePanel.add(enterExitRoom);
         movePanel.add(upButton);
-        movePanel.add(SecretPass);
+        movePanel.add(SecPasButton);
         movePanel.add(leftButton);
         movePanel.add(downButton);
         movePanel.add(rightButton);
@@ -475,9 +475,9 @@ public class PlayerPanelCanvas extends JPanel {
          * and return
          */
         if (remainingSteps == 0) {
-            EnterExitRoom.setEnabled(false);
+            enterExitRoom.setEnabled(false);
             upButton.setEnabled(false);
-            SecretPass.setEnabled(false);
+            SecPasButton.setEnabled(false);
             leftButton.setEnabled(false);
             downButton.setEnabled(false);
             rightButton.setEnabled(false);
@@ -489,9 +489,9 @@ public class PlayerPanelCanvas extends JPanel {
         }
 
         // let's disable most actions
-        EnterExitRoom.setEnabled(false);
+        enterExitRoom.setEnabled(false);
         upButton.setEnabled(false);
-        SecretPass.setEnabled(false);
+        SecPasButton.setEnabled(false);
         leftButton.setEnabled(false);
         downButton.setEnabled(false);
         rightButton.setEnabled(false);
@@ -555,20 +555,20 @@ public class PlayerPanelCanvas extends JPanel {
         // if the player is standing at an entrance to a room
         if (gui.getBoard().atEntranceTo(player) != null) {
             // since we combine two buttons together, we have to change the image
-            EnterExitRoom.setName("ENTER");
-            EnterExitRoom.setIcon(ENTER_DEFAULT_IMG);
-            EnterExitRoom.setRolloverIcon(ENTER_DEFAULT_IMG);
-            EnterExitRoom.setPressedIcon(ENTER_PRESSED_IMG);
-            EnterExitRoom.setEnabled(true);
+            enterExitRoom.setName("ENTER");
+            enterExitRoom.setIcon(ENTER_DEFAULT_IMG);
+            enterExitRoom.setRolloverIcon(ENTER_DEFAULT_IMG);
+            enterExitRoom.setPressedIcon(ENTER_PRESSED_IMG);
+            enterExitRoom.setEnabled(true);
         }
 
         // if the player is in a room, get the exits
         List<Entrance> entrances = gui.getBoard().lookForExit(player);
         if (entrances != null && !entrances.isEmpty()) {
-            EnterExitRoom.setName("EXIT");
-            EnterExitRoom.setIcon(EXIT_DEFAULT_IMG);
-            EnterExitRoom.setRolloverIcon(EXIT_DEFAULT_IMG);
-            EnterExitRoom.setPressedIcon(EXIT_PRESSED_IMG);
+            enterExitRoom.setName("EXIT");
+            enterExitRoom.setIcon(EXIT_DEFAULT_IMG);
+            enterExitRoom.setRolloverIcon(EXIT_DEFAULT_IMG);
+            enterExitRoom.setPressedIcon(EXIT_PRESSED_IMG);
 
             Location room = entrances.get(0).toRoom().getRoom();
 
@@ -582,7 +582,7 @@ public class PlayerPanelCanvas extends JPanel {
                         break;
                     }
                 }
-                EnterExitRoom.setEnabled(!isBlocking);
+                enterExitRoom.setEnabled(!isBlocking);
 
             } else {
                 // other rooms have more than one exit. Check if they are all blocked.
@@ -604,9 +604,9 @@ public class PlayerPanelCanvas extends JPanel {
                 }
 
                 if (allBlocked) {
-                    EnterExitRoom.setEnabled(false);
+                    enterExitRoom.setEnabled(false);
                 } else {
-                    EnterExitRoom.setEnabled(true);
+                    enterExitRoom.setEnabled(true);
                 }
             }
         }
@@ -614,7 +614,7 @@ public class PlayerPanelCanvas extends JPanel {
         // if the player is in a room, and there is a secret passage
         if (gui.getBoard().lookForSecPas(player) != null) {
             // in a room, have a secret passage
-            SecretPass.setEnabled(true);
+            SecPasButton.setEnabled(true);
         }
 
         // validate the roll dice button
@@ -718,7 +718,7 @@ public class PlayerPanelCanvas extends JPanel {
      */
     public void clickOnEnterExitRoom() {
 
-        if (EnterExitRoom.getName().equals("ENTER")) {
+        if (enterExitRoom.getName().equals("ENTER")) {
             Room room = gui.getBoard()
                     .atEntranceTo(gui.getPlayerByCharacter(currentPlayer));
             if (room != null) {
@@ -879,7 +879,7 @@ public class PlayerPanelCanvas extends JPanel {
      * if no, do nothing.
      */
     public void tryClickOnEnterExitRoom() {
-        if (EnterExitRoom.isEnabled()) {
+        if (enterExitRoom.isEnabled()) {
             clickOnEnterExitRoom();
         }
     }
@@ -890,7 +890,7 @@ public class PlayerPanelCanvas extends JPanel {
      * no, do nothing.
      */
     public void tryClickOnSecretOass() {
-        if (SecretPass.isEnabled()) {
+        if (SecPasButton.isEnabled()) {
             clickOnSecretPass();
         }
     }

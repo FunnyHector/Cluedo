@@ -86,7 +86,7 @@ public class GUIClient extends JFrame {
     /**
      * game board on left
      */
-    private BoardCanvas gameBoardPanel;
+    private BoardCanvas boardPanel;
     /**
      * player panel on right
      */
@@ -202,24 +202,20 @@ public class GUIClient extends JFrame {
         window.setLayout(new BoxLayout(window, BoxLayout.X_AXIS));
 
         // now make the left panel, which is game board
-        gameBoardPanel = new BoardCanvas(this);
-        TitledBorder gameBoardPanel_border = creatTitledBorder("Board");
-        gameBoardPanel.setPreferredSize(new Dimension(LEFT_PANEL_WIDTH, HEIGHT));
-        gameBoardPanel.setBorder(gameBoardPanel_border);
+        boardPanel = new BoardCanvas(this);
+        boardPanel.setPreferredSize(new Dimension(LEFT_PANEL_WIDTH, HEIGHT));
+        boardPanel.setBorder(creatTitledBorder("Board"));
 
         // now the right panel (player panel)
         playerPanel = new PlayerPanelCanvas(this);
-        TitledBorder playerPanel_border = creatTitledBorder("Player Panel");
         playerPanel.setPreferredSize(new Dimension(RIGHT_PANEL_WIDTH, HEIGHT));
-        playerPanel.setBorder(playerPanel_border);
+        playerPanel.setBorder(creatTitledBorder("Player Panel"));
 
         // now put them together
-        window.add(gameBoardPanel);
+        window.add(boardPanel);
         window.add(playerPanel);
 
         // add key bindings
-        addKeyBindings(gameBoardPanel);
-        addKeyBindings(playerPanel);
         addKeyBindings(window);
 
         // enable the no brainer mode on menu
@@ -227,10 +223,8 @@ public class GUIClient extends JFrame {
 
         // last, pack and display
         this.add(window);
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.pack();
         this.validate();
-        this.repaint();
         this.setResizable(false);
         this.setVisible(true);
     }
@@ -241,12 +235,10 @@ public class GUIClient extends JFrame {
      */
     public void update() {
         if (game.isGameRunning()) {
-            gameBoardPanel.update();
+            boardPanel.update();
             playerPanel.update();
-            window.requestFocusInWindow();
         } else {
             // game stopped, we must have a winner
-            window.requestFocusInWindow();
             int choice = JOptionPane.showConfirmDialog(window,
                     game.getWinner().toString()
                             + " are the only player left. Congratulations, "
@@ -387,7 +379,7 @@ public class GUIClient extends JFrame {
         // move the player
         game.movePlayer(character, position);
         // we move the corresponding character token as well
-        CharacterToken[] characterTokens = gameBoardPanel.getCharacterTokens();
+        CharacterToken[] characterTokens = boardPanel.getCharacterTokens();
         if (position instanceof Tile) {
             // Tile tile = (Tile) position;
             // characterTokens[character.ordinal()].moveToTile(tile);
